@@ -5,15 +5,60 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style>html,body{margin:0;min-height:100%;background:#16152b;color:#f7eddf}#root{min-height:100vh}</style>
-</head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script>
+<style>
+html,body{margin:0;min-height:100%;background:#190408;color:#fff0dc;font-family:system-ui,sans-serif}
+#root{min-height:100vh}
+#fallback-home{min-height:100dvh;box-sizing:border-box;background:linear-gradient(#19040833,#08010399),url('./public/hell.svg') center/cover;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 16px 30px}
+#fallback-home .wrap{width:min(100%,520px);display:flex;align-items:center;flex-direction:column}
+#fallback-home h1{font-size:clamp(32px,7vw,66px);margin:4px 0;color:#ffe6c4;text-shadow:4px 5px #500917;font-weight:900;letter-spacing:-2px}
+#fallback-home .sprite{width:clamp(160px,30vw,260px);image-rendering:pixelated;filter:drop-shadow(0 10px 8px #100106);margin:5px auto 10px}
+#fallback-home .eyebrow,#fallback-home .caption{font-family:monospace;font-size:11px;letter-spacing:2px;text-shadow:0 2px #120308}
+#fallback-home .caption{margin:10px 0 24px;letter-spacing:1px}
+#fallback-home .modes{display:flex;gap:5px;width:min(100%,360px);padding:5px;background:#1d0613;border:2px solid #f7d3a7}
+#fallback-home button{cursor:pointer;border-radius:0}
+#fallback-home .modes button{flex:1;border:0;background:transparent;color:#ffe5cd;font-weight:700;padding:13px 7px}
+#fallback-home .modes button.active{background:#f6d29d;color:#2b0d12}
+#fallback-home .start{width:min(100%,374px);margin-top:14px;padding:18px;border:2px solid #ffebc8;background:#db2c3d;color:white;font-size:18px;font-weight:900;box-shadow:5px 5px #150309}
+#fallback-home .lang{position:absolute;right:18px;top:16px;display:flex;gap:6px}
+#fallback-home .lang button{background:#210912cc;color:white;border:1px solid #bb7e77;padding:9px 12px}
+#fallback-home .fine{font:10px monospace;margin-top:26px;color:#ffccb5}
+#fallback-home .panel{background:#1b0714ed;border:2px solid #f6d29d;padding:20px;width:min(100%,470px);box-sizing:border-box;text-align:left}
+#fallback-home .panel h2{font-size:22px;line-height:1.4;margin:15px 0}
+#fallback-home input{box-sizing:border-box;width:100%;padding:14px;border:2px solid #b77d83;background:#fff4e7;color:#271016;font-size:16px}
+#fallback-home .suggestions{max-height:145px;overflow:auto;background:#2a0d1d}
+#fallback-home .suggestions button{display:block;width:100%;padding:8px 12px;text-align:left;background:transparent;color:#fff2e2;border:0;border-bottom:1px solid #56303b}
+#fallback-home .result{margin:12px 0;line-height:1.6}
+#fallback-home .result strong{color:#f9c77d}
+#fallback-home .results-scroll{max-height:300px;overflow:auto}
+#fallback-home .results-scroll p{border-bottom:1px solid #70404c;padding:7px 0}
+#fallback-home .secondary{background:transparent;color:#fff0df;border:1px solid #bc8c7d;padding:8px 13px;margin-top:10px}
+@media(max-width:480px){#fallback-home .sprite{width:175px}#fallback-home h1{font-size:34px}#fallback-home .panel{padding:15px}}
+</style>
+</head><body><div id="root"><main id="fallback-home"><div class="lang"><button id="fb-en">EN</button><button id="fb-ko">한국어</button></div><div class="wrap" id="fb-wrap">
+<p class="eyebrow" id="fb-eyebrow">THE OBSCURITY GAME</p><h1 id="fb-title">larper101</h1>
+<img class="sprite" src="./public/devil.svg" alt="Red pixel devil" />
+<p class="caption" id="fb-tagline">THE RARER YOU KNOW, THE DEEPER YOU GO.</p>
+<div class="modes"><button id="fb-music" class="active">MUSIC</button><button id="fb-all">ALL MEDIA</button></div>
+<button id="fb-start" class="start">START →</button>
+<p class="fine" id="fb-fine">7 ROUNDS · 25 SECONDS · LIMITED OFFLINE CATALOG</p></div></main></div><script type="module" src="/src/main.tsx"></script>
 <script>
-window.addEventListener('load',function(){
-  window.setTimeout(function(){
-    var root=document.getElementById('root');
-    if(root && root.childElementCount===0){
-      root.innerHTML='<main style="box-sizing:border-box;max-width:640px;margin:12vh auto;padding:28px;font-family:system-ui,sans-serif;line-height:1.7"><h1 style="color:#f3b65b">larper101 is not loading yet</h1><p>The game assets could not load. On GitHub Pages, set <b>Settings → Pages → Source → GitHub Actions</b>, then check the latest workflow deployment.</p><p>게임을 불러올 수 없습니다. GitHub Pages 배포 소스를 <b>GitHub Actions</b>로 변경해 주세요.</p><p><a style="color:#f3b65b" href="https://github.com/eggseed1/dotdotdot/actions">View deployment status →</a></p></main>';
-    }
-  },3500);
-});
+(function(){
+var root=document.getElementById('root'),mode='music',lang='en',items=[],questions=[],results=[],round=0,seconds=25,timer=null,chosen='';
+var labels={en:{title:'larper101',eyebrow:'THE OBSCURITY GAME',tag:'THE RARER YOU KNOW, THE DEEPER YOU GO.',music:'MUSIC',all:'ALL MEDIA',start:'START →',fine:'7 ROUNDS · 25 SECONDS · LIMITED OFFLINE CATALOG',submit:'LOCK IN →',next:'NEXT →',skip:'SKIP →',again:'PLAY AGAIN',missing:'Not found in the offline demo catalog.',incorrect:'That title does not match this prompt.',complete:'YOU DESCENDED',archive:'POSSIBLE ANSWERS',copy:'COPY RESULTS'},ko:{title:'꺼드럭대마왕',eyebrow:'지옥의 꺼드럭 퀴즈',tag:'마이너할수록 더 깊이 내려간다.',music:'음악',all:'전체 미디어',start:'시작하기 →',fine:'7문제 · 문제당 25초 · 제한된 체험판 데이터',submit:'제출 →',next:'다음 →',skip:'넘기기 →',again:'다시 하기',missing:'체험판 데이터에 없는 작품입니다.',incorrect:'이 문제의 조건과 맞지 않습니다.',complete:'지옥 하강 완료',archive:'가능한 정답',copy:'결과 복사'}};
+function txt(){return labels[lang]}
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function setLanguage(next){lang=next;var e=document.getElementById('fb-title');if(!e)return;['title','eyebrow','tagline','fine'].forEach(function(k){var el=document.getElementById('fb-'+k);if(el)el.textContent=txt()[k==='tagline'?'tag':k]});document.getElementById('fb-music').textContent=txt().music;document.getElementById('fb-all').textContent=txt().all;document.getElementById('fb-start').textContent=txt().start}
+function norm(s){return String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'')}
+function pool(){return mode==='music'?items.filter(function(w){return w.kind==='music'}):items}
+function makeQ(){var kinds=mode==='music'?['music','music','music','music','music','music','music']:['music','film','literature','anime','games','music','film'];return kinds.map(function(kind,i){var candidates=items.filter(function(w){return w.kind===kind}),years=candidates.map(function(w){return Math.floor(w.year/10)*10}),decade=years[i*3%years.length]||1990;var matches=candidates.filter(function(w){return w.year>=decade&&w.year<decade+10});if(matches.length<2){decade=0;matches=candidates}return {kind:kind,decade:decade,valid:matches,prompt:(lang==='ko'?(kind==='music'?'음반':kind==='film'?'영화':kind==='literature'?'책':kind==='anime'?'애니메이션':'게임')+' 중 '+(decade?decade+'년대 작품을':'작품을')+' 대보세요.':'Name a '+(kind==='music'?'music album':kind==='film'?'film':kind==='literature'?'book':kind==='anime'?'anime':'video game')+(decade?' from the '+decade+'s.':'.'))}})}
+function showHome(){if(timer)clearInterval(timer);location.hash='';var wrap=document.getElementById('fb-wrap');if(!wrap)return;wrap.innerHTML='<p class="eyebrow" id="fb-eyebrow">'+esc(txt().eyebrow)+'</p><h1 id="fb-title">'+esc(txt().title)+'</h1><img class="sprite" src="./public/devil.svg" alt="Red pixel devil"><p class="caption" id="fb-tagline">'+esc(txt().tag)+'</p><div class="modes"><button id="fb-music" class="'+(mode==='music'?'active':'')+'">'+esc(txt().music)+'</button><button id="fb-all" class="'+(mode==='all'?'active':'')+'">'+esc(txt().all)+'</button></div><button id="fb-start" class="start">'+esc(txt().start)+'</button><p class="fine" id="fb-fine">'+esc(txt().fine)+'</p>';wireHome()}
+function wireHome(){var m=document.getElementById('fb-music'),a=document.getElementById('fb-all'),s=document.getElementById('fb-start');if(!m)return;m.onclick=function(){mode='music';m.className='active';a.className=''};a.onclick=function(){mode='all';a.className='active';m.className=''};s.onclick=function(){if(!items.length){alert('Offline catalog unavailable. Enable GitHub Actions deployment.');return}questions=makeQ();results=[];round=0;showQuestion()}}
+function current(){return questions[round]}
+function showQuestion(){if(timer)clearInterval(timer);chosen='';seconds=25;var q=current();if(!q){showResults();return}var wrap=document.getElementById('fb-wrap');wrap.innerHTML='<div class="panel"><p class="eyebrow">'+esc((round+1)+'/7 · '+q.kind.toUpperCase())+' · <span id="fb-time">25s</span></p><h2>'+esc(q.prompt)+'</h2><input id="fb-answer" autocomplete="off" placeholder="'+(lang==='ko'?'작품 제목...':'Enter a title...')+'"><div class="suggestions" id="fb-suggestions"></div><p class="result" id="fb-message"></p><button class="start" id="fb-submit">'+esc(txt().submit)+'</button><button class="secondary" id="fb-skip">'+esc(txt().skip)+'</button></div>';var input=document.getElementById('fb-answer');input.focus();input.oninput=function(){var v=norm(input.value),found=v.length<2?[]:pool().filter(function(w){return w.kind===q.kind&&[w.title,w.titleKo,w.creator+' '+w.title].some(function(x){return norm(x).includes(v)})}).slice(0,6);document.getElementById('fb-suggestions').innerHTML=found.map(function(w){return '<button type="button" data-id="'+esc(w.id)+'">'+esc((lang==='ko'&&w.titleKo)||w.title)+' · '+esc(w.creator)+'</button>'}).join('');Array.from(document.querySelectorAll('#fb-suggestions button')).forEach(function(b){b.onclick=function(){var w=items.find(function(x){return x.id===b.dataset.id});input.value=w.title;chosen=w.id;document.getElementById('fb-suggestions').innerHTML=''}})};input.onkeydown=function(e){if(e.key==='Enter')submit()};document.getElementById('fb-submit').onclick=submit;document.getElementById('fb-skip').onclick=function(){save(null)};timer=setInterval(function(){if(!document.getElementById('fb-time')){clearInterval(timer);return}seconds--;document.getElementById('fb-time').textContent=seconds+'s';if(seconds<=0){clearInterval(timer);save(null)}},1000)}
+function submit(){var q=current(),v=norm(document.getElementById('fb-answer').value),w=items.find(function(x){return x.id===chosen&&x.kind===q.kind})||items.find(function(x){return x.kind===q.kind&&[x.title,x.titleKo,x.creator+' '+x.title].some(function(s){return norm(s)===v})});if(!w){document.getElementById('fb-message').textContent=txt().missing;return}if(q.valid.indexOf(w)<0){document.getElementById('fb-message').textContent=txt().incorrect;return}save(w)}
+function save(w){if(timer)clearInterval(timer);var q=current(),score=w?Math.max(10,Math.min(100,Math.round((100-w.popularity)*.85+10))):0;results.push({q:q,work:w,points:score});round++;var wrap=document.getElementById('fb-wrap');wrap.innerHTML='<div class="panel"><p class="eyebrow">'+esc(w?'VALID ANSWER':'NO ANSWER')+'</p><h2>'+esc(w?w.title:'—')+'</h2><p class="result"><strong>+'+score+' POINTS</strong> · '+results.reduce(function(n,r){return n+r.points},0)*10+'m</p><button class="start" id="fb-next">'+esc(round===7?txt().complete:txt().next)+'</button></div>';document.getElementById('fb-next').onclick=showQuestion}
+function showResults(){var score=results.reduce(function(n,r){return n+r.points},0),wrap=document.getElementById('fb-wrap');wrap.innerHTML='<div class="panel"><p class="eyebrow">'+esc(txt().complete)+'</p><h2>'+score+' / 700 · '+score*10+'m</h2><div class="results-scroll">'+results.map(function(r,i){return '<p><strong>'+(i+1)+'. '+esc(r.work?r.work.title:'—')+' · +'+r.points+'</strong><br><small>'+esc(r.q.prompt)+'</small><br><small>'+esc(txt().archive)+': '+r.q.valid.slice(0,5).map(function(w){return esc(w.title)}).join(' · ')+'</small></p>'}).join('')+'</div><button class="start" id="fb-again">'+esc(txt().again)+'</button><button class="secondary" id="fb-copy">'+esc(txt().copy)+'</button></div>';document.getElementById('fb-again').onclick=showHome;document.getElementById('fb-copy').onclick=function(){navigator.clipboard?.writeText('larper101 '+score+'/700 · '+score*10+'m\n'+results.map(function(r){return r.work?r.work.title+' +'+r.points:'—'}).join('\n'))}}
+document.getElementById('fb-en').onclick=function(){setLanguage('en')};document.getElementById('fb-ko').onclick=function(){setLanguage('ko')};wireHome();
+fetch('./public/demo-catalog.json').then(function(r){if(!r.ok)throw Error('missing');return r.json()}).then(function(data){items=data}).catch(function(){document.getElementById('fb-fine').textContent='OFFLINE DATA UNAVAILABLE · CHECK GITHUB ACTIONS'});
+})();
 </script></body></html>
