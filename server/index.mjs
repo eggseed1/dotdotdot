@@ -8,7 +8,6 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
-import { rarityFromCounts } from '../src/lib/rarity-model.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
@@ -109,7 +108,31 @@ tick.unref();
 
 const mimetypes={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.json':'application/json','.png':'image/png','.woff2':'font/woff2'};
 const server=http.createServer((req,res)=>{
-  const pathname=new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname;
+  const parsedUrl=new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+  const pathname=parsedUrl.pathname;
+  if(pathname==='/api/suggest' && req.method==='GET'){
+    const kind=parsedUrl.searchParams.get('kind'),q=(parsedUrl.searchParams.get('q')||'').slice(0,100);
+    const allowed=new Set(['music','film','literature','anime','games']);
+    const suggestions=allowed.has(kind)&&q.trim().length>=2?sourceCatalog?.suggest(kind,q,7)||[]:[];
+    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+    res.end(JSON.stringify({suggestions:suggestions.map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));return;
+  }
+  if(pathname==='/api/validate' && req.method==='POST'){
+    let chunks='',bytes=0;
+    req.on('data',chunk=>{bytes+=chunk.length;if(bytes>4096){req.destroy();return;}chunks+=chunk.toString('utf8');});
+    req.on('end',()=>{
+      let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
+      const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
+      if(!prompt||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
+      const found=sourceCatalog.lookup(prompt.kind,raw),valid=found.filter(w=>prompt.match(w));
+      const response=found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
+        !valid[0].verified||!Number.isFinite(valid[0].ratingCount)||valid[0].ratingCount<1?{status:'unverified'}:(()=>{
+        const w=valid[0],score=sourceCatalog.score(prompt.id,w.ratingCount);
+        return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},points:score.points,tier:score.tier,provisional:true};
+      })();
+      res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
+    });return;
+  }
   if(pathname==='/api/leaderboard'){
     const players=Object.entries(ratings).filter(([,v])=>Number.isFinite(v.rating)&&v.played>0).map(([id,v])=>({id:id.slice(0,8),name:v.name,rating:v.rating,played:v.played,wins:v.wins||0})).sort((a,b)=>b.rating-a.rating).slice(0,100);
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
@@ -156,8 +179,7 @@ wss.on('connection',ws=>{
       if(!prompt.match(found.work)){send(ws,{type:'invalid',reason:'notEligible'});return;}
       const imported=Boolean(found.work.source&&found.work.ratingCount!==undefined);
       if(imported&&!found.work.verified){send(ws,{type:'invalid',reason:'unverified'});return;}
-      const pool=imported?sourceCatalog.eligible(prompt.id):null;
-      const result=imported?rarityFromCounts(found.work.ratingCount,pool.map(w=>w.ratingCount),{minimumEvidence:1}):rarity(found.work,prompt);
+      const result=imported?sourceCatalog.score(prompt.id,found.work.ratingCount):rarity(found.work,prompt);
       if(result.points===0){send(ws,{type:'invalid',reason:'unverified'});return;}
       m.answers[id]={workId:found.work.id,title:found.work.title,points:result.points,tier:result.tier};
       sync(id);sendTo(m.players.find(p=>p!==id),{type:'rival_locked'});return;
