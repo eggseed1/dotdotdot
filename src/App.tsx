@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen,
 import { catalog } from './data/catalog';
 import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
+import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt } from './data/art';
 import { Swords, Flame } from 'lucide-react';
@@ -56,6 +57,7 @@ export default function App(){
   const t=strings[lang];
   const date=todayKey();
   const activePrompt=useMemo(()=>session?promptById.get(session.prompts[session.index]):undefined,[session]);
+  const autocomplete=useTitleAutocomplete(answer,activePrompt?.kind||'any',lang,session?.state==='play');
   const activeResult=session?.state==='reveal'?session.results[session.index]:undefined;
   const activeWork=selectedWork(activeResult?.workId);
   const activeScore=session?totalScore(session.results):0;
@@ -183,7 +185,7 @@ export default function App(){
           <h1 className="question-text">{activePrompt?.label[lang]}</h1>
           <div className="answer-card"><div className="answer-label"><label htmlFor="answer">{t.yourAnswer}</label><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span><small>s</small></div></div>
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
-            <form onSubmit={submit}><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}}/><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            <form onSubmit={submit}><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={e=>autocomplete.onKeyDown(e,setAnswer)}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
           </div>
