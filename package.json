@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "vitest run src/lib/engine.test.ts src/lib/sharing.test.ts && node --test server/*.test.mjs src/lib/title-match.test.mjs scripts/import-imdb-dump.test.mjs",
+    "test": "vitest run src/lib/engine.test.ts src/lib/sharing.test.ts && node --test server/*.test.mjs src/lib/title-match.test.mjs && npm run test:catalog-pipelines",
     "server": "node server/index.mjs",
     "start": "node server/index.mjs",
     "test:duel": "node --test server/*.test.mjs",
@@ -16,7 +16,12 @@
     "fetch:wikidata": "node scripts/fetch-wikidata.mjs",
     "import:books": "node scripts/import-openlibrary-dump.mjs",
     "import:imdb": "node scripts/import-imdb-dump.mjs",
-    "test:bulk": "node --test scripts/import-imdb-dump.test.mjs"
+    "test:bulk": "node --test scripts/import-imdb-dump.test.mjs",
+    "import:musicbrainz-core": "node scripts/import-musicbrainz-core.mjs",
+    "fetch:anilist": "node scripts/fetch-anilist.mjs",
+    "fetch:tmdb": "node scripts/fetch-tmdb.mjs",
+    "fetch:igdb": "node scripts/fetch-igdb.mjs",
+    "test:catalog-pipelines": "node --test scripts/import-musicbrainz-core.test.mjs scripts/fetch-anilist.test.mjs scripts/fetch-tmdb.test.mjs scripts/fetch-igdb.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
