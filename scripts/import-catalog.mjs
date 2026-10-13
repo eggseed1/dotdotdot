@@ -9,8 +9,8 @@ import readline from 'node:readline';
 import {createCatalogStore} from '../server/catalog-store.mjs';
 const args=process.argv.slice(2);const opt=(k)=>args[args.indexOf(k)+1];
 const filename=opt('--file'),source=opt('--source');
-if(!filename||!source){console.error('Usage: npm run import:catalog -- --file PATH.jsonl --source musicbrainz|openlibrary|imdb|... [--authorized] [--db data/catalog.sqlite]');process.exit(1);}
-const restricted=new Set(['rym','letterboxd','backloggd','spotify','imdb','myanimelist','igdb','tmdb']);
+if(!filename||!source){console.error('Usage: npm run import:catalog -- --file PATH.jsonl --source musicbrainz|wikidata|openlibrary|imdb|... [--authorized] [--db data/catalog.sqlite]');process.exit(1);}
+const restricted=new Set(['rym','lastfm','bandcamp','letterboxd','backloggd','spotify','imdb','myanimelist','igdb','tmdb']);
 if(restricted.has(source)&&!args.includes('--authorized')){console.error(`Source ${source} requires a permitted/authorized dataset and explicit --authorized flag; nothing imported.`);process.exit(1);}
 const dbPath=opt('--db')||path.resolve('data/catalog.sqlite');
 const store=createCatalogStore(dbPath);
