@@ -20,7 +20,7 @@ export function hangulSound(value=''){
 }
 export function soundKey(value=''){
  return canonical(value).replace(/ph/g,'p').replace(/th/g,'t').replace(/sh/g,'s').replace(/ch/g,'j')
- .replace(/v/g,'b').replace(/f/g,'p').replace(/w/g,'u').replace(/y/g,'i')
+ .replace(/v/g,'b').replace(/f/g,'p').replace(/w/g,'u').replace(/y/g,'i').replace(/r/g,'l')
  .replace(/eo/g,'o').replace(/eu/g,'').replace(/ou/g,'u').replace(/ee/g,'i')
  .replace(/(.)\1+/g,'$1').replace(/[^a-z0-9]/g,'');
 }
