@@ -1,3 +1,4 @@
+import { useTitleAutocomplete, TitleSuggestions } from './TitleAutocomplete';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Copy, Flame, Gamepad2, LockKeyhole, Swords, Wifi, WifiOff, X } from 'lucide-react';
 import { Hellscape } from './Hellscape';
@@ -76,6 +77,7 @@ export function DuelArena({lang,onBack}:{lang:Lang;onBack:()=>void}){
   };
   useEffect(()=>{connect();fetch(`${apiBase()}/api/leaderboard`).then(r=>r.ok?r.json():null).then(data=>setLadder(data?.players||[])).catch(()=>{});const interval=window.setInterval(()=>setClock(Date.now()),125);return()=>{window.clearInterval(interval);wsRef.current?.close();};},[]);
   useEffect(()=>{if(match?.phase==='play' && !match.ownLocked)inputRef.current?.focus();},[match?.round,match?.phase]);
+  const autocomplete=useTitleAutocomplete(input,match?.kind||'any',lang,match?.phase==='play'&&!match.ownLocked);
   const remaining=match?Math.max(0,Math.ceil((match.deadline-clock)/1000)):0;
   const begin=(ranked:boolean)=>{setWarning('');setFinished(null);setWaiting(ranked?'ranked':'friend');send({type:ranked?'queue':'invite',mode});};
   const cancel=()=>{send({type:'cancel'});setWaiting(null);setInvite('');};
@@ -104,7 +106,7 @@ export function DuelArena({lang,onBack}:{lang:Lang;onBack:()=>void}){
       <div className="duel-stage-grid"><Hellscape score={match.score} opponentScore={match.rivalScore} opponentName={match.opponent.name} lang={lang} compact/>
         <div className="duel-question-panel"><div className="duel-question-category">{match.kind?.toUpperCase()} / {match.promptBadge?.[lang]}</div><h2>{match.prompt?.[lang]}</h2>
         {match.phase==='play'?<>
-          <form onSubmit={submit}><label htmlFor="duel-answer">{t.answer}</label><input id="duel-answer" ref={inputRef} value={input} disabled={match.ownLocked} onChange={e=>{setInput(e.target.value);setWarning('');}} placeholder={t.placeholder} autoComplete="off" spellCheck={false}/><button className="action-button" type="submit" disabled={match.ownLocked||!input.trim()}>{match.ownLocked?t.locked:t.lock}<ArrowRight size={15}/></button></form>
+          <form onSubmit={submit}><label htmlFor="duel-answer">{t.answer}</label><div className="title-suggest-wrap"><input id="duel-answer" ref={inputRef} value={input} disabled={match.ownLocked} onChange={e=>{setInput(e.target.value);setWarning('');}} placeholder={t.placeholder} autoComplete="off" spellCheck={false} onKeyDown={e=>autocomplete.onKeyDown(e,setInput)}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setInput)}/></div><button className="action-button" type="submit" disabled={match.ownLocked||!input.trim()}>{match.ownLocked?t.locked:t.lock}<ArrowRight size={15}/></button></form>
           <div className="duel-timer-track"><div style={{width:`${remaining/25*100}%`}}/></div>
           <div className="duel-lock-row"><span>{match.ownLocked?'✓ ': '○ '}YOU</span><span>{match.rivalLocked?'✓ ': '○ '}{match.opponent.name}</span></div>
           {match.rivalLocked && <p className="duel-rival-locked">{t.opponentLocked}</p>}
