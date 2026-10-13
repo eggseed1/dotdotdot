@@ -1,9 +1,12 @@
+import {canonical,namesFor,suggestWorks,exactWorks} from '../src/lib/title-match.mjs';
+import {rarityFromRank} from '../src/lib/rarity-model.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 
+const grams=word=>{const v=canonical(word).replaceAll(' ','');if(v.length<3)return [];return [...new Set(Array.from({length:v.length-2},(_,i)=>v.slice(i,i+3)))].slice(0,80);};
 const KINDS=new Set(['music','film','literature','anime','games']);
-const SOURCES=new Set(['musicbrainz','rym','spotify','letterboxd','imdb','tmdb','openlibrary','myanimelist','anilist','backloggd','igdb','custom']);
+const SOURCES=new Set(['musicbrainz','wikidata','lastfm','bandcamp','rym','spotify','letterboxd','imdb','tmdb','openlibrary','myanimelist','anilist','backloggd','igdb','custom']);
 
 export function createCatalogStore(dbPath){
   if(dbPath!==':memory:')fs.mkdirSync(path.dirname(dbPath),{recursive:true});
@@ -21,6 +24,10 @@ export function createCatalogStore(dbPath){
   CREATE INDEX IF NOT EXISTS works_source ON works(source);
   CREATE TABLE IF NOT EXISTS work_genres (work_id TEXT, genre TEXT, PRIMARY KEY(work_id,genre));
   CREATE INDEX IF NOT EXISTS genre_lookup ON work_genres(genre,work_id);
+  CREATE TABLE IF NOT EXISTS work_aliases (work_id TEXT NOT NULL,alias_norm TEXT NOT NULL COLLATE NOCASE,PRIMARY KEY(work_id,alias_norm));
+  CREATE INDEX IF NOT EXISTS title_alias_lookup ON work_aliases(alias_norm,work_id);
+  CREATE TABLE IF NOT EXISTS work_grams (work_id TEXT NOT NULL,gram TEXT NOT NULL,PRIMARY KEY(work_id,gram));
+  CREATE INDEX IF NOT EXISTS gram_lookup ON work_grams(gram,work_id);
   CREATE TABLE IF NOT EXISTS source_attribution (source TEXT PRIMARY KEY, terms TEXT, attribution TEXT, permitted_at TEXT);
   `);
   const insert=db.prepare(`INSERT INTO works(id,kind,title,title_ko,creator,year,country,genres,aliases,source,source_id,rating_count,verified,source_url)
@@ -28,6 +35,11 @@ export function createCatalogStore(dbPath){
   creator=excluded.creator,year=excluded.year,country=excluded.country,genres=excluded.genres,aliases=excluded.aliases,
   rating_count=excluded.rating_count,verified=excluded.verified,source_url=excluded.source_url,updated_at=CURRENT_TIMESTAMP`);
   const clearGenres=db.prepare('DELETE FROM work_genres WHERE work_id=?');
+  const clearAliases=db.prepare('DELETE FROM work_aliases WHERE work_id=?');
+  const aliasInsert=db.prepare('INSERT OR IGNORE INTO work_aliases(work_id,alias_norm) VALUES(?,?)');
+  const clearGrams=db.prepare('DELETE FROM work_grams WHERE work_id=?');
+  const gramInsert=db.prepare('INSERT OR IGNORE INTO work_grams(work_id,gram) VALUES(?,?)');
+  function indexAliases(id,work){for(const alias of namesFor(work)){aliasInsert.run(id,alias);for(const gram of grams(alias))gramInsert.run(id,gram);}}
   const genreInsert=db.prepare('INSERT OR IGNORE INTO work_genres(work_id,genre) VALUES(?,?)');
   function put(w){
     if(!KINDS.has(w.kind)||!SOURCES.has(w.source)||!w.title||!w.sourceId)throw Error('Missing required kind/source/title/sourceId');
@@ -36,6 +48,7 @@ export function createCatalogStore(dbPath){
     const id=`${w.source}:${w.sourceId}`;
     insert.run(id,w.kind,w.title,w.titleKo||null,w.creator||null,w.year??null,w.country||null,JSON.stringify(genres),JSON.stringify(aliases),w.source,w.sourceId,w.ratingCount??null,Number(Boolean(w.verified)),w.sourceUrl||null);
     clearGenres.run(id);for(const genre of genres)genreInsert.run(id,genre);
+    clearAliases.run(id);clearGrams.run(id);indexAliases(id,{...w,aliases});
     return id;
   }
   function begin(){db.exec('BEGIN TRANSACTION');}
@@ -46,10 +59,33 @@ export function createCatalogStore(dbPath){
   }
   function lookup(kind,title){
     if(!KINDS.has(kind)||typeof title!=='string'||title.trim().length<2)return [];
-    const normalized=title.trim().toLowerCase();
-    // SQL narrows matches; final aliases, transliterations and ambiguous names are handled by caller.
-    const candidates=db.prepare(`SELECT * FROM works WHERE kind=? AND (title COLLATE NOCASE=? OR title_ko=? OR aliases LIKE ?) LIMIT 60`).all(kind,title.trim(),title.trim(),`%${title.trim().slice(0,80)}%`);
-    return candidates.map(hydrate).filter(w=>[w.title,w.titleKo,...w.aliases].some(x=>x?.toLowerCase()===normalized));
+    const key=canonical(title.slice(0,200));
+    const rows=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id
+      WHERE w.kind=? AND a.alias_norm=? LIMIT 20`).all(kind,key);
+    const seen=new Set();
+    return exactWorks(title,rows.map(hydrate)).sort((a,b)=>(b.ratingCount??-1)-(a.ratingCount??-1)).filter(w=>{
+      const identity=[w.kind,canonical(w.title),canonical(w.creator||''),w.year||''].join(':');
+      if(seen.has(identity))return false;seen.add(identity);return true;
+    });
+  }
+  function suggest(kind,query,limit=7){
+    if(!KINDS.has(kind)||typeof query!=='string'||query.trim().length<2)return [];
+    const key=canonical(query.slice(0,100)),needle=key.replace(/[\\%_]/g,'');
+    const prefix=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`).all(kind,needle+'%');
+    const candidates=prefix.map(hydrate),ids=new Set(candidates.map(w=>w.id));
+    if(candidates.length<limit){
+      const contains=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`).all(kind,'%'+needle+'%');
+      for(const r of contains.map(hydrate))if(!ids.has(r.id)){ids.add(r.id);candidates.push(r);}
+    }
+    if(candidates.length<limit&&key.length>=3){
+      const parts=grams(key);
+      if(parts.length){
+        const matches=db.prepare(`SELECT w.* FROM work_grams g JOIN works w ON w.id=g.work_id WHERE w.kind=?
+          AND g.gram IN (${parts.map(()=>'?').join(',')}) GROUP BY w.id ORDER BY COUNT(*) DESC LIMIT 120`).all(kind,...parts);
+        for(const r of matches.map(hydrate))if(!ids.has(r.id)){ids.add(r.id);candidates.push(r);}
+      }
+    }
+    return suggestWorks(query,candidates,limit);
   }
   function wherePrompt(id){
     const kind=id[0]==='m'?'music':id[0]==='f'?'film':id[0]==='l'?'literature':id[0]==='a'?'anime':'games';
@@ -67,9 +103,21 @@ export function createCatalogStore(dbPath){
     const filter=wherePrompt(promptId);if(!filter)return [];
     return db.prepare(`SELECT * FROM works WHERE ${filter.sql} AND verified=1 AND rating_count IS NOT NULL AND rating_count >= 1 ORDER BY rating_count DESC LIMIT ?`).all(...filter.params,limit).map(hydrate);
   }
+  function score(promptId,count){
+    const filter=wherePrompt(promptId);if(!filter)return {points:0,tier:-1,percentile:0};
+    const row=db.prepare(`SELECT COUNT(*) AS n,SUM(CASE WHEN rating_count>? THEN 1 ELSE 0 END) AS greater
+      FROM works WHERE ${filter.sql} AND verified=1 AND rating_count>=1`).get(count,...filter.params);
+    return rarityFromRank(count,Number(row.n),Number(row.greater||0));
+  }
   function possible(promptId,limit=12){const pool=eligible(promptId);if(!pool.length)return [];
     return pool.sort((a,b)=>a.ratingCount-b.ratingCount).slice(0,limit);
   }
-  return {db,put,begin,commit,rollback,stats,lookup,eligible,possible,close:()=>db.close()};
+  if((db.prepare('SELECT COUNT(*) n FROM work_aliases').get().n===0 || db.prepare('SELECT COUNT(*) n FROM work_grams').get().n===0)
+      && db.prepare('SELECT COUNT(*) n FROM works').get().n>0){
+    const rows=db.prepare('SELECT * FROM works').iterate();
+    db.exec('BEGIN TRANSACTION');try{for(const row of rows)indexAliases(row.id,hydrate(row));db.exec('COMMIT');}
+    catch(e){db.exec('ROLLBACK');throw e;}
+  }
+  return {db,put,begin,commit,rollback,stats,lookup,suggest,eligible,score,possible,close:()=>db.close()};
 }
 function hydrate(row){return {id:row.id,kind:row.kind,title:row.title,titleKo:row.title_ko,creator:row.creator,year:row.year,country:row.country,genres:JSON.parse(row.genres||'[]'),aliases:JSON.parse(row.aliases||'[]'),source:row.source,sourceId:row.source_id,ratingCount:row.rating_count,verified:Boolean(row.verified),sourceUrl:row.source_url};}
