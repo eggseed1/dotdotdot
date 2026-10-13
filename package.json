@@ -14,7 +14,9 @@
     "import:catalog": "node scripts/import-catalog.mjs",
     "fetch:musicbrainz": "node scripts/fetch-musicbrainz.mjs",
     "fetch:wikidata": "node scripts/fetch-wikidata.mjs",
-    "import:books": "node scripts/import-openlibrary-dump.mjs"
+    "import:books": "node scripts/import-openlibrary-dump.mjs",
+    "import:imdb": "node scripts/import-imdb-dump.mjs",
+    "test:bulk": "node --test scripts/import-imdb-dump.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
