@@ -27,7 +27,7 @@ export function decodeShare(code:string):{session:GameSession;score:number}|null
    }
    // Imported catalog metadata is displayable offline; score remains UNVERIFIED until signed server attempts exist.
    if(data.version===2&&typeof e.title==='string'&&e.title.length<=180&&typeof e.points==='number'
-     &&Number.isInteger(e.points)&&e.points>=0&&e.points<=100&&typeof e.tier==='number'&&Number.isInteger(e.tier)&&e.tier>=0&&e.tier<=5){
+     &&Number.isInteger(e.points)&&e.points>=0&&e.points<=100&&typeof e.tier==='number'&&Number.isInteger(e.tier)&&e.tier>=0&&e.tier<=7){
     return {promptId:e.prompt,workId:e.work,title:e.title,titleKo:typeof e.titleKo==='string'?e.titleKo.slice(0,180):undefined,
       creator:typeof e.creator==='string'?e.creator.slice(0,180):undefined,year:typeof e.year==='number'?e.year:undefined,
       rawAnswer:e.title,points:e.points,tier:e.tier};
