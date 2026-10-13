@@ -147,7 +147,7 @@ Download the **official** `mbdump.tar.bz2` snapshot from [MusicBrainz database d
 npm run import:musicbrainz-core -- --dump-dir /data/mbdump --db /data/catalog.sqlite
 ```
 
-This importer streams MusicBrainz's core TSV tables, joins artist credits, saves every artist (with aliases and country where verifiable) to `music_artists`, and indexes album/EP release groups with original release years and multilingual release-group aliases. It stages tables on disk; use `--limit 1000` for an initial test. Keep its `.musicbrainz-stage.sqlite` file if you intend to resume after an interrupted run.
+This importer streams MusicBrainz's core TSV tables, joins artist credits, saves every artist (with aliases and country where verifiable) to `music_artists`, and indexes album/EP release groups with original release years and multilingual release-group aliases. It stages tables on disk; use `--limit 1000` for an initial test. The staging file is reused on reruns; for a clean reimport, delete the `.musicbrainz-stage.sqlite` staging file before restarting. Do not treat interrupted imports as fully resumable until checkpoints are implemented.
 
 **Genre associations and popularity are NOT in the CC0 core.** The official `mbdump-derived.tar.bz2` supplementary snapshot is licensed **CC BY-NC-SA 3.0** and cannot be treated as unrestricted commercial game data. Only if you are complying with those terms (or have separate commercial permission), extract it and pass:
 
