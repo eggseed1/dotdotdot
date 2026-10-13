@@ -1,9 +1,10 @@
 import { byId, catalog } from '../data/catalog';
+import { rarityFromRank, RARITY_TAGS, SCORE_TIERS } from './rarity-model.mjs';
 import type { GameSession, Kind, Mode, Prompt, RoundResult, Work } from './types';
 
 export const ROUND_SECONDS = 25;
 export const ROUNDS = 7;
-export const SCORE_LEVELS = [100, 85, 65, 40, 20, 10] as const;
+export const SCORE_LEVELS = SCORE_TIERS;
 
 export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
   music: {en:'MUSIC',ko:'음악'}, film:{en:'FILM',ko:'영화'},
@@ -99,25 +100,16 @@ export function lookupAnswer(raw:string, kind:Kind, fromCatalog:Work[]=catalog):
 
 export function rarity(work:Work,prompt:Prompt):{points:number;tier:number;percentile:number} {
   const matching=eligible(prompt);
-  // When imported counts exist, compare like-for-like verified counts. Otherwise use clearly labeled demo values.
-  const observed = work.voteCount !== undefined && matching.filter(w=>w.voteCount !== undefined).length >= 3;
-  const pool = observed ? matching.filter(w=>w.voteCount !== undefined) : matching;
-  const measure = (w:Work) => observed ? (w.voteCount ?? 0) : w.popularity;
-  const moreFamiliar=pool.filter(w=>measure(w)>measure(work)).length;
-  const percentile=pool.length<=1?0:moreFamiliar/(pool.length-1);
-  let tier=5;
-  if(percentile>=0.94)tier=0;
-  else if(percentile>=0.79)tier=1;
-  else if(percentile>=0.57)tier=2;
-  else if(percentile>=0.33)tier=3;
-  else if(percentile>=0.12)tier=4;
-  return {points:SCORE_LEVELS[tier],tier,percentile};
+  // Never mix imported verified vote counts with hand-entered demo weights.
+  const withCounts=matching.filter(w=>Number.isSafeInteger(w.voteCount)&&Number(w.voteCount)>=1);
+  const verified=Number.isSafeInteger(work.voteCount)&&Number(work.voteCount)>=1&&withCounts.length>=3;
+  const pool=verified?withCounts:matching.filter(w=>w.voteCount===undefined);
+  const measure=(w:Work)=>verified?Number(w.voteCount):w.popularity;
+  const rank=rarityFromRank(measure(work),pool.length,pool.filter(w=>measure(w)>measure(work)).length);
+  return {points:rank.points,tier:rank.tier,percentile:rank.percentile};
 }
-export const tierLabels=[
-  {en:'ONE OF A KIND',ko:'전설급'}, {en:'DEEP CUT',ko:'찐고인물'},
-  {en:'OBSCURE',ko:'숨은 명작'}, {en:'COLLECTOR',ko:'수집가'},
-  {en:'FAMILIAR',ko:'어디서 들어봄'}, {en:'ESSENTIAL',ko:'국민 교양'},
-];
+export const tierLabels=RARITY_TAGS.map(t=>({en:t.en,ko:t.ko}));
+
 export function todayKey(date=new Date()):string {return date.toLocaleDateString('en-CA',{timeZone:'America/New_York'});}
 export function newGame(mode:Mode,date=todayKey(),ranked=true):GameSession {
   return {id:`${mode}-${date}-${ranked?'daily':Date.now()}`,date,mode,ranked,prompts:selectPrompts(mode,date).map(p=>p.id),index:0,roundStartedAt:Date.now(),state:'play',results:[]};
