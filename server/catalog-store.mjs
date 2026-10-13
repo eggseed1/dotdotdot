@@ -1,4 +1,4 @@
-import {canonical,namesFor,suggestWorks,exactWorks} from '../src/lib/title-match.mjs';
+import {canonical,indexNamesFor,phoneticKeys,suggestWorks,exactWorks} from '../src/lib/title-match.mjs';
 import {rarityFromRank} from '../src/lib/rarity-model.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
@@ -39,7 +39,7 @@ export function createCatalogStore(dbPath){
   const aliasInsert=db.prepare('INSERT OR IGNORE INTO work_aliases(work_id,alias_norm) VALUES(?,?)');
   const clearGrams=db.prepare('DELETE FROM work_grams WHERE work_id=?');
   const gramInsert=db.prepare('INSERT OR IGNORE INTO work_grams(work_id,gram) VALUES(?,?)');
-  function indexAliases(id,work){for(const alias of namesFor(work)){aliasInsert.run(id,alias);for(const gram of grams(alias))gramInsert.run(id,gram);}}
+  function indexAliases(id,work){for(const alias of indexNamesFor(work)){aliasInsert.run(id,alias);for(const gram of grams(alias))gramInsert.run(id,gram);}}
   const genreInsert=db.prepare('INSERT OR IGNORE INTO work_genres(work_id,genre) VALUES(?,?)');
   function put(w){
     if(!KINDS.has(w.kind)||!SOURCES.has(w.source)||!w.title||!w.sourceId)throw Error('Missing required kind/source/title/sourceId');
@@ -70,19 +70,21 @@ export function createCatalogStore(dbPath){
   }
   function suggest(kind,query,limit=7){
     if(!KINDS.has(kind)||typeof query!=='string'||query.trim().length<2)return [];
-    const key=canonical(query.slice(0,100)),needle=key.replace(/[\\%_]/g,'');
-    const prefix=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`).all(kind,needle+'%');
-    const candidates=prefix.map(hydrate),ids=new Set(candidates.map(w=>w.id));
-    if(candidates.length<limit){
-      const contains=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`).all(kind,'%'+needle+'%');
-      for(const r of contains.map(hydrate))if(!ids.has(r.id)){ids.add(r.id);candidates.push(r);}
-    }
-    if(candidates.length<limit&&key.length>=3){
-      const parts=grams(key);
-      if(parts.length){
-        const matches=db.prepare(`SELECT w.* FROM work_grams g JOIN works w ON w.id=g.work_id WHERE w.kind=?
-          AND g.gram IN (${parts.map(()=>'?').join(',')}) GROUP BY w.id ORDER BY COUNT(*) DESC LIMIT 120`).all(kind,...parts);
-        for(const r of matches.map(hydrate))if(!ids.has(r.id)){ids.add(r.id);candidates.push(r);}
+    const keys=phoneticKeys(query.slice(0,100)).map(k=>k.replace(/[\\%_]/g,'')).filter(Boolean);
+    const candidates=[],ids=new Set();
+    const add=rows=>{for(const row of rows){if(!ids.has(row.id)){ids.add(row.id);candidates.push(hydrate(row));}}};
+    const prefix=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`);
+    const contains=db.prepare(`SELECT DISTINCT w.* FROM work_aliases a JOIN works w ON w.id=a.work_id WHERE w.kind=? AND a.alias_norm LIKE ? LIMIT 90`);
+    for(const key of keys){
+      add(prefix.all(kind,key+'%'));
+      if(candidates.length<limit)add(contains.all(kind,'%'+key+'%'));
+      if(candidates.length<limit&&key.length>=3){
+        const parts=grams(key);
+        if(parts.length){
+          const matches=db.prepare(`SELECT w.* FROM work_grams g JOIN works w ON w.id=g.work_id WHERE w.kind=?
+            AND g.gram IN (${parts.map(()=>'?').join(',')}) GROUP BY w.id ORDER BY COUNT(*) DESC LIMIT 120`).all(kind,...parts);
+          add(matches);
+        }
       }
     }
     return suggestWorks(query,candidates,limit);
