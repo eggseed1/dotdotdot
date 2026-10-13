@@ -12,3 +12,11 @@ export function rarityFromCounts(answerCount,eligibleCounts,{minimumEvidence=1}=
   const tier=percentile>=.94?0:percentile>=.79?1:percentile>=.57?2:percentile>=.33?3:percentile>=.12?4:5;
   return {points:SCORE_TIERS[tier],tier,percentile,reason:'ok'};
 }
+
+/** Constant-memory rarity over an indexed media database; no arbitrary 25k limit. */
+export function rarityFromRank(answerCount,totalEligible,moreCommon,{minimumEvidence=1}={}){
+ if(!Number.isFinite(answerCount)||answerCount<minimumEvidence||totalEligible<1)return {points:0,tier:-1,percentile:0,reason:'insufficient_evidence'};
+ const percentile=totalEligible===1?0:Math.max(0,Math.min(1,moreCommon/(totalEligible-1)));
+ const tier=percentile>=.94?0:percentile>=.79?1:percentile>=.57?2:percentile>=.33?3:percentile>=.12?4:5;
+ return {points:SCORE_TIERS[tier],tier,percentile,reason:'ok'};
+}
