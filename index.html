@@ -1,8 +1,19 @@
 <!doctype html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="icon" type="image/svg+xml" href="./favicon.svg"/><meta name="theme-color" content="#16152b"/><meta name="description" content="A pixel-art daily trivia game for the terminally cultured. Name the rarest valid record, film, book, anime or game."/>
+<link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg"/><meta name="theme-color" content="#16152b"/><meta name="description" content="A pixel-art daily trivia game for the terminally cultured. Name the rarest valid record, film, book, anime or game."/>
 <title>larper101 / 꺼드럭대마왕</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-</head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<style>html,body{margin:0;min-height:100%;background:#16152b;color:#f7eddf}#root{min-height:100vh}</style>
+</head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script>
+<script>
+window.addEventListener('load',function(){
+  window.setTimeout(function(){
+    var root=document.getElementById('root');
+    if(root && root.childElementCount===0){
+      root.innerHTML='<main style="box-sizing:border-box;max-width:640px;margin:12vh auto;padding:28px;font-family:system-ui,sans-serif;line-height:1.7"><h1 style="color:#f3b65b">larper101 is not loading yet</h1><p>The game assets could not load. On GitHub Pages, set <b>Settings → Pages → Source → GitHub Actions</b>, then check the latest workflow deployment.</p><p>게임을 불러올 수 없습니다. GitHub Pages 배포 소스를 <b>GitHub Actions</b>로 변경해 주세요.</p><p><a style="color:#f3b65b" href="https://github.com/eggseed1/dotdotdot/actions">View deployment status →</a></p></main>';
+    }
+  },3500);
+});
+</script></body></html>
