@@ -115,3 +115,17 @@ npm run import:catalog -- --source wikidata --file wiki-films.jsonl
 **Important:** These scripts create infrastructure, NOT a complete imported catalog. The checked-in sample data is still small. Full popularity-based competitive rarity needs authorized, comparable user-count signals plus rigorous entity matching across providers. Records without reliable popularity counts can be suggested, but are not scored as exceptionally obscure by default.
 
 For Node-only tests without npm packages: `node --test server/*.test.mjs src/lib/title-match.test.mjs`. For the app build, install dependencies and run `npm run build`.
+
+
+## Bulk IMDb movie database importer
+
+New: `scripts/import-imdb-dump.mjs` streams official `title.basics.tsv.gz`, `title.ratings.tsv.gz`, and optionally `title.akas.tsv.gz` into the indexed catalog. It imports all feature films (unless `--limit` is set), joins real vote counts on disk, indexes Korean/alternate titles for fuzzy autocomplete, and does not fabricate countries or creators.
+
+**Licensing:** IMDb public downloadable datasets are generally limited to noncommercial use. Check your use is permitted or obtain appropriate rights before downloading/importing. The `--acknowledge-imdb-terms` flag does not grant permission.
+
+```sh
+npm run import:imdb -- --basics /data/title.basics.tsv.gz --ratings /data/title.ratings.tsv.gz --akas /data/title.akas.tsv.gz --db /data/catalog.sqlite --acknowledge-imdb-terms
+npm run test:bulk
+```
+
+This importer is a real bulk-data pathway, **not an imported dataset**. The live Node server needs `CATALOG_DB=/data/catalog.sqlite` with persistent storage. GitHub Pages cannot query the database, and its solo game still uses the small fixture until server-backed daily gameplay is deployed. Music, books, anime and games also remain incomplete until their official/authorized bulk sources are ingested.
