@@ -30,6 +30,11 @@ export type Prompt = {
 export type RoundResult = {
   promptId: string;
   workId?: string;
+  title?: string;
+  titleKo?: string;
+  creator?: string;
+  year?: number;
+  country?: string;
   rawAnswer: string;
   points: number;
   tier: number;
