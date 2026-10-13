@@ -59,7 +59,10 @@ export default function App(){
   const activePrompt=useMemo(()=>session?promptById.get(session.prompts[session.index]):undefined,[session]);
   const autocomplete=useTitleAutocomplete(answer,activePrompt?.kind||'any',lang,session?.state==='play');
   const activeResult=session?.state==='reveal'?session.results[session.index]:undefined;
-  const activeWork=selectedWork(activeResult?.workId);
+  const activeWork=selectedWork(activeResult?.workId) || (activeResult?.title ? {
+    id:activeResult.workId||'',title:activeResult.title,titleKo:activeResult.titleKo,creator:activeResult.creator||'',
+    year:activeResult.year||0,country:activeResult.country||'',genres:[] as string[]
+  } : undefined);
   const activeScore=session?totalScore(session.results):0;
   const modeLabel=(mode:Mode)=>mode==='music'?t.music:t.all;
 
@@ -89,13 +92,28 @@ export default function App(){
     setSession(s=>s&&s.state==='play'?{...s,state:'reveal',results:[...s.results,result]}:s);
     setFeedback('');
   };
-  const submit=(event?:FormEvent)=>{
+  const submit=async(event?:FormEvent)=>{
     event?.preventDefault();
     if(!session||session.state!=='play'||!activePrompt)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     if(!answer.trim()){setFeedback(t.empty);return;}
     const found=lookupAnswer(answer,activePrompt.kind);
-    if(found.status==='missing'){setFeedback(t.invalid);return;}
+    if(found.status==='missing'){
+      try{
+        const api=location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
+        const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:answer.trim()})});
+        if(response.ok){
+          const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
+          if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
+            if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
+            lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:answer.trim(),points:data.points!,tier:data.tier!});return;
+          }
+          if(data.status==='ambiguous'){setFeedback(t.ambiguous);return;}
+          if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
+        }
+      }catch{/* Static-only mode has no live catalog API. */}
+      setFeedback(t.invalid);return;
+    }
     if(found.status==='ambiguous'){setFeedback(t.ambiguous);return;}
     if(!activePrompt.match(found.work)){setFeedback(t.notEligible);return;}
     const points=rarity(found.work,activePrompt);
@@ -168,7 +186,7 @@ export default function App(){
         <div className="result-stars">✦ <span>✳</span> ✦</div><p className="eyebrow centered">{t.completed}</p><h1>{t.resultTitle}</h1>
         <div className="final-score"><strong>{activeScore}</strong><span>/ 700</span></div><p className="score-caption">{t.yourScore} · {modeLabel(session.mode)}</p>{publicResults&&<p className="share-flag">{lang==='ko'?'공유된 결과 · 서버 미검증':'SHARED RESULTS · NOT SERVER VERIFIED'}</p>}
         <Hellscape lang={lang} score={activeScore} compact/>
-        <div className="result-recap">{session.results.map((r,i)=>{const work=selectedWork(r.workId);const p=promptById.get(r.promptId);return <div className="recap-row" key={i}><span className="recap-n">0{i+1}</span><span className="recap-work">{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):t.noAnswer}<small>{p?.badge[lang]} · {work?.creator||'—'}</small></span><b className={r.points>=65?'high-score':''}>+{r.points}</b></div>;})}</div>
+        <div className="result-recap">{session.results.map((r,i)=>{const work=selectedWork(r.workId);const p=promptById.get(r.promptId);return <div className="recap-row" key={i}><span className="recap-n">0{i+1}</span><span className="recap-work">{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title?(lang==='ko'&&r.titleKo?r.titleKo:r.title):t.noAnswer)}<small>{p?.badge[lang]} · {work?.creator||r.creator||'—'}</small></span><b className={r.points>=65?'high-score':''}>+{r.points}</b></div>;})}</div>
         <div className="answers-archive"><div className="answers-archive-heading"><span>✦</span><h2>{lang==='ko'?'가능한 정답 둘러보기':'THE ARCHIVE · POSSIBLE ANSWERS'}</h2><p>{lang==='ko'?'문제별 다른 정답과 예상 점수입니다. 현재는 샘플 데이터만 표시됩니다.':'Explore other valid titles and their provisional scores from the current sample catalog.'}</p></div>
         {session.prompts.map((id,i)=>{const p=promptById.get(id);const examples=sampleAnswers(id);return <details key={id} className="answers-archive-round"><summary><strong>{String(i+1).padStart(2,'0')}</strong><span>{p?.label[lang]}</span><span aria-hidden="true">▾</span></summary><div className="answers-archive-grid">{examples.map(w=><div key={w.id} className="possible-answer"><div><strong>{lang==='ko'&&w.titleKo?w.titleKo:w.title}</strong><small>{w.creator} · {w.year} · {w.country}</small></div><b>+{w.points}</b></div>)}</div></details>})}
         </div>
