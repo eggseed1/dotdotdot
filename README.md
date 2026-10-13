@@ -1,44 +1,67 @@
 # DEEP CUT / 꺼드럭대마왕
 
-**A tiny pixel-art culture-snob trivia game.** Name the most obscure valid work you know. Seven prompts, twenty-five seconds per round, up to 700 points.
+A pixel-art rarity trivia game where **rare answers send a tiny red devil further down into hell**. The English title is **DEEP CUT**; switch to Korean to play **꺼드럭대마왕**.
 
-- **Music Only**: albums filtered by genres, decades, years, and artist countries, inspired by the idea of Rate Your Music's catalog metadata.
-- **All Media**: two music prompts, two film prompts, one literature prompt, one anime prompt, and one video game prompt (Backloggd-inspired game categories).
-- **English / 한국어**: change the language instantly; Korean title is **꺼드럭대마왕**.
-- Illustrated pixel mascot, vinyl sprite, retro-lilac UI; responsive desktop and mobile layout.
-- Daily seeded question selection, 25-second timer, album/work matching including Korean titles and alternate spellings, rarity-scored reveals, result sharing, and local session persistence.
+Play 7 rounds, 25 seconds each. Score up to 700 points (7,000 meters of hell). Discover new infernal layers as you descend. Original pixel-style visuals are based on two reference images supplied by the project owner and bundled locally in `src/data/art.ts`.
+
+## Game modes
+
+| Mode | What's included |
+|---|---|
+| **Music Only** | Album prompts using genres, decades, original release years, and artist countries. |
+| **All Media** | Music (2), film (2), literature (1), anime (1), and games (1). |
+| **Private 1v1** | Create a six-character invite and share it with a friend. |
+| **Ranked 1v1 (guest beta)** | Matchmaking within the chosen mode, persistent guest Elo, placement games. |
+
+### Hell dive, PvP rules
+
+- **10 meters per point**. The devil and background descend through six named layers of hell; a route meter tracks progress toward the 7,000m abyss.
+- PvP players receive **the same seven prompts**, 25 seconds each, with live *answer locked* indicators. Answers aren't revealed to the opponent until the round ends.
+- Valid answers earn 10/20/40/65/85/100 points by tier, according to a **curated demo popularity proxy**, **not** real RYM, Backloggd, or user-submission counts.
+- **Jinx:** identical correct answers in a round halve both players' points for that round.
+- Live room codes, queue matchmaking, reconnect via stable guest browser ID, and Elo updates (provisional; 10 placement matches with a larger rating adjustment).
+- Server validates all PvP answers, timing, and scoring. Guest identity and Elo aren't secure authentication, so this is a **beta**, not cheat-proof ranked play.
 
 ## Run locally
 
-Install Node.js 20.19+ or 22.12+ and run:
+Use Node.js 22+. Install and build:
 
 ```bash
 npm install
-npm run dev
+npm run build
+npm start
 ```
 
-Navigate to the address printed by Vite. To create a static production bundle, run `npm run build`.
+Open **http://localhost:8787**. Run a second browser or incognito window to test a private match or ranked queue against yourself. Note: a guest ID persists in the browser; for two players use separate profiles/containers.
 
-Run the engine tests with `npm test`.
+For frontend-only live editing, run two terminals:
 
-## IMPORTANT: prototype limitations
+```bash
+npm run dev       # Vite frontend, usually http://localhost:5173
+npm run server    # Multiplayer backend, http://localhost:8787
+```
 
-**This is a playable vertical slice with a small hand-curated sample catalog.** It does **not** contain the complete Rate Your Music, Backloggd, Letterboxd, IMDb, Goodreads, or AniList databases, and it does not scrape them. `src/data/catalog.ts` contains explicitly illustrative popularity weights, **not real rating or audience counts**. A work absent from the sample catalog will be rejected even if the answer is correct in the real world. The prototype labels this limitation in the interface.
+In Vite development, the browser connects to `ws://localhost:8787/ws`. On a Node-hosted production app it connects to `wss://YOUR_DOMAIN/ws` automatically. Set `VITE_DUEL_URL` when building to override the WebSocket URL.
 
-Daily attempts and results are tracked in browser localStorage. That is not tamper-resistant; production leaderboards must validate attempts, clocks, and scores on the server.
+Run rules tests:
 
-## Roadmap: production metadata
+```bash
+npm run test:duel  # built-in Node tests for jinx, timeouts and Elo
+npm test           # also runs Vitest catalog/prompt tests
+```
 
-- Establish authorized metadata access and a canonical item-ID system for all five media; do not scrape websites contrary to their terms or bypass anti-bot access controls.
-- Music: licensed/authorized music metadata, including primary genres and countries (RYM-style). MusicBrainz can supply some baseline metadata, subject to its data and tag licenses.
-- Film: license-compatible movie metadata with country and year.
-- Literature: licensed book/author metadata with original publication year and origin country.
-- Anime: licensed anime metadata with format, production country, year, and genres.
-- Games: licensed video game metadata with developer country, initial release year, and genres (Backloggd-style discovery).
-- Add proper aliases, transliterations, Korean localized titles, collision-resolution UI, and review/admin tools for disputed answers.
-- Move scoring, timed attempts, saved scores, and daily question packs to a real server with a database and monitoring.
-- Use distribution-based rarity scoring with a verifiability floor instead of manually assigned demo weights.
+## Hosting
 
-## Tech stack
+**Important:** GitHub Pages can show the static frontend and daily mode, **but cannot run live 1v1**. Host the project as a **Node web service** (Railway, Render, Fly.io, or a server), with `npm install && npm run build` during deployment and `npm start` to serve both the built UI and WebSocket endpoint on the same domain. Set `PORT` to the host's port and optionally `DATA_DIR=/data` on a persistent disk to retain guest ratings. Without an online backend the 1v1 lobby clearly shows an offline warning; it doesn't pretend to have live opponents.
 
-Vite + React 19 + TypeScript + CSS, with custom CSS/grid pixel sprites. No images are scraped or hotlinked from outside sites.
+The GitHub Pages workflow remains useful for a static daily-only preview; in that environment live 1v1 buttons remain unavailable until a public WebSocket server is configured via `VITE_DUEL_URL` at build time.
+
+## Prototype data limitations
+
+**This build contains a small, manually curated catalog** in `src/data/catalog.ts`. It does **not** scrape, mirror, or provide official access to Rate Your Music, Backloggd, Letterboxd, Goodreads or AniList. Many legitimate answers outside the sample catalog are currently rejected. Popularity weights are hand-curated *illustrations*, not actual rating counts, and therefore are not suitable for a serious ranked competition yet.
+
+To launch real competitive play, obtain data from authorized or appropriately licensed catalogs, add source attribution and aliases, store the verified work registry on the server, freeze rarity tiers per match, implement secure accounts and anti-cheat measures, add fair player reports, persistent match histories and rate-limits. Avoid bypassing restrictions on third-party catalog sites.
+
+## Stack
+
+React 19, TypeScript, Vite, CSS pixel effects, WebSockets (`ws`), Node server, local JSON guest Elo storage. The reference [Krillion Ranked](https://github.com/RazorTigerKid/krillion-ranked) inspired the PvP **mechanics**, but the game UI, code and branding here are original.
