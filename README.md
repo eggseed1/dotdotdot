@@ -79,3 +79,39 @@ GitHub Pages only serves the static single-player preview. **For ranked play and
 ## Security/production work before launch
 
 Replace guest UUIDs with authenticated identities, introduce account-specific Elo records and match auditing, load authoritative daily prompts from the backend, pin release-day rarity snapshots, and implement anti-cheat/server-validated daily attempts. Backups, rate limits, abuse controls, source normalization, and dispute reports are required for a production ranking system.
+
+## Bilingual title suggestions and permitted catalog expansion
+
+Typing at least two characters now opens a selectable dropdown in solo and ranked 1v1. Search works across English and Korean regardless of the language toggle; e.g. `중경` / `Chungking` and `에반게리온` / `Evangelion` resolve to the same works. Arrow keys navigate and Enter selects; a second Enter submits. Submissions still require a valid matching work. The Node server offers `GET /api/suggest` (normalized aliases and trigram typo search) and `POST /api/validate` (imported title + prompt + verified count rarity).
+
+### Import the broadest available *permitted* sources
+
+**MusicBrainz:** For comprehensive coverage, download the [CC0 core database dump](https://musicbrainz.org/doc/MusicBrainz_Database/Download). Supplementary tags and ratings are under different licenses. For a *limited* rate-controlled API discovery sample:
+
+```sh
+CATALOG_CONTACT_EMAIL=your-real-contact@example.com npm run fetch:musicbrainz -- --query 'primarytype:album' --limit 100 --out musicbrainz-sample.jsonl
+npm run import:catalog -- --source musicbrainz --file musicbrainz-sample.jsonl
+```
+
+The query fetcher identifies itself, never exceeds one request per second, and caps responses; do not use repeated sample requests as a replacement for the core dump.
+
+**Open Library:** Download the [monthly works dump](https://openlibrary.org/developers/dumps) rather than scraping HTML or using the API for bulk collection:
+
+```sh
+npm run import:books -- --file /path/to/ol_dump_works_YYYY-MM-DD.txt.gz --limit 250000
+```
+
+This streaming importer collects identifiers, book titles, release dates, and subjects, but *does not invent* missing creator countries or readership counts.
+
+**Wikidata:** CC0 multilingual labels and cross-media entities. A capped sample importer for a local experiment (for broad imports use Wikidata dumps):
+
+```sh
+CATALOG_CONTACT_EMAIL=your-real-contact@example.com npm run fetch:wikidata -- --kind film --limit 50 --out wiki-films.jsonl
+npm run import:catalog -- --source wikidata --file wiki-films.jsonl
+```
+
+**Restricted sources:** RYM, Bandcamp, Last.fm, Spotify, IMDb, Letterboxd, MyAnimeList, Backloggd, and similar catalogs each have separate restrictions. Don't scrape or evade blocks. If you obtain a *licensed export*, `scripts/import-catalog.mjs` can ingest normalized JSONL / TSV / CSV with `--authorized` where required. Last.fm's documented API requires a key and the required licensing approval for commercial usage.
+
+**Important:** These scripts create infrastructure, NOT a complete imported catalog. The checked-in sample data is still small. Full popularity-based competitive rarity needs authorized, comparable user-count signals plus rigorous entity matching across providers. Records without reliable popularity counts can be suggested, but are not scored as exceptionally obscure by default.
+
+For Node-only tests without npm packages: `node --test server/*.test.mjs src/lib/title-match.test.mjs`. For the app build, install dependencies and run `npm run build`.
