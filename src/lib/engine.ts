@@ -1,0 +1,123 @@
+import { byId, catalog } from '../data/catalog';
+import type { GameSession, Kind, Mode, Prompt, RoundResult, Work } from './types';
+
+export const ROUND_SECONDS = 25;
+export const ROUNDS = 7;
+export const SCORE_LEVELS = [100, 85, 65, 40, 20, 10] as const;
+
+export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
+  music: {en:'MUSIC',ko:'음악'}, film:{en:'FILM',ko:'영화'},
+  literature:{en:'LITERATURE',ko:'문학'}, anime:{en:'ANIME',ko:'애니'},
+  games:{en:'GAMES',ko:'게임'},
+};
+
+export const promptPool: Prompt[] = [
+  {id:'m-shoegaze',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a shoegaze album.',ko:'슈게이즈 앨범을 하나 대보세요.'},match:w=>w.genres.includes('shoegaze')},
+  {id:'m-90s',kind:'music',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an album released in the 1990s.',ko:'1990년대에 발매된 앨범을 하나 대보세요.'},match:w=>w.year>=1990&&w.year<=1999},
+  {id:'m-japan',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a Japanese artist.',ko:'일본 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='Japan'},
+  {id:'m-postrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a post-rock album.',ko:'포스트 록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('post-rock')},
+  {id:'m-brazil',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a Brazilian album.',ko:'브라질 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='Brazil'},
+  {id:'m-70s',kind:'music',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an album released in the 1970s.',ko:'1970년대에 발매된 앨범을 하나 대보세요.'},match:w=>w.year>=1970&&w.year<=1979},
+  {id:'m-jazz',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a jazz album released before 1970.',ko:'1970년 이전에 발매된 재즈 앨범을 하나 대보세요.'},match:w=>w.genres.includes('jazz')&&w.year<1970},
+  {id:'m-electronic',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an electronic album released in the 1990s.',ko:'90년대에 발매된 전자음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('electronic')&&w.year>=1990&&w.year<2000},
+  {id:'m-uk',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a British artist.',ko:'영국 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='United Kingdom'},
+  {id:'m-krautrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a krautrock album.',ko:'크라우트록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('krautrock')},
+  {id:'m-experimental',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an experimental music album.',ko:'실험음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('experimental')},
+  {id:'f-korean',kind:'film',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a South Korean film.',ko:'한국 영화를 하나 대보세요.'},match:w=>w.country==='South Korea'},
+  {id:'f-90s',kind:'film',badge:{en:'DECADE',ko:'시대'},label:{en:'Name a film from the 1990s.',ko:'90년대 영화를 하나 대보세요.'},match:w=>w.year>=1990&&w.year<=1999},
+  {id:'f-japanese',kind:'film',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a Japanese film.',ko:'일본 영화를 하나 대보세요.'},match:w=>w.country==='Japan'},
+  {id:'f-70s',kind:'film',badge:{en:'DECADE',ko:'시대'},label:{en:'Name a film from the 1970s.',ko:'70년대 영화를 하나 대보세요.'},match:w=>w.year>=1970&&w.year<=1979},
+  {id:'f-romance',kind:'film',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a romance film.',ko:'로맨스 영화를 하나 대보세요.'},match:w=>w.genres.includes('romance')},
+  {id:'l-japanese',kind:'literature',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a novel by a Japanese author.',ko:'일본 작가의 소설을 하나 대보세요.'},match:w=>w.country==='Japan'},
+  {id:'l-1900s',kind:'literature',badge:{en:'CENTURY',ko:'세기'},label:{en:'Name a book published in the 20th century.',ko:'20세기에 출간된 책을 하나 대보세요.'},match:w=>w.year>=1901&&w.year<=2000},
+  {id:'l-experimental',kind:'literature',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an experimental or postmodern novel.',ko:'실험적이거나 포스트모던한 소설을 하나 대보세요.'},match:w=>w.genres.includes('experimental')||w.genres.includes('postmodernism')},
+  {id:'l-asia',kind:'literature',badge:{en:'REGION',ko:'지역'},label:{en:'Name a book by an author from Japan or South Korea.',ko:'한국 또는 일본 작가의 책을 하나 대보세요.'},match:w=>['Japan','South Korea'].includes(w.country)},
+  {id:'a-90s',kind:'anime',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an anime released in the 1990s.',ko:'90년대 애니메이션을 하나 대보세요.'},match:w=>w.year>=1990&&w.year<=1999},
+  {id:'a-2000s',kind:'anime',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an anime from the 2000s.',ko:'2000년대 애니메이션을 하나 대보세요.'},match:w=>w.year>=2000&&w.year<=2009},
+  {id:'a-psych',kind:'anime',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a psychological anime.',ko:'심리물 애니메이션을 하나 대보세요.'},match:w=>w.genres.includes('psychological')},
+  {id:'a-sci-fi',kind:'anime',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a science-fiction anime.',ko:'SF 애니메이션을 하나 대보세요.'},match:w=>w.genres.includes('science fiction')||w.genres.includes('cyberpunk')},
+  {id:'g-japan',kind:'games',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a video game developed in Japan.',ko:'일본에서 개발된 게임을 하나 대보세요.'},match:w=>w.country==='Japan'},
+  {id:'g-2010s',kind:'games',badge:{en:'DECADE',ko:'시대'},label:{en:'Name a game released in the 2010s.',ko:'2010년대에 발매된 게임을 하나 대보세요.'},match:w=>w.year>=2010&&w.year<=2019},
+  {id:'g-rpg',kind:'games',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an RPG video game.',ko:'RPG 게임을 하나 대보세요.'},match:w=>w.genres.includes('rpg')},
+  {id:'g-psych',kind:'games',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a psychological or surreal video game.',ko:'심리적이거나 초현실적인 게임을 하나 대보세요.'},match:w=>w.genres.includes('psychological')||w.genres.includes('surrealism')},
+];
+
+export const promptById = new Map(promptPool.map(p=>[p.id,p]));
+
+function hash(input:string): number {
+  let h=2166136261;
+  for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,16777619);}
+  return h>>>0;
+}
+function shuffle<T>(array:T[], seed:string):T[] {
+  const sorted=[...array];let n=hash(seed)||1;
+  for(let i=sorted.length-1;i>0;i--){n^=n<<13;n^=n>>>17;n^=n<<5;const j=(n>>>0)%(i+1);[sorted[i],sorted[j]]=[sorted[j],sorted[i]];}
+  return sorted;
+}
+
+export function eligible(prompt:Prompt):Work[] {
+  return catalog.filter(w=>(prompt.kind==='any'||w.kind===prompt.kind)&&prompt.match(w));
+}
+export function selectPrompts(mode:Mode,date:string):Prompt[] {
+  if(mode==='music')return shuffle(promptPool.filter(p=>p.kind==='music'&&eligible(p).length>=3),date+mode).slice(0,ROUNDS);
+  const counts: Array<[Kind,number]>=[['music',2],['film',2],['literature',1],['anime',1],['games',1]];
+  return shuffle(counts.flatMap(([kind,amount])=>shuffle(promptPool.filter(p=>p.kind===kind&&eligible(p).length>=2),date+kind).slice(0,amount)),date+mode);
+}
+
+/** Unicode-aware canonicalization; Hangul is preserved. */
+export function normalize(input:string):string {
+  return input.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase()
+    .replace(/[’‘]/g,"'").replace(/&/g,'and').replace(/♯/g,'#')
+    .replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\s+/g,' ');
+}
+function distance(a:string,b:string):number {
+  const prev=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+    let before=prev[0];prev[0]=i;
+    for(let j=1;j<=b.length;j++){
+      const old=prev[j];prev[j]=Math.min(prev[j]+1,prev[j-1]+1,before+(a[i-1]===b[j-1]?0:1));before=old;
+    }
+  }
+  return prev[b.length];
+}
+export type Lookup = {status:'found';work:Work}|{status:'ambiguous';works:Work[]}|{status:'missing'};
+export function lookupAnswer(raw:string, kind:Kind, fromCatalog:Work[]=catalog):Lookup {
+  const query=normalize(raw);
+  if(query.length<2)return {status:'missing'};
+  const candidates=fromCatalog.filter(w=>kind==='any'||w.kind===kind);
+  const matches = candidates.filter(w=>{
+    const fullNames=[w.title+' '+w.creator,w.creator+' '+w.title,w.titleKo? w.titleKo+' '+w.creator:''].filter(Boolean);
+    const titleNames=[w.title,w.titleKo,...(w.aliases||[])].filter((x):x is string=>Boolean(x));
+    return titleNames.some(name=>normalize(name)===query)||fullNames.some(name=>normalize(name)===query)||
+      // Only tolerate tiny typos on long titles, avoiding a misleading guess for short titles.
+      (query.length>=9&&titleNames.some(name=>{const n=normalize(name);return Math.abs(n.length-query.length)<=1&&distance(query,n)<=1;}));
+  });
+  if(matches.length===1)return {status:'found',work:matches[0]};
+  if(matches.length>1)return {status:'ambiguous',works:matches};
+  return {status:'missing'};
+}
+
+export function rarity(work:Work,prompt:Prompt):{points:number;tier:number;percentile:number} {
+  const matching=eligible(prompt);
+  // DEMO proxy only. Higher popularity value means more familiar.
+  const moreFamiliar=matching.filter(w=>w.popularity>work.popularity).length;
+  const percentile=matching.length<=1?0:moreFamiliar/(matching.length-1);
+  let tier=5;
+  if(percentile>=0.94)tier=0;
+  else if(percentile>=0.79)tier=1;
+  else if(percentile>=0.57)tier=2;
+  else if(percentile>=0.33)tier=3;
+  else if(percentile>=0.12)tier=4;
+  return {points:SCORE_LEVELS[tier],tier,percentile};
+}
+export const tierLabels=[
+  {en:'ONE OF A KIND',ko:'전설급'}, {en:'DEEP CUT',ko:'찐고인물'},
+  {en:'OBSCURE',ko:'숨은 명작'}, {en:'COLLECTOR',ko:'수집가'},
+  {en:'FAMILIAR',ko:'어디서 들어봄'}, {en:'ESSENTIAL',ko:'국민 교양'},
+];
+export function todayKey(date=new Date()):string {return date.toLocaleDateString('en-CA',{timeZone:'America/New_York'});}
+export function newGame(mode:Mode,date=todayKey(),ranked=true):GameSession {
+  return {id:`${mode}-${date}-${ranked?'daily':Date.now()}`,date,mode,ranked,prompts:selectPrompts(mode,date).map(p=>p.id),index:0,roundStartedAt:Date.now(),state:'play',results:[]};
+}
+export function totalScore(results:RoundResult[]):number{return results.reduce((sum,r)=>sum+r.points,0);}
+export function selectedWork(id?:string){return id?byId.get(id):undefined;}
