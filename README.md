@@ -1,67 +1,81 @@
-# DEEP CUT / 꺼드럭대마왕
+# larper101 / 꺼드럭대마왕
 
-A pixel-art rarity trivia game where **rare answers send a tiny red devil further down into hell**. The English title is **DEEP CUT**; switch to Korean to play **꺼드럭대마왕**.
+A bilingual, pixel-art obscurity challenge. **Music Only** and **All Media** (music, movies, books, anime, games). Name a valid obscure title to dive deeper into the inferno. English brand **larper101**; Korean brand **꺼드럭대마왕**.
 
-Play 7 rounds, 25 seconds each. Score up to 700 points (7,000 meters of hell). Discover new infernal layers as you descend. Original pixel-style visuals are based on two reference images supplied by the project owner and bundled locally in `src/data/art.ts`.
+## Implemented prototype
 
-## Game modes
+- Seven questions per daily game; 25 seconds each, with browser-local single-player progress.
+- Korean and English UI; original little-devil + crimson hellscape art (provided by project owner).
+- Result screen with **seven answers, points, possible answers** and a copyable public `?r=...` link. The code recalculates scores instead of trusting scores encoded in the link. **Solo share codes are portable and unverified**, not an authoritative record.
+- Live WebSocket 1v1: private rooms, ranked queue, 7 shared questions, opponent lock indicators, identical-answer jinx, synchronized reveal, rematch lobby.
+- Provisional guest Elo (initial 1000, first 10 placement matches at K=48, then K=24), ranked ladder API, persisted match history, and **shareable `?match=<id>`** completed-duel reports with possible answers. The match page requires the Node server and saved data.
+- Offline catalog import into indexed SQLite with source provenance, aliases, genres, rating counts, authorization requirements, and tests. Imported results are available to the **PvP server**; the local daily UI still uses the curated fixture.
 
-| Mode | What's included |
-|---|---|
-| **Music Only** | Album prompts using genres, decades, original release years, and artist countries. |
-| **All Media** | Music (2), film (2), literature (1), anime (1), and games (1). |
-| **Private 1v1** | Create a six-character invite and share it with a friend. |
-| **Ranked 1v1 (guest beta)** | Matchmaking within the chosen mode, persistent guest Elo, placement games. |
-
-### Hell dive, PvP rules
-
-- **10 meters per point**. The devil and background descend through six named layers of hell; a route meter tracks progress toward the 7,000m abyss.
-- PvP players receive **the same seven prompts**, 25 seconds each, with live *answer locked* indicators. Answers aren't revealed to the opponent until the round ends.
-- Valid answers earn 10/20/40/65/85/100 points by tier, according to a **curated demo popularity proxy**, **not** real RYM, Backloggd, or user-submission counts.
-- **Jinx:** identical correct answers in a round halve both players' points for that round.
-- Live room codes, queue matchmaking, reconnect via stable guest browser ID, and Elo updates (provisional; 10 placement matches with a larger rating adjustment).
-- Server validates all PvP answers, timing, and scoring. Guest identity and Elo aren't secure authentication, so this is a **beta**, not cheat-proof ranked play.
+**This is NOT a complete RYM / Backloggd / Letterboxd / Spotify / IMDb / MAL catalog.** Current fixture has a small number of hand-selected titles, and its popularity values are illustrative. Production coverage, authorization, normalization, prompt generation and security remain future work. Rankings using guest identities are not cheat-resistant. Do not advertise the game as fully populated.
 
 ## Run locally
 
-Use Node.js 22+. Install and build:
+Requires Node.js **22.13+** (built-in experimental SQLite support).
 
 ```bash
 npm install
 npm run build
 npm start
+# http://localhost:8787
 ```
 
-Open **http://localhost:8787**. Run a second browser or incognito window to test a private match or ranked queue against yourself. Note: a guest ID persists in the browser; for two players use separate profiles/containers.
-
-For frontend-only live editing, run two terminals:
+For a frontend-only demo: `npm run dev`; the live 1v1 server must also run via `npm run server` to enable ranked play.
 
 ```bash
-npm run dev       # Vite frontend, usually http://localhost:5173
-npm run server    # Multiplayer backend, http://localhost:8787
+npm test
 ```
 
-In Vite development, the browser connects to `ws://localhost:8787/ws`. On a Node-hosted production app it connects to `wss://YOUR_DOMAIN/ws` automatically. Set `VITE_DUEL_URL` when building to override the WebSocket URL.
+## Authorized data imports
 
-Run rules tests:
+Use API licenses and permitted official exports only. We do not implement scraping protections bypasses. The importer supports **JSONL, TSV, CSV** with a normalized schema:
+
+```json
+{"kind":"music","title":"Example Album","creator":"Example Artist","sourceId":"release-group-123","year":1987,"country":"Japan","genres":["shoegaze","dream pop"],"aliases":["Alternate Name"],"ratingCount":540,"verified":true,"sourceUrl":"https://example.org/123"}
+```
+
+Required: `kind` (music/film/literature/anime/games), `title`, `sourceId`. Optional: `titleKo`, `creator`, `year`, `country`, `genres`, `aliases`, `ratingCount`, `verified`, `sourceUrl`. Imported works without **verified** metadata or positive vote counts are not included in ranked rarity pools. `ratingCount` should reflect the actual count of listeners/raters/voters, not an average rating.
 
 ```bash
-npm run test:duel  # built-in Node tests for jinx, timeouts and Elo
-npm test           # also runs Vitest catalog/prompt tests
+npm run import:catalog -- --source musicbrainz --file permitted-music.jsonl
+npm run import:catalog -- --source openlibrary --file licensed-books.tsv
+npm run import:catalog -- --source imdb --file licensed-imdb.jsonl --authorized
+npm run import:catalog -- --source rym --file authorized-rym-export.csv --authorized
 ```
 
-## Hosting
+The `--authorized` flag is a confirmation that **you already have legal permission**, not permission itself. For a production import, check rights for each dataset, do canonical ID/alternate edition deduplication, ensure genre/country definitions match, and keep popularity counts comparable within the same source. The loader does not download or fetch the providers automatically. Run imports on a separate machine or background job for multi-gigabyte datasets. SQLite's `node:sqlite` is experimental in Node 22; use managed PostgreSQL for large production deployments.
 
-**Important:** GitHub Pages can show the static frontend and daily mode, **but cannot run live 1v1**. Host the project as a **Node web service** (Railway, Render, Fly.io, or a server), with `npm install && npm run build` during deployment and `npm start` to serve both the built UI and WebSocket endpoint on the same domain. Set `PORT` to the host's port and optionally `DATA_DIR=/data` on a persistent disk to retain guest ratings. Without an online backend the 1v1 lobby clearly shows an offline warning; it doesn't pretend to have live opponents.
+| Desired source | Path to real data | Restriction |
+| --- | --- | --- |
+| RYM | Permission / licensed export | No unrestricted public bulk API |
+| Backloggd | Permission / export | No general sanctioned bulk catalog feed |
+| Spotify | Registered developer Web API | Rate/field limitations; no broad unrestricted export |
+| Letterboxd | Approved API access | By request only, restricted intended uses |
+| IMDb | Official noncommercial IMDb TSV datasets | Confirm noncommercial license or obtain commercial rights |
+| MyAnimeList | Approved MAL API / authorized content | Authentication and usage rules; unofficial Jikan is not a licensed bulk dump |
+| MusicBrainz | Official data dump, then normalize as JSONL/TSV | Attribution and license obligations |
+| Open Library | Monthly works/authors/ratings dumps | Prefer dumps to bulk API calls |
+| Film alternatives | TMDB API with attribution | API key and license |
+| Games alternatives | IGDB API with Twitch OAuth | API credentials and license |
 
-The GitHub Pages workflow remains useful for a static daily-only preview; in that environment live 1v1 buttons remain unavailable until a public WebSocket server is configured via `VITE_DUEL_URL` at build time.
+Supported aliases let the game avoid false negatives, but duplicate works across providers and title collisions must be resolved before a large ranked launch.
 
-## Prototype data limitations
+## APIs
 
-**This build contains a small, manually curated catalog** in `src/data/catalog.ts`. It does **not** scrape, mirror, or provide official access to Rate Your Music, Backloggd, Letterboxd, Goodreads or AniList. Many legitimate answers outside the sample catalog are currently rejected. Popularity weights are hand-curated *illustrations*, not actual rating counts, and therefore are not suitable for a serious ranked competition yet.
+- `GET /health` — server health
+- `GET /api/catalog/status` — imported catalog coverage and sources
+- `GET /api/leaderboard` — provisional top guest Elo ratings
+- `GET /api/matches/:id` — completed public 1v1 results (retains latest 250 matches)
+- WebSocket `/ws` — same-match questions, validation, jinx, final result
 
-To launch real competitive play, obtain data from authorized or appropriately licensed catalogs, add source attribution and aliases, store the verified work registry on the server, freeze rarity tiers per match, implement secure accounts and anti-cheat measures, add fair player reports, persistent match histories and rate-limits. Avoid bypassing restrictions on third-party catalog sites.
+## Deployment
 
-## Stack
+GitHub Pages only serves the static single-player preview. **For ranked play and live sharing, deploy the Node server on a persistent-disk host** with `DATA_DIR` set to a persistent directory and `PORT` configured by the host. The server hosts both the built frontend and WebSocket API.
 
-React 19, TypeScript, Vite, CSS pixel effects, WebSockets (`ws`), Node server, local JSON guest Elo storage. The reference [Krillion Ranked](https://github.com/RazorTigerKid/krillion-ranked) inspired the PvP **mechanics**, but the game UI, code and branding here are original.
+## Security/production work before launch
+
+Replace guest UUIDs with authenticated identities, introduce account-specific Elo records and match auditing, load authoritative daily prompts from the backend, pin release-day rarity snapshots, and implement anti-cheat/server-validated daily attempts. Backups, rate limits, abuse controls, source normalization, and dispute reports are required for a production ranking system.

@@ -99,9 +99,12 @@ export function lookupAnswer(raw:string, kind:Kind, fromCatalog:Work[]=catalog):
 
 export function rarity(work:Work,prompt:Prompt):{points:number;tier:number;percentile:number} {
   const matching=eligible(prompt);
-  // DEMO proxy only. Higher popularity value means more familiar.
-  const moreFamiliar=matching.filter(w=>w.popularity>work.popularity).length;
-  const percentile=matching.length<=1?0:moreFamiliar/(matching.length-1);
+  // When imported counts exist, compare like-for-like verified counts. Otherwise use clearly labeled demo values.
+  const observed = work.voteCount !== undefined && matching.filter(w=>w.voteCount !== undefined).length >= 3;
+  const pool = observed ? matching.filter(w=>w.voteCount !== undefined) : matching;
+  const measure = (w:Work) => observed ? (w.voteCount ?? 0) : w.popularity;
+  const moreFamiliar=pool.filter(w=>measure(w)>measure(work)).length;
+  const percentile=pool.length<=1?0:moreFamiliar/(pool.length-1);
   let tier=5;
   if(percentile>=0.94)tier=0;
   else if(percentile>=0.79)tier=1;

@@ -15,6 +15,10 @@ export type Work = {
   aliases?: string[];
   /** Hand-curated DEMO popularity proxy, NOT RYM or other service popularity. */
   popularity: number;
+  /** Verified number of ratings/votes on the source when a licensed source is imported. */
+  voteCount?: number;
+  source?: string;
+  sourceId?: string;
 };
 export type Prompt = {
   id: string;

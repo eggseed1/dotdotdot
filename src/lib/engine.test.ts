@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { eligible,lookupAnswer,newGame,normalize,promptById,rarity,selectPrompts } from './engine';
+import { eligible,lookupAnswer,normalize,promptById,rarity,selectPrompts } from './engine';
 
 describe('daily engine',()=>{
   it('always returns seven stable prompts in each mode',()=>{
