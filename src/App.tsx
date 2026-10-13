@@ -5,7 +5,7 @@ import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
-import { devilArt } from './data/art';
+import { devilArt, hellBackdrop } from './data/art';
 import { Swords, Flame } from 'lucide-react';
 import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, tierLabels, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
@@ -45,6 +45,7 @@ export default function App(){
     return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
+  const [landingMode,setLandingMode]=useState<Mode>('music');
   const [publicMatch,setPublicMatch]=useState(()=>new URLSearchParams(window.location.search).get('match'));
   const [publicShare,setPublicShare]=useState(()=>{try{return new URLSearchParams(window.location.search).get('r');}catch{return null;}});
   const publicResults=publicShare?decodeShare(publicShare):null;
@@ -151,35 +152,20 @@ export default function App(){
         <button className="info-button" onClick={()=>setInfoOpen(true)} aria-label={t.about}><Info size={17}/></button>
       </div>
     </header>
-    {publicMatch?<PublicMatchPage matchId={publicMatch} lang={lang} onBack={home}/>:duelOpen ? <DuelArena lang={lang} onBack={()=>setDuelOpen(false)}/> : !session? <main className="home-main">
-      <section className="hero-grid">
-        <div className="hero-copy">
-          <div className="eyebrow"><span className="pulse-dot"/> {t.daily} <span className="line-accent">//</span> {stamp(date)}</div>
-          <div className="hero-heading">
-            <p className="hero-kicker">{t.heroTop}</p>
-            <h1>{t.heroTitle}</h1>
-          </div>
-          <p className="hero-description">{t.heroSub}</p>
-          <div className="hero-pills"><span>✦ {t.rounds}</span><span>◷ {t.duration}</span><span>✺ {t.rarity}</span></div>
+    {publicMatch?<PublicMatchPage matchId={publicMatch} lang={lang} onBack={home}/>:duelOpen ? <DuelArena lang={lang} onBack={()=>setDuelOpen(false)}/> : !session? <main className="pixel-landing" style={{backgroundImage:`linear-gradient(180deg,rgba(25,0,8,.08),rgba(12,0,5,.38) 64%,rgba(9,0,4,.7)),url("${hellBackdrop}")`}}>
+      <div className="pixel-landing-inner">
+        <p className="pixel-landing-kicker">{lang==='ko'?'지옥에서 가장 잘난 척하는 법':'THE OBSCURITY GAME'}</p>
+        <h1 className="pixel-landing-title">{lang==='ko'?'꺼드럭대마왕':'larper101'}</h1>
+        <img className="pixel-landing-devil" src={devilArt} alt={lang==='ko'?'픽셀 악마':'Little pixel devil'} draggable="false"/>
+        <p className="pixel-landing-tagline">{lang==='ko'?'더 마이너할수록, 더 깊이.':'THE RARER YOU KNOW, THE DEEPER YOU GO.'}</p>
+        <div className="pixel-landing-choices" role="group" aria-label={lang==='ko'?'카테고리 선택':'Choose category'}>
+          <button type="button" className={landingMode==='music'?'selected':''} aria-pressed={landingMode==='music'} onClick={()=>setLandingMode('music')}>{lang==='ko'?'음악':'MUSIC'}</button>
+          <button type="button" className={landingMode==='all'?'selected':''} aria-pressed={landingMode==='all'} onClick={()=>setLandingMode('all')}>{lang==='ko'?'전체 미디어':'ALL MEDIA'}</button>
         </div>
-        <Hellscape lang={lang} score={137}/>
-      </section>
-      <section className="choose-section" aria-labelledby="mode-heading">
-        <div className="section-heading"><div><span className="section-number">01 /</span><h2 id="mode-heading">{t.select}</h2></div><span className="section-sparkle">✳ ✳ ✳</span></div>
-        <div className="mode-grid">
-          <ModeCard theme="music" title={t.music} description={t.musicDesc} display={lang==='ko'?'음악':'MUSIC'} icon={Disc3} finished={Boolean(getSaved(gameKey('music',date)))} t={t} onClick={()=>start('music')}/>
-          <ModeCard theme="all" title={t.all} description={t.allDesc} display={lang==='ko'?'종합':'EVERYTHING'} icon={Star} finished={Boolean(getSaved(gameKey('all',date)))} t={t} onClick={()=>start('all')}/>
-        </div>
-        <div className="arena-callout">
-          <div className="arena-callout-icon"><Swords size={30}/></div>
-          <div><span className="arena-callout-eyebrow">ONLINE PVP · 1V1</span><h3>{lang==='ko'?'지옥 끝장 꺼드럭 대결':'HELLBOUND DUELS'}</h3><p>{lang==='ko'?'친구랑 붙거나 랭크전에서 다른 꺼드럭쟁이와 경쟁하세요. 같은 문제로 얼마나 깊이 떨어지는지 겨뤄봅니다.':'Challenge a friend or queue into a ranked 1v1. Same questions; whoever digs the deepest wins.'}</p></div>
-          <button className="arena-cta" onClick={()=>setDuelOpen(true)}><Flame size={18}/>{lang==='ko'?'1대1 대결하기':'ENTER THE ARENA'} <ArrowRight size={17}/></button>
-        </div>
-        <div className="micro-notice"><span>▸</span> {t.homeTip}</div>
-      </section>
-      <section className="how-section"><div className="section-heading"><div><span className="section-number">02 /</span><h2>{t.how}</h2></div></div>
-        <div className="how-grid"><div className="how-illustration"><span>▼</span><img className="how-devil" src={devilArt} alt=""/><b>+1000m</b></div><div><h3>{t.howTitle}</h3><ol>{[t.how1,t.how2,t.how3,t.how4].map((line,i)=><li key={i}><span>0{i+1}</span>{line}</li>)}</ol></div></div>
-      </section>
+        <button className="pixel-landing-start" onClick={()=>start(landingMode)}>{lang==='ko'?'시작하기':'START'} <ArrowRight size={20}/></button>
+        <button className="pixel-landing-duel" onClick={()=>setDuelOpen(true)}><Swords size={14}/>{lang==='ko'?'1대1 대결':'1V1 RANKED / FRIENDS'}</button>
+        <span className="pixel-landing-fineprint">{lang==='ko'?'7문제 · 25초 · 데이터 확장 중':'7 ROUNDS · 25 SECONDS · CATALOG EXPANDING'}</span>
+      </div>
     </main>:<main className="game-main">
       <div className="game-topbar"><button className="small-link" onClick={home}><ArrowLeft size={15}/> {t.back}</button><div className="game-title-plate"><span className="mini-diamond">◆</span>{modeLabel(session.mode)}<span className="game-slash">/</span>{session.ranked?t.daily:t.unranked}</div><span className="date-tag">{stamp(session.date)}</span></div>
       {session.state==='finished'?<section className="results-panel">
