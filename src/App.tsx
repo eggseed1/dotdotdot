@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen, Gamepad2, Info, Play, RotateCcw, SkipForward, Star, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen, Gamepad2, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
 import { catalog } from './data/catalog';
 import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt, hellBackdrop } from './data/art';
-import { Swords, Flame } from 'lucide-react';
+import { Swords } from 'lucide-react';
 import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, tierLabels, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
@@ -206,11 +206,3 @@ export default function App(){
   </div>;
 }
 function MediaGlyph({kind}:{kind:Kind}){const Icon=kind==='any'?Star:mediaIcons[kind];return <Icon size={15} strokeWidth={2.2}/>;}
-function ModeCard({theme,title,description,display,icon:Icon,finished,t,onClick}:{theme:Mode;title:string;description:string;display:string;icon:IconType;finished:boolean;t:typeof strings[Lang];onClick:()=>void}){
-  return <button className={`mode-card mode-${theme}`} onClick={onClick}>
-    <div className="mode-top"><span className="mode-index">{theme==='music'?'01':'02'} / {theme==='music'?'VINYL ARCHIVE':'CULTURE ARCHIVE'}</span><span className="mode-corner"><Icon size={22}/></span></div>
-    <div className="mode-art"><span className="mode-art-glow"/>{theme==='music'?<div className="album-art"><Pixel pattern={pixelRecord}/><span>33 RPM</span></div>:<div className="all-art"><div className="cassette-art">▣ <small>01</small></div><div className="book-art">▥</div><div className="star-art">✦</div></div>}<span className="mode-big-word">{display}</span></div>
-    <div className="mode-bottom"><div><h3>{title}</h3><p>{description}</p></div><span className="mode-arrow"><ArrowRight size={19}/></span></div>
-    <span className="mode-play-tag"><Play size={11} fill="currentColor"/> {finished?t.practice:t.play}</span>
-  </button>;
-}
