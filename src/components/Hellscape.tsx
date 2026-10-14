@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import {devilArt} from '../data/art';
 import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
 
@@ -14,7 +15,7 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
   <div className="neon-skyline skyline-back" aria-hidden="true" style={{transform:`translateX(-${moving*.016%80}px)`}}>{Array.from({length:19},(_,i)=><i key={i} style={{height:`${28+(i*47)%51}%`}}/>)}</div>
   <div className="neon-skyline skyline-front" aria-hidden="true" style={{transform:`translateX(-${moving*.039%130}px)`}}>{Array.from({length:17},(_,i)=><i key={i} style={{height:`${38+(i*29)%53}%`}}/>)}</div>
   <div className="neon-sidewalk" aria-hidden="true"/><div className="neon-road" aria-hidden="true"><div className="neon-road-stripes" style={{backgroundPositionX:`-${moving*.35}px`}}/></div>
-  <div className="neon-player" aria-hidden="true"><div className="neon-travel-car"><span className="car-roof"/><span className="car-window"/><span className="car-driver"/><span className="car-body"/><span className="car-light"/><span className="car-wheel wheel-left"/><span className="car-wheel wheel-right"/></div></div>
+  <div className="neon-player" aria-hidden="true"><div className="neon-travel-car"><span className="car-roof"/><span className="car-window"/><span className="car-driver"/><img className="neon-devil-rider" src={devilArt} alt=""/><span className="car-body"/><span className="car-light"/><span className="car-wheel wheel-left"/><span className="car-wheel wheel-right"/></div></div>
   <div className="city-distance-readout"><small>{lang==='ko'?'이동 거리':'DISTANCE'}</small><b>{distance.toLocaleString()}m</b><span>{rank[lang]} · {rank.division}</span></div>
   {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {distance}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
   {children}
