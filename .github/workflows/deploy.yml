@@ -24,6 +24,18 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npm run build
+      - name: Restore published catalog shards from release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist/catalog-shards
+          if gh release view catalog-current --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release download catalog-current --repo "$GITHUB_REPOSITORY" --pattern "catalog-shards.tar.gz" --dir /tmp
+            tar -xzf /tmp/catalog-shards.tar.gz -C dist
+            echo "Restored published catalog: $(du -sh dist/catalog-shards)"
+          else
+            echo "No catalog-current release yet; deploying current sample."
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
