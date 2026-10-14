@@ -1,5 +1,8 @@
 name: Build free media catalog
 on:
+  push:
+    paths:
+      - '.github/workflows/catalog.yml'
   workflow_dispatch:
   schedule:
     - cron: '17 5 * * 0'
