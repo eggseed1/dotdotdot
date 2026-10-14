@@ -133,3 +133,5 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .hellscape .hell-character-zone{z-index:4}
 .hellscape .hell-depth,.hellscape .hell-headline,.hellscape .hell-route,.hellscape .hell-bottom-copy{z-index:5}
 @media(prefers-reduced-motion:reduce){.hell-world{transition:none}.hell-world-ember{animation:none}}
+
+.hell-rank-label{display:block;margin-top:12px;color:#ffe3a4;font:7px/1.8 var(--pixel);text-shadow:2px 2px #27030d;max-width:240px}.points-won .rarity-label{letter-spacing:.04em}
