@@ -949,3 +949,25 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 .krillion-game-screen .infernal-devil--descending{animation:devil-plunge 1.5s cubic-bezier(.18,.72,.18,1) both!important}
 .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{animation:infernal-camera-drop 2.25s cubic-bezier(.14,.76,.12,1) both!important}
 @media(max-width:800px){.krillion-game-screen input,.krillion-game-screen input[type=text],.krillion-game-screen input[type=search]{font-size:16px!important}}
+
+
+/* Fixed-camera fall v3: stable viewport, no scaling of scene, text or character. */
+.krillion-game-screen,.krillion-game-screen .cinematic-play-stage,.krillion-game-screen .hellscape{overflow:hidden;max-width:100%;width:100%;touch-action:pan-y}
+.krillion-game-screen .hellscape .infernal-sky{transform:none!important;background-size:cover!important;background-position:center center!important;animation:none!important}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{transform:none!important;animation:none!important}
+.krillion-game-screen .infernal-devil--descending{animation:devil-fall-translation 1.4s steps(8,end) both!important}
+@keyframes devil-fall-translation{0%{transform:translate(-50%,-85%);opacity:.7}35%{transform:translate(-50%,-40%);opacity:1}72%{transform:translate(-50%,8%)}100%{transform:translate(-50%,-50%)}}
+.krillion-game-screen .infernal-fall-depth{animation:none!important;transform:translateX(-50%)!important}
+.krillion-game-screen .infernal-fall-depth strong{animation:none!important;transform:none!important}
+.krillion-game-screen .infernal-fall-overlay,.krillion-game-screen .infernal-fall-streaks{transform:none!important}
+.krillion-game-screen .infernal-fall-vignette{opacity:.35}
+.krillion-game-screen .infernal-descent-announcement{animation:fall-caption-only 1.5s steps(6,end) both!important}
+@keyframes fall-caption-only{0%,100%{opacity:0}12%,80%{opacity:1}}
+@media(max-width:680px){
+ .krillion-game-screen .hellscape .infernal-sky{background-position:center center!important;background-size:cover!important}
+ .krillion-game-screen .infernal-fall-depth{top:48%!important;width:min(280px,85%)!important}
+ .krillion-game-screen .infernal-descent-announcement{top:17%!important;max-width:76%!important;box-sizing:border-box}
+ .krillion-game-screen .infernal-fall-streaks{opacity:.36}
+ .krillion-game-screen input,.krillion-game-screen input[type=text]{font-size:16px!important}
+}
+@media(prefers-reduced-motion:reduce){.krillion-game-screen .infernal-devil--descending,.krillion-game-screen .infernal-fall-overlay,.krillion-game-screen .infernal-descent-announcement{animation:none!important}}
