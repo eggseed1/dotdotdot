@@ -1,0 +1,45 @@
+name: Build free media catalog
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * 0'
+permissions:
+  contents: write
+concurrency:
+  group: media-catalog-release
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      CATALOG_DB: ${{ github.workspace }}/data/catalog.sqlite
+      GH_TOKEN: ${{ github.token }}
+      TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Restore previous release DB if available
+        run: |
+          mkdir -p data
+          gh release download catalog-latest --pattern catalog.sqlite --dir data --clobber || echo "No previous catalog release yet."
+      - name: Incrementally ingest permitted AniList metadata
+        run: |
+          npm run catalog:bootstrap -- --anime-pages 35 --db "$CATALOG_DB"
+      - name: Optional TMDB catalog sync
+        if: env.TMDB_READ_TOKEN != ''
+        run: |
+          npm run catalog:bootstrap -- --anime-pages 0 --movies --movie-from 1990 --movie-to 1999 --db "$CATALOG_DB"
+      - name: Verify snapshot and checkpoint WAL
+        run: |
+          node scripts/catalog-snapshot.mjs --db "$CATALOG_DB"
+          npm run catalog:audit -- --db "$CATALOG_DB"
+      - name: Publish public database snapshot
+        run: |
+          if gh release view catalog-latest >/dev/null 2>&1; then
+            gh release upload catalog-latest "$CATALOG_DB" --clobber
+          else
+            gh release create catalog-latest "$CATALOG_DB" --title "Catalog snapshot" --notes "Automatically generated media metadata catalog. Sources: AniList and optionally authorized TMDB." --latest=false
+          fi
