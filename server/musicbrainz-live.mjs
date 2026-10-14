@@ -65,18 +65,46 @@ async function mbGet(route){return enqueue(async()=>{
  return res.json();
  }finally{clearTimeout(timer);}
 });}
+const genreAlias=new Map([
+ ['post rock','post-rock'],['postrock','post-rock'],['space rock','space rock'],
+ ['experimental rock','experimental'],['avant-garde','experimental'],
+ ['avant garde','experimental'],['electronica','electronic'],
+ ['electronic music','electronic'],['jazz fusion','jazz'],['free jazz','jazz'],
+ ['avant-garde jazz','jazz'],['ambient electronic','electronic'],
+ ['kraut rock','krautrock']
+]);
+export function votedGenres(genres=[],tags=[]){
+ const weighted=new Map();
+ for(const item of [...genres,...tags]){
+  const name=String(item.name||'').toLowerCase().trim();
+  const votes=Number(item.count);
+  if(!name||!Number.isFinite(votes)||votes<=0)continue;
+  const normalized=genreAlias.get(name)||name;
+  weighted.set(normalized,Math.max(weighted.get(normalized)||0,votes));
+ }
+ const evidence=[...weighted].sort((a,b)=>b[1]-a[1]);
+ const strong=evidence.filter(([,count])=>count>=2).map(([name])=>name);
+ return {genres:strong,genreVotes:Object.fromEntries(evidence.slice(0,30)),hasGenreEvidence:evidence.length>0};
+}
+export function provisionalRarity(voteCount){
+ // MusicBrainz ratings are sparse; this is NOT a population percentile.
+ if(!Number.isSafeInteger(voteCount)||voteCount<=0)return {points:44,tier:5,unrated:true};
+ const points=Math.round(Math.max(12,Math.min(85,74-12*Math.log10(1+voteCount))));
+ return {points,tier:points>=70?7:points>=58?6:points>=45?5:points>=30?4:3,unrated:false};
+}
 const countryNames={'JP':'Japan','BR':'Brazil','GB':'United Kingdom','US':'United States','KR':'South Korea'};
 export async function enrichMusicBrainz(work){
  if(!work?.id?.startsWith('musicbrainz:'))return work;
  const id=work.id.slice('musicbrainz:'.length),existing=detailsCache.get(id);
  if(existing&&existing.expires>Date.now())return {...work,...existing.fields};
- const result=await mbGet('release-group/'+encodeURIComponent(id)+'?inc=genres+artist-credits&fmt=json');
- const genres=(result.genres||[]).filter(g=>g.count>0).map(g=>g.name.toLowerCase());
+ const result=await mbGet('release-group/'+encodeURIComponent(id)+'?inc=genres+tags+ratings+artist-credits&fmt=json');
+ const genreData=votedGenres(result.genres,result.tags);
  const artistId=result['artist-credit']?.find(a=>a.artist)?.artist?.id;
  let country='';
  if(artistId){try{const artist=await mbGet('artist/'+encodeURIComponent(artistId)+'?fmt=json');
  country=countryNames[artist.country]||artist.area?.name||'';}catch{}}
- const fields={genres,country};
+ const voteCount=Number(result.rating?.['votes-count']||0);
+ const fields={...genreData,country,ratingCount:Number.isSafeInteger(voteCount)&&voteCount>0?voteCount:null,ratingSource:'musicbrainz-release-group'};
  detailsCache.set(id,{fields,expires:Date.now()+TTL});
  if(detailsCache.size>MAX)detailsCache.delete(detailsCache.keys().next().value);
  return {...work,...fields};
