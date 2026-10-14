@@ -90,7 +90,7 @@ export function createCatalogStore(dbPath){
     return suggestWorks(query,candidates,limit);
   }
   function wherePrompt(id){
-    const kind=id[0]==='m'?'music':id[0]==='f'?'film':id[0]==='l'?'literature':id[0]==='a'?'anime':'games';
+    const kind=id[0]==='m'?'music':id[0]==='f'?'film':id[0]==='l'?'literature':id[0]==='a'?'anime':id[0]==='t'?'tv':'games';
     const genres={'m-shoegaze':['shoegaze'],'m-postrock':['post-rock'],'m-jazz':['jazz'],'m-electronic':['electronic'],'m-krautrock':['krautrock'],'m-experimental':['experimental'],'f-romance':['romance'],'l-experimental':['experimental','postmodernism'],'a-psych':['psychological'],'a-sci-fi':['science fiction','cyberpunk'],'g-rpg':['rpg'],'g-psych':['psychological','surrealism']};
     const years={'m-90s':[1990,1999],'m-70s':[1970,1979],'m-jazz':[0,1969],'m-electronic':[1990,1999],'f-90s':[1990,1999],'f-70s':[1970,1979],'l-1900s':[1901,2000],'a-90s':[1990,1999],'a-2000s':[2000,2009],'g-2010s':[2010,2019]};
     const countries={'m-japan':['Japan'],'m-brazil':['Brazil'],'m-uk':['United Kingdom'],'f-korean':['South Korea'],'f-japanese':['Japan'],'l-japanese':['Japan'],'l-asia':['Japan','South Korea'],'g-japan':['Japan']};
