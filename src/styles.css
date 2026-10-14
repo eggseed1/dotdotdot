@@ -658,3 +658,5 @@ body:has(.krillion-game-screen) .game-main,body:has(.krillion-game-screen) .ques
  .krillion-game-screen .cinematic-stage-top{top:30px!important;max-height:28dvh!important}
  .krillion-game-screen .infernal-devil{top:54%!important;width:72px!important;height:72px!important}
 }
+
+.krillion-game-screen .infernal-sky{background-image:var(--pixel-scene)!important}
