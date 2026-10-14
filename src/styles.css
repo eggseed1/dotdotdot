@@ -832,3 +832,55 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 @keyframes badge-burn{50%{filter:brightness(1.23)}}
 @media (max-width:600px){.infernal-descent-announcement{top:17%;padding:7px 11px}.infernal-descent-announcement span,.infernal-descent-announcement small{font-size:6px}.points-won .rarity-label{font-size:9px;padding:8px}}
 @media (prefers-reduced-motion:reduce){.infernal-devil--descending,.infernal-descent-announcement,.points-won:not(.empty-points),.points-won .rarity-label{animation:none!important}.infernal-descent-announcement{opacity:1}}
+
+
+/* Fullscreen Krillion-style fall sequence: results stay INSIDE the scene. */
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell){isolation:isolate}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{animation:infernal-camera-drop 2.25s cubic-bezier(.14,.76,.12,1) both!important}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-world{animation:infernal-world-shake 2.2s ease-out both}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sparks{animation:infernal-speed-lines 1.8s ease-in-out both}
+.krillion-game-screen .hellscape .reveal-panel--inside-hell{
+ position:absolute!important;left:50%!important;right:auto!important;top:auto!important;
+ bottom:clamp(14px,4dvh,36px)!important;
+ transform:translateX(-50%)!important;
+ z-index:90!important;box-sizing:border-box!important;
+ width:min(600px,calc(100% - 28px))!important;
+ max-height:42dvh!important;overflow-y:auto!important;
+ margin:0!important;padding:clamp(11px,2dvh,22px)!important;
+ background:#170d24f2!important;border:3px solid #ab7265!important;
+ box-shadow:6px 7px #0d0715!important;color:#fff4e5!important;
+ animation:infernal-reveal-appear .6s steps(6,end) 1.65s both!important;
+}
+.krillion-game-screen .reveal-panel--inside-hell h2{font-size:clamp(18px,4vw,34px)!important;color:#ffe9d0!important;margin:2px 0!important}
+.krillion-game-screen .reveal-panel--inside-hell .reveal-creator,
+.krillion-game-screen .reveal-panel--inside-hell .genre-line{color:#d7b8bd!important}
+.krillion-game-screen .reveal-panel--inside-hell .points-won{padding:9px 0!important;margin:3px auto!important;max-width:100%!important}
+.krillion-game-screen .reveal-panel--inside-hell .points-won strong{font-size:clamp(32px,7vw,54px)!important;color:#ffe3a7!important}
+.krillion-game-screen .reveal-panel--inside-hell .next-button{margin-top:8px!important}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .cinematic-stage-top{animation:infernal-stage-fade .35s ease-out both!important}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-descent-announcement{
+ top:32%!important;font-size:11px!important;animation:infernal-drop-counter 2s steps(8,end) both!important;
+}
+@keyframes infernal-camera-drop{
+ 0%{transform:translateY(0) scale(1);filter:brightness(1)}
+ 15%{transform:translateY(-4%) scale(1.05);filter:brightness(1.3)}
+ 45%{transform:translateY(-25%) scale(1.22);filter:brightness(.75)}
+ 75%{transform:translateY(-55%) scale(1.28);filter:brightness(.5)}
+ 100%{transform:translateY(-74%) scale(1.18);filter:brightness(.66)}
+}
+@keyframes infernal-world-shake{0%,100%{filter:brightness(1)}26%,37%{filter:brightness(2)}34%,48%{filter:brightness(.7)}}
+@keyframes infernal-speed-lines{0%,100%{opacity:1}25%,65%{opacity:1;transform:translateY(-65px) scaleY(1.8)}}
+@keyframes infernal-stage-fade{to{opacity:.12}}
+@keyframes infernal-drop-counter{0%{opacity:0;transform:translate(-50%,35px) scale(.7)}25%,77%{opacity:1;transform:translate(-50%,-8px) scale(1.12)}100%{opacity:0;transform:translate(-50%,-48px)}}
+@keyframes infernal-reveal-appear{0%{opacity:0;translate:0 28px}100%{opacity:1;translate:0 0}}
+@media(max-width:700px){
+ .krillion-game-screen .hellscape .reveal-panel--inside-hell{bottom:max(9px,env(safe-area-inset-bottom))!important;max-height:48dvh!important}
+ .krillion-game-screen .reveal-panel--inside-hell .rarity-label{font-size:9px!important}
+ .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-descent-announcement{top:30%!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky,
+ .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-world,
+ .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sparks,
+ .krillion-game-screen .hellscape .reveal-panel--inside-hell{animation:none!important}
+}
