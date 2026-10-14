@@ -13,7 +13,7 @@ const zones=[
  {at:5650,en:'DEMON CITADEL',ko:'마왕성',tone:'#933645'},
  {at:6650,en:'THE INFERNAL CORE',ko:'지옥의 핵',tone:'#ed8b4f'}
 ];
-export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName,previewDepth=0,children}:{score?:number;opponentScore?:number;lang:Lang;compact?:boolean;opponentName?:string;previewDepth?:number;children?:ReactNode}){
+export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName,previewDepth=0,recentPoints=0,children}:{score?:number;opponentScore?:number;lang:Lang;compact?:boolean;opponentName?:string;previewDepth?:number;recentPoints?:number;children?:ReactNode}){
  const depth=Math.max(0,Math.min(7000,score*10));
  const travel=Math.max(0,Math.min(7000,depth+previewDepth));
  const rank=rarityRank(score>0?score/7:10);
@@ -46,7 +46,8 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
    <div className="infernal-cliff left"/><div className="infernal-cliff right"/>
    <div className="infernal-black-spires left"><i/><i/><i/><i/></div>
    <div className="infernal-black-spires right"><i/><i/><i/><i/></div>
-   <div className="infernal-devil" aria-hidden="true"><div className="infernal-devil-glow"/><img src={devilArt} alt=""/><span className="infernal-devil-trail"/></div>
+   <div className={`infernal-devil ${recentPoints>0?'infernal-devil--descending':''}`} key={`devil-${score}-${recentPoints}`} aria-hidden="true"><div className="infernal-devil-glow"/><img src={devilArt} alt=""/><span className="infernal-devil-trail"/></div>
+   {recentPoints>0&&<div className="infernal-descent-announcement" key={`descend-${score}`} aria-live="polite"><span>{lang==='ko'?'악마가 더 깊이 내려갑니다':'DESCENDING INTO HELL'}</span><strong>▼ {recentPoints*10}m</strong><small>{lang==='ko'?'희귀한 답일수록 더 깊이':'RARER ANSWERS · DEEPER DESCENT'}</small></div>}
    <div className="infernal-depth-meter"><small>{lang==='ko'?'현재 심도':'DEPTH'}</small><strong>{depth.toLocaleString()}m</strong><span>{zone[lang]} · {rank[lang]}</span></div>
    {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
    {children}
