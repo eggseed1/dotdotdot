@@ -1,6 +1,7 @@
 import {canonical} from '../src/lib/title-match.mjs';
 const CACHE_MS=6*60*60*1000,cache=new Map();
 const filmTypes=new Set(['Q11424','Q9325869','Q202866','Q24856','Q25110269']);
+const filmDescription=description=>/\\b(film|movie|documentary|motion picture|cinema|short film|experimental cinema)\\b/i.test(String(description||''))&&!/\\b(film director|film producer|film actor|film festival|film company|film award)\\b/i.test(String(description||''));
 const genreNames={'Q157443':'romance','Q130232':'drama','Q859369':'comedy','Q200092':'horror','Q471839':'science fiction','Q157394':'fantasy'};
 const countryNames={'Q884':'South Korea','Q17':'Japan','Q30':'United States','Q145':'United Kingdom','Q142':'France','Q183':'Germany','Q148':'China'};
 const remember=(key,value)=>{if(cache.size>400)cache.delete(cache.keys().next().value);cache.set(key,{value,until:Date.now()+CACHE_MS});return value;};
@@ -19,13 +20,13 @@ const label=(entities,id)=>entities[id]?.labels?.en?.value||entities[id]?.labels
 export async function searchWikidataFilms(query,{limit=9}={}){
  const raw=String(query||'').trim().slice(0,95);if(raw.length<2)return [];
  const key='film:'+canonical(raw),cached=cache.get(key);if(cached?.until>Date.now())return cached.value;
- const results=await wikidata({action:'wbsearchentities',search:raw,language:/[가-힣]/u.test(raw)?'ko':'en',uselang:'en',limit:Math.min(18,Math.max(limit,10))});
+ const results=await wikidata({action:'wbsearchentities',search:raw,language:/[가-힣]/u.test(raw)?'ko':'en',uselang:'en',limit:Math.min(50,Math.max(limit,35))});
  const hits=(results.search||[]).filter(x=>/^Q\d+$/.test(x.id));
  if(!hits.length)return remember(key,[]);
  const payload=await wikidata({action:'wbgetentities',ids:hits.map(x=>x.id).join('|'),props:'claims|labels',languages:'en|ko'});
  const entries=payload.entities||{};
  const films=hits.flatMap(hit=>{
-  const e=entries[hit.id];if(!e||!ids(e,'P31').some(id=>filmTypes.has(id)))return [];
+  const e=entries[hit.id];if(!e||!(ids(e,'P31').some(id=>filmTypes.has(id))||filmDescription(hit.description)))return [];
   return [{id:'wikidata:'+hit.id,kind:'film',source:'wikidata-live',title:e.labels?.en?.value||hit.label,titleKo:e.labels?.ko?.value||'',
    creator:'',year:yearFrom(e),country:countryNames[ids(e,'P495')[0]]||'',genres:ids(e,'P136').map(id=>genreNames[id]).filter(Boolean),
    genreIds:ids(e,'P136'),countryIds:ids(e,'P495'),verified:true,ratingCount:null,aliases:[hit.label],sourceUrl:'https://www.wikidata.org/wiki/'+hit.id}];
