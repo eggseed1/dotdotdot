@@ -250,7 +250,12 @@ const server=http.createServer((req,res)=>{
     const prompt=promptById.get(promptId);
     if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
     if(editorialAnswers[promptId]){
-      const examples=editorialAnswers[promptId].answers.map((title,i)=>({title,source:'editorial-verified',points:44}));
+      const curated=editorialAnswers[promptId].answers.map(title=>({title,source:'editorial-candidate',points:44}));
+      const discovered=promptId==='f-title-number'
+        ?sourceCatalog.db.prepare("SELECT title FROM works WHERE kind='film' AND verified=1 ORDER BY title LIMIT 100000").all()
+          .filter(w=>/[0-9０-９]/u.test(w.title)).map(w=>({title:w.title,source:'catalog-metadata',points:44}))
+        :[];
+      const examples=[...curated,...discovered].filter((w,i,a)=>a.findIndex(x=>normEditorial(x.title)===normEditorial(w.title))===i).slice(0,200);
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
       res.end(JSON.stringify({examples,complete:true}));return;
     }
