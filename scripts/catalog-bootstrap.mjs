@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
+import {createCatalogStore} from '../server/catalog-store.mjs';
 const argv=process.argv.slice(2);
 const opt=(flag,defaultValue)=>{const at=argv.indexOf(flag);return at<0?defaultValue:argv[at+1];};
 const count=(flag,fallback,max)=>{const value=Number(opt(flag,String(fallback)));if(!Number.isSafeInteger(value)||value<0||value>max)throw Error('Invalid '+flag);return value;};
@@ -22,6 +23,7 @@ const outDir=fs.mkdtempSync(path.join(os.tmpdir(),'larper-catalog-'));
 const run=(file,args)=>{console.error('RUN',file,...args);const p=spawnSync(process.execPath,[file,...args],{stdio:'inherit',env:process.env});if(p.error)throw p.error;if(p.status!==0)throw Error(file+' failed with status '+p.status);};
 try{
  if(animePages){
+  const initialized=createCatalogStore(db);initialized.close();
   const state=new DatabaseSync(db);
   state.exec('CREATE TABLE IF NOT EXISTS catalog_sync_state (source TEXT PRIMARY KEY, next_page INTEGER NOT NULL)');
   const saved=state.prepare('SELECT next_page FROM catalog_sync_state WHERE source=?').get('anilist');
