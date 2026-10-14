@@ -9,6 +9,7 @@ import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
 import {searchAniList,exactAniList,aniListScore} from './anilist-live.mjs';
+import {searchWikidataGames,exactGameMatches,enrichWikidataGame} from './wikidata-games.mjs';
 import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
 import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
@@ -124,6 +125,7 @@ const server=http.createServer((req,res)=>{
     if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
     else if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
     else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
+    else if(kind==='games'&&q.trim().length>=2){searchWikidataGames(q).then(respond).catch(()=>respond());}
     else respond();
     return;
   }
@@ -138,6 +140,10 @@ const server=http.createServer((req,res)=>{
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
+      if(!found.length&&prompt.kind==='games'){
+        try{found=exactGameMatches(raw,await searchWikidataGames(raw,{limit:25}));}catch{}
+      }
+      if(prompt.kind==='games'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-games')return w;try{return await enrichWikidataGame(w);}catch{return {...w,metadataUnavailable:true};}}));}
       if(!found.length&&prompt.kind==='anime'){
         try{found=exactAniList(raw,await searchAniList(raw,{limit:25}));}catch{}
       }
