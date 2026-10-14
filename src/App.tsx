@@ -82,7 +82,7 @@ export default function App(){
   const [session,setSession]=useState<GameSession|null>(()=>{
     const param=new URLSearchParams(window.location.search).get('r');
     if(param){const shared=decodeShare(param);if(shared)return shared.session;}
-    const saved=getSaved<GameSession>('deepcut:session:cinematic-v3');
+    const saved=getSaved<GameSession>('deepcut:session:exact-answer-v4');
     return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'&&saved.prompts.every(id=>!id.startsWith('m-'))?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
@@ -106,12 +106,12 @@ export default function App(){
   const activeWork=activeResult?.title ? {
     id:activeResult.workId||'',title:activeResult.title,titleKo:activeResult.titleKo,creator:activeResult.creator||'',
     year:activeResult.year||0,country:activeResult.country||'',genres:[] as string[]
-  } : activeResult?.workId ? selectedWork(activeResult.workId) : undefined;
+  } : activeResult?.rawAnswer ? {id:'',title:activeResult.rawAnswer,titleKo:'',creator:'',year:0,country:'',genres:[] as string[]} : undefined;
   const activeScore=session?totalScore(session.results):0;
   const modeLabel=(_mode:Mode)=>t.all;
 
   useEffect(()=>setSaved('deepcut:lang:ko-default-v2',lang),[lang]);
-  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:cinematic-v3',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
+  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:exact-answer-v4',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
   useEffect(()=>{if(!session||session.state!=='play')return;
     const tick=()=>{
       const remaining=Math.max(0,ROUND_SECONDS-(Date.now()-session.roundStartedAt)/1000);
@@ -277,7 +277,7 @@ export default function App(){
         <div className="result-stars">✦ <span>✳</span> ✦</div><p className="eyebrow centered">{t.completed}</p><h1>{t.resultTitle}</h1>
         <div className="final-score"><strong>{activeScore}</strong><span>/ 700</span></div><p className="score-caption">{t.yourScore} · {modeLabel(session.mode)}</p>{publicResults&&<p className="share-flag">{lang==='ko'?'공유된 결과 · 서버 미검증':'SHARED RESULTS · NOT SERVER VERIFIED'}</p>}
         <Hellscape lang={lang} score={activeScore} compact/>
-        <div className="result-recap">{session.results.map((r,i)=>{const work=r.title?{title:r.title,titleKo:r.titleKo}:selectedWork(r.workId);const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,10000);const examples: Array<{title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}> = serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang}/></div></details>;})}</div>
+        <div className="result-recap">{session.results.map((r,i)=>{const work=r.title?{title:r.title,titleKo:r.titleKo}:r.rawAnswer?{title:r.rawAnswer,titleKo:''}:undefined;const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,10000);const examples: Array<{title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}> = serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang}/></div></details>;})}</div>
         <div className="result-actions"><button className="action-button" onClick={share}><Clipboard size={16}/>{copied?t.copied:t.copy}</button><button className="secondary-button" onClick={()=>start(session.mode,true)}><RotateCcw size={16}/>{t.playAgain}</button><button className="text-button" onClick={home}>{t.back} →</button></div>
         <p className="warning-note">{t.local}</p>
       </section>:<section className="question-shell krillion-game-screen">
@@ -286,7 +286,7 @@ export default function App(){
           <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><h1>{activePrompt?.label[lang]}</h1></div>
           {session.state==='play'&&<div className="hell-answer-ui cinematic-answer-ui"><div className="answer-card">
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
-            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);setTypoSuggestion(null);if(feedback)setFeedback('');}} onKeyDown={autocomplete.onKeyDown}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>{setTypoSuggestion(null);autocomplete.select(item,setAnswer);}}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);setTypoSuggestion(null);if(feedback)setFeedback('');}} onKeyDown={e=>{autocomplete.onKeyDown(e);if(e.key==='Enter'&&(e.nativeEvent.isComposing||e.repeat)){e.preventDefault();}}}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>{setTypoSuggestion(null);autocomplete.select(item,setAnswer);}}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
             {typoSuggestion&&<div className="typo-confirm" role="status"><span>{lang==='ko'?'혹시 이걸 말씀하셨나요?':'DID YOU MEAN THIS?'}</span><strong>{typoSuggestion.display}</strong><small>{typoSuggestion.title!==typoSuggestion.display?typoSuggestion.title:''}</small><button type="button" onClick={()=>{void submit();}}>{lang==='ko'?'Enter 한 번 더 · 이 답으로 제출':'PRESS ENTER AGAIN TO CONFIRM'} ↵</button></div>}
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
