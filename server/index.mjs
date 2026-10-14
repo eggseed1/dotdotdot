@@ -14,8 +14,8 @@ const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path
 const ratingsFile = path.join(dataDir, 'guest-ratings.json');
 const matchesFile = path.join(dataDir,'match-results.json');
 const catalogFile=process.env.CATALOG_DB||path.join(dataDir,'catalog.sqlite');
-const sourceCatalog=fs.existsSync(catalogFile)?createCatalogStore(catalogFile):null;
-const importedCounts=sourceCatalog?.stats()||[];
+// Open the catalog even if it did not exist at startup; bulk imports can then become visible live.
+const sourceCatalog=createCatalogStore(catalogFile);
 const port = Number(process.env.PORT || 8787);
 const vite = await createViteServer({ root, server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' });
 const { lookupAnswer, promptById, rarity, selectPrompts, eligible, todayKey } = await vite.ssrLoadModule('/src/lib/engine.ts');
@@ -141,7 +141,7 @@ const server=http.createServer((req,res)=>{
     const players=Object.entries(ratings).filter(([,v])=>Number.isFinite(v.rating)&&v.played>0).map(([id,v])=>({id:id.slice(0,8),name:v.name,rating:v.rating,played:v.played,wins:v.wins||0})).sort((a,b)=>b.rating-a.rating).slice(0,100);
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
   }
-  if(pathname==='/api/catalog/status'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({demoWorks:0,imported:importedCounts,comprehensive:false}));return;}
+  if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),live:true}));return;}
   if(/^\/api\/matches\/[A-Za-z0-9]{12}$/.test(pathname)){const id=pathname.split('/').pop();const item=completedMatches[id];res.writeHead(item?200:404,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(item||{error:'not_found'}));return;}
   if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({ok:true,players:clients.size,matches:matches.size}));return;}
   // Production bundle served by the same origin as the websocket endpoint.
@@ -181,9 +181,10 @@ wss.on('connection',ws=>{
       const found=databaseMatches.length===1?{status:'found',work:databaseMatches[0]}:databaseMatches.length>1?{status:'ambiguous',works:databaseMatches}:lookupAnswer(raw,prompt.kind);
       if(found.status!=='found'){send(ws,{type:'invalid',reason:found.status});return;}
       if(!prompt.match(found.work)){send(ws,{type:'invalid',reason:'notEligible'});return;}
-      const imported=Boolean(found.work.source&&found.work.ratingCount!==undefined);
+      const imported=Boolean(found.work.source);
       if(imported&&!found.work.verified){send(ws,{type:'invalid',reason:'unverified'});return;}
-      const result=imported?sourceCatalog.score(prompt.id,found.work.ratingCount):rarity(found.work,prompt);
+      const hasVotes=Number.isSafeInteger(found.work.ratingCount)&&found.work.ratingCount>=1;
+      const result=imported?(hasVotes?sourceCatalog.score(prompt.id,found.work.ratingCount):{points:44,tier:5}):rarity(found.work,prompt);
       if(result.points===0){send(ws,{type:'invalid',reason:'unverified'});return;}
       m.answers[id]={workId:found.work.id,title:found.work.title,points:result.points,tier:result.tier};
       sync(id);sendTo(m.players.find(p=>p!==id),{type:'rival_locked'});return;
