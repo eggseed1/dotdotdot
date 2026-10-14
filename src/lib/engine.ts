@@ -9,10 +9,14 @@ export const SCORE_LEVELS = SCORE_TIERS;
 export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
   music: {en:'MUSIC',ko:'음악'}, film:{en:'FILM',ko:'영화'},
   literature:{en:'LITERATURE',ko:'문학'}, anime:{en:'ANIME',ko:'애니'},
-  games:{en:'GAMES',ko:'게임'},
+  games:{en:'GAMES',ko:'게임'}, tv:{en:'TELEVISION',ko:'드라마'},
 };
 
 export const promptPool: Prompt[] = [
+  {id:'tv-90s-drama',kind:'tv',badge:{en:'TV · ERA · GENRE',ko:'방송 · 시대 · 장르'},label:{en:'Name a drama TV series that premiered in the 1990s.',ko:'1990년대 첫 방영한 드라마 TV 시리즈를 대보세요.'},match:w=>w.year>=1990&&w.year<=1999&&w.genres.includes('drama')},
+  {id:'tv-2000s-scifi',kind:'tv',badge:{en:'TV · ERA · GENRE',ko:'방송 · 시대 · 장르'},label:{en:'Name a science-fiction TV series that premiered in the 2000s.',ko:'2000년대 첫 방영한 SF TV 시리즈를 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&(w.genres.includes('science-fiction')||w.genres.includes('science fiction'))},
+  {id:'tv-2010s-crime',kind:'tv',badge:{en:'TV · ERA · GENRE',ko:'방송 · 시대 · 장르'},label:{en:'Name a crime TV series that premiered in the 2010s.',ko:'2010년대 첫 방영한 범죄 TV 시리즈를 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('crime')},
+
   {id:'f-korean-2000s-drama',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a South Korean drama film released between 2000 and 2009.',ko:'2000년부터 2009년 사이 개봉한 한국 드라마 영화를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009&&w.genres.includes('drama')},
   {id:'f-japan-90s-horror',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a Japanese horror film released in the 1990s.',ko:'1990년대 개봉한 일본 공포 영화를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=1990&&w.year<=1999&&w.genres.includes('horror')},
   {id:'f-70s-sci-fi',kind:'film',badge:{en:'DECADE · GENRE',ko:'시대 · 장르'},label:{en:'Name a science-fiction film released in the 1970s.',ko:'1970년대 개봉한 SF 영화를 대보세요.'},match:w=>w.year>=1970&&w.year<=1979&&w.genres.includes('science fiction')},
@@ -68,7 +72,8 @@ export function selectPrompts(_mode:Mode,date:string):Prompt[] {
   const groups: Array<[Kind,number,string[]]>=[
     ['film',2,['f-korean-2000s-drama','f-japan-90s-horror','f-70s-sci-fi']],
     ['anime',2,['a-90s-sci-fi-tv','a-2000s-movie-fantasy','a-2010s-mystery-tv','a-2000s-psych-tv']],
-    ['games',2,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-psych']],
+    ['games',1,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-psych']],
+    ['tv',1,['tv-90s-drama','tv-2000s-scifi','tv-2010s-crime']],
     ['literature',1,['l-experimental','l-japanese','l-asia','l-1900s']]
   ];
   const chosen=groups.flatMap(([kind,count,ids])=>{
