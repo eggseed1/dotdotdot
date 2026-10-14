@@ -28,9 +28,11 @@ jobs:
         run: |
           mkdir -p data
           gh release download catalog-latest --pattern catalog.sqlite --dir data --clobber || echo "No previous catalog release yet."
+      - name: Test importer pagination
+        run: node --test scripts/fetch-anilist.test.mjs
       - name: Incrementally ingest permitted AniList metadata
         run: |
-          npm run catalog:bootstrap -- --anime-pages 35 --db "$CATALOG_DB"
+          npm run catalog:bootstrap -- --anime-pages 80 --db "$CATALOG_DB"
       - name: Optional TMDB catalog sync
         if: env.TMDB_READ_TOKEN != ''
         run: |
