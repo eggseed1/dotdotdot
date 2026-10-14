@@ -24,6 +24,10 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
      <div className="infernal-moon"/>
      {skyStars.map((v,i)=><i key={i} className="infernal-star" style={{left:`${v.x}%`,top:`${v.y}%`}}/>)}
      <div className="infernal-mountains far"/><div className="infernal-mountains near"/>
+     <div className="infernal-citadel"><div className="citadel-tower tower-left"><i/><i/><i/></div><div className="citadel-tower tower-main"><i/><i/><i/></div><div className="citadel-tower tower-right"><i/><i/><i/></div><div className="citadel-gate"/><div className="citadel-bridge"/></div>
+     <div className="infernal-lava-river"><i/><i/><i/><i/><i/><i/><i/><i/></div>
+     <div className="infernal-lava-falls left"><i/><i/><i/></div><div className="infernal-lava-falls right"><i/><i/><i/></div>
+     <div className="infernal-skeleton-tree left"><i/><i/><i/></div><div className="infernal-skeleton-tree right"><i/><i/><i/></div>
    </div>
    <div className="infernal-world" style={{transform:`translate3d(0,${100-travel*.135}px,0)`}} aria-hidden="true">
      {zones.map((z,i)=><div key={z.at} className={`infernal-zone zone-${i}`} style={{top:`${z.at*.135}px`,'--zone-tone':z.tone} as CSSProperties}>
