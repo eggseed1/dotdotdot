@@ -15,9 +15,9 @@ describe('daily engine',()=>{
   it('all media features film anime games and books without music',()=>{
     const kinds=selectPrompts('all','2026-10-14').map(p=>p.kind);
     expect(kinds.filter(x=>x==='music')).toHaveLength(0);
-    expect(kinds.filter(x=>x==='film')).toHaveLength(2);
-    expect(new Set(kinds).size).toBe(5);
-    expect(kinds.filter(x=>x==='tv')).toHaveLength(1);
+    expect(kinds.filter(x=>x==='film')).toHaveLength(4);
+    expect(new Set(kinds).size).toBe(4);
+    expect(kinds.filter(x=>x==='games')).toHaveLength(1);
   });
   it('matches accented names, Korean titles and album/artist pairs',()=>{
     expect(lookupAnswer('Ágætis byrjun','music')).toMatchObject({status:'found',work:{id:'m25'}});
