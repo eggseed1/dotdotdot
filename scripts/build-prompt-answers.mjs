@@ -31,7 +31,7 @@ try{
    for(const w of works){
     // Precomputed provisional rarity; no vote data means neutral points, never fabricated popularity.
     const rank=ranks.get(w.id);
-    const points=rank===undefined?44:Math.max(10,Math.min(100,Math.round(10+90*(ranked.length-rank)/Math.max(1,ranked.length))));
+    const points=rank===undefined?44:Math.max(10,Math.min(100,Math.round(10+90*rank/Math.max(1,ranked.length-1))));
     const tier=Math.max(1,Math.min(7,Math.ceil(points/15)));
     add.run(prompt.id,w.id,points,tier);
    }
