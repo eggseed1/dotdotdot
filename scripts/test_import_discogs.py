@@ -2,6 +2,8 @@ import gzip
 import io
 import json
 import tempfile
+import sqlite3
+import subprocess
 import unittest
 from pathlib import Path
 import importlib.util
@@ -35,6 +37,27 @@ class DiscogsImportTest(unittest.TestCase):
             self.assertEqual(r['year'], 1983)
             out = io.StringIO()
             self.assertEqual(module.convert(str(release_path), 'releases', out, True), 2)
+
+
+    def test_stream_into_real_catalog(self):
+        masters = b'''<masters><master id="999"><title>Almost Unknown Record</title><year>1987</year><artists><artist><name>Unknown Artist</name></artist></artists><genres><genre>Rock</genre></genres><styles><style>Shoegaze</style></styles></master></masters>'''
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder, 'masters.xml.gz')
+            db = Path(folder, 'catalog.sqlite')
+            source.write_bytes(gzip.compress(masters))
+            text = io.StringIO()
+            module.convert(str(source), 'masters', text)
+            result = subprocess.run(
+                ['node', 'scripts/import-catalog.mjs', '--file', '-', '--source', 'discogs', '--db', str(db)],
+                input=text.getvalue(), capture_output=True, text=True, cwd=script.parent.parent, check=True
+            )
+            self.assertIn('"imported": 1', result.stdout)
+            connection = sqlite3.connect(db)
+            row = connection.execute('SELECT title,rating_count,verified FROM works WHERE source=?', ('discogs',)).fetchone()
+            self.assertEqual(row, ('Almost Unknown Record', None, 1))
+            genres = connection.execute('SELECT genre FROM work_genres ORDER BY genre').fetchall()
+            self.assertIn(('shoegaze',), genres)
+            connection.close()
 
 
 if __name__ == '__main__':
