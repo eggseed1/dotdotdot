@@ -35,6 +35,11 @@ jobs:
       - name: Incrementally ingest permitted AniList metadata
         run: |
           npm run catalog:bootstrap -- --anime-pages 80 --db "$CATALOG_DB"
+      - name: Deep search candidates for narrow anime questions
+        continue-on-error: true
+        run: |
+          node scripts/fetch-anilist-by-question.mjs --pages 5 --out data/anime-question-candidates.jsonl
+          node scripts/import-catalog.mjs --file data/anime-question-candidates.jsonl --source anilist --db "$CATALOG_DB"
       - name: Expand literature using Open Library
         continue-on-error: true
         run: |
