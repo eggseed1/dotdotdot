@@ -22,17 +22,26 @@ const entities=ids.length?await get({action:'wbgetentities',ids:ids.join('|'),pr
 const claimIds=(e,p)=>(e.claims?.[p]||[]).map(x=>x.mainsnak?.datavalue?.value?.id).filter(Boolean);
 const year=e=>{const t=e.claims?.P577?.[0]?.mainsnak?.datavalue?.value?.time||'';return Number(/^\+?(\d{4})/.exec(t)?.[1])||null;};
 const works=[];
+const genreIds=new Set(),countryIds=new Set();
+for(const id of ids){const e=entities.entities?.[id];if(e){for(const g of claimIds(e,'P136'))genreIds.add(g);for(const c of claimIds(e,'P495'))countryIds.add(c);}}
+const metadataIds=[...new Set([...genreIds,...countryIds])].slice(0,200);
+const metadata=metadataIds.length?await get({action:'wbgetentities',ids:metadataIds.join('|'),props:'labels',languages:'en'}):{entities:{}};
+const labelFor=id=>String(metadata.entities?.[id]?.labels?.en?.value||'').toLowerCase();
 for(const id of ids){
  const e=entities.entities?.[id];if(!e)continue;
  const instance=claimIds(e,'P31');
  if(kind==='film'&&!instance.some(x=>['Q11424','Q9325869','Q202866','Q24856'].includes(x)))continue;
  if(kind==='games'&&!instance.includes('Q7889'))continue;
  const title=e.labels?.en?.value||e.labels?.ko?.value;if(!title)continue;
- const countryIds=claimIds(e,'P495');
- const country=countryIds.includes('Q17')?'Japan':countryIds.includes('Q884')?'South Korea':'';
- const genreIds=claimIds(e,'P136'),genres=[];
- const known={'Q471839':'science fiction','Q200092':'horror','Q130232':'drama','Q157443':'romance','Q157394':'fantasy'};
- for(const g of genreIds)if(known[g])genres.push(known[g]);
+ const countries=claimIds(e,'P495');
+ const country=countries.includes('Q17')?'Japan':countries.includes('Q884')?'South Korea':countries.map(labelFor).find(Boolean)||'';
+ const genres=claimIds(e,'P136').map(labelFor).filter(Boolean);
+ for(const genre of [...genres]){
+  if(/science fiction|sci-fi/i.test(genre))genres.push('science fiction');
+  if(/role.playing|jrpg/i.test(genre))genres.push('rpg');
+  if(/psychological/i.test(genre))genres.push('psychological');
+ }
+
  const aliases=[...(e.aliases?.en||[]),...(e.aliases?.ko||[])].map(x=>x.value).slice(0,25);
  works.push({kind,sourceId:id,title,titleKo:e.labels?.ko?.value||'',creator:'',year:year(e),country,genres,aliases,ratingCount:null,verified:true,sourceUrl:'https://www.wikidata.org/wiki/'+id});
 }
