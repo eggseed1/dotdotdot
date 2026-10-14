@@ -37,7 +37,7 @@ function gameKey(mode:Mode,date:string){return `deepcut:completed:${mode}:${date
 function percent(n:number){return `${Math.max(0,Math.min(100,n))}%`;}
 
 export default function App(){
-  const [lang,setLang]=useState<Lang>(()=>getSaved<Lang>('deepcut:lang')==='en'?'en':'ko');
+  const [lang,setLang]=useState<Lang>(()=>getSaved<Lang>('deepcut:lang:ko-default-v2')==='en'?'en':'ko');
   const [session,setSession]=useState<GameSession|null>(()=>{
     const param=new URLSearchParams(window.location.search).get('r');
     if(param){const shared=decodeShare(param);if(shared)return shared.session;}
@@ -66,7 +66,7 @@ export default function App(){
   const activeScore=session?totalScore(session.results):0;
   const modeLabel=(_mode:Mode)=>t.all;
 
-  useEffect(()=>setSaved('deepcut:lang',lang),[lang]);
+  useEffect(()=>setSaved('deepcut:lang:ko-default-v2',lang),[lang]);
   useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:cinematic-v3',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
   useEffect(()=>{if(!session||session.state!=='play')return;
     const tick=()=>{
@@ -169,18 +169,18 @@ export default function App(){
               <div className="krillion-hud-score"><small>{lang==='ko'?'점수':'SCORE'}</small><strong>0</strong></div>
             </div>
             <div className="cinematic-stage-top home-stage-title">
-              <div className="cinematic-stage-count">{lang==='ko'?'지옥에서 가장 잘난 척하는 법':'THE OBSCURITY GAME'}</div>
+              
               <h1>{lang==='ko'?'꺼드럭 대마왕':'larper101'}</h1>
-              <p>▶ {lang==='ko'?'남들 모르는 작품을 대고 더 깊이 내려가라':'NAME THE OBSCURE. DESCEND DEEPER.'} ◀</p>
-              <div className="home-category-choice"><button type="button" disabled aria-disabled="true">{lang==='ko'?'음악 · 준비 중':'MUSIC · SOON'}</button><span>{lang==='ko'?'영화 · 애니 · 게임 · 문학':'FILM · ANIME · GAMES · BOOKS'}</span></div>
+              
+              
             </div>
             <div className="hell-answer-ui cinematic-answer-ui home-start-dock">
               <div className="home-start-actions">
-                <span className="home-start-dial">07<small>{lang==='ko'?'문제':'ROUNDS'}</small></span>
+                
                 <button className="pixel-landing-start" onClick={()=>start('all')}>{lang==='ko'?'지옥으로 입장':'ENTER THE UNDERWORLD'} <ArrowRight size={20}/></button>
                 <button className="pixel-landing-duel" onClick={()=>setDuelOpen(true)}><Swords size={16}/>{lang==='ko'?'1대1':'DUEL'}</button>
               </div>
-              <p className="home-start-footnote">{lang==='ko'?'7문제 · 25초 · 더 희귀할수록 더 깊이':'7 ROUNDS · 25 SECONDS · DEEPER IS BETTER'}</p>
+              
             </div>
           </Hellscape>
         </div>
@@ -196,8 +196,8 @@ export default function App(){
         <p className="warning-note">{t.local}</p>
       </section>:<section className="question-shell krillion-game-screen">
         <div className="cinematic-play-stage"><button type="button" className="scene-back-button" onClick={home} aria-label={lang==='ko'?'홈으로':'Back to home'}><ArrowLeft size={16}/><span>{lang==='ko'?'나가기':'EXIT'}</span></button><Hellscape lang={lang} score={activeScore} previewDepth={session.state==='play'?Math.min(680,answer.trim().length*27):0}>
-          <div className="krillion-hud"><div className="krillion-hud-block"><small>DEPTH</small><strong>{(activeScore*10).toLocaleString()}m</strong></div><div className="krillion-hud-round"><div className="krillion-round-pips">{Array.from({length:ROUNDS},(_,i)=><span key={i} className={i<=session.index?'active':''}/>)}</div><small>SCENE {session.index+1} OF {ROUNDS}</small></div><div className="krillion-hud-score"><small>SCORE</small><strong>{activeScore}</strong></div></div>
-          <div className="cinematic-stage-top"><div className="cinematic-stage-count">SCENE {session.index+1} / {ROUNDS}</div><div className="cinematic-stage-kind">{activePrompt?kindNames[activePrompt.kind as Exclude<Kind,'any'>]?.[lang]:''} / {activePrompt?.badge[lang]}</div><h1>{activePrompt?.label[lang]}</h1><p>{lang==='ko'?'아는 사람이 적을수록 더 깊이':'RARER ANSWERS DESCEND DEEPER'}</p></div>
+          <div className="krillion-hud"><div className="krillion-hud-block"><small>{lang==='ko'?'깊이':'DEPTH'}</small><strong>{(activeScore*10).toLocaleString()}m</strong></div><div className="krillion-hud-round"><div className="krillion-round-pips">{Array.from({length:ROUNDS},(_,i)=><span key={i} className={i<=session.index?'active':''}/>)}</div><small>{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</small></div><div className="krillion-hud-score"><small>{lang==='ko'?'점수':'SCORE'}</small><strong>{activeScore}</strong></div></div>
+          <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><div className="cinematic-stage-kind">{activePrompt?kindNames[activePrompt.kind as Exclude<Kind,'any'>]?.[lang]:''} / {activePrompt?.badge[lang]}</div><h1>{activePrompt?.label[lang]}</h1></div>
           {session.state==='play'&&<div className="hell-answer-ui cinematic-answer-ui"><div className="answer-card">
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
             <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={e=>autocomplete.onKeyDown(e,setAnswer,selected=>{void submit(undefined,selected);})}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
