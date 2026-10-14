@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "method": "editorial-estimate-v1",
+  "disclaimer": "Editorial visibility estimates, NOT measured audience frequency. Unreviewed titles receive default tier until individual review.",
+  "tiers": [
+    {
+      "key": "iconic",
+      "labelKo": "국민급",
+      "labelEn": "ICONIC",
+      "points": 10
+    },
+    {
+      "key": "familiar",
+      "labelKo": "유명작",
+      "labelEn": "FAMILIAR",
+      "points": 27
+    },
+    {
+      "key": "cult",
+      "labelKo": "컬트",
+      "labelEn": "CULT",
+      "points": 44
+    },
+    {
+      "key": "underground",
+      "labelKo": "언더그라운드",
+      "labelEn": "UNDERGROUND",
+      "points": 60
+    },
+    {
+      "key": "deep-cut",
+      "labelKo": "딥컷",
+      "labelEn": "DEEP CUT",
+      "points": 75
+    },
+    {
+      "key": "obscure",
+      "labelKo": "희귀작",
+      "labelEn": "OBSCURE",
+      "points": 88
+    },
+    {
+      "key": "rare",
+      "labelKo": "극희귀",
+      "labelEn": "EXTREMELY RARE",
+      "points": 96
+    },
+    {
+      "key": "abyssal",
+      "labelKo": "심연",
+      "labelEn": "ABYSSAL",
+      "points": 100
+    }
+  ],
+  "defaults": {
+    "tier": "cult",
+    "reviewed": false
+  },
+  "overrides": {
+    "f-title-number": {
+      "300": "iconic",
+      "1917": "iconic",
+      "2012": "iconic",
+      "2046": "cult",
+      "2001: A Space Odyssey": "iconic",
+      "12 Angry Men": "iconic",
+      "28 Days Later": "familiar",
+      "Se7en": "familiar",
+      "8½": "cult",
+      "964 Pinocchio": "obscure",
+      "71 Fragments of a Chronology of Chance": "obscure",
+      "36 Fillette": "rare",
+      "88:88": "rare",
+      "13 Lakes": "deep-cut",
+      "The 3 Rooms of Melancholia": "deep-cut",
+      "2LDK": "deep-cut",
+      "4:44 Last Day on Earth": "underground"
+    },
+    "f-nonhuman-romance": {
+      "Her": "iconic",
+      "The Shape of Water": "iconic",
+      "Beauty and the Beast": "iconic",
+      "Splash": "familiar",
+      "Let the Right One In": "familiar",
+      "The Lure": "underground",
+      "Spring": "underground",
+      "The Untamed": "obscure",
+      "November": "deep-cut",
+      "Border": "underground",
+      "A Girl Walks Home Alone at Night": "cult"
+    },
+    "f-after-death-protagonist": {
+      "Ghost": "iconic",
+      "The Sixth Sense": "iconic",
+      "Beetlejuice": "iconic",
+      "Coco": "iconic",
+      "A Ghost Story": "cult",
+      "Enter the Void": "cult",
+      "The Nine Lives of Thomas Katz": "rare",
+      "The Wraith": "deep-cut",
+      "Wristcutters: A Love Story": "underground",
+      "Hello Ghost": "cult"
+    },
+    "g-fictional-corporation": {
+      "Umbrella Corporation": "iconic",
+      "Aperture Science": "iconic",
+      "Shinra Electric Power Company": "familiar",
+      "Arasaka Corporation": "familiar",
+      "FICSIT Inc.": "cult",
+      "Mann Co.": "familiar",
+      "RuptureFarms": "deep-cut",
+      "Seegson Corporation": "underground",
+      "Fink Manufacturing": "underground",
+      "Czerka Corporation": "deep-cut",
+      "KASMA Corporation": "rare"
+    },
+    "a-anime-parodies-anime": {
+      "Gintama": "iconic",
+      "Lucky Star": "familiar",
+      "Osomatsu-san": "familiar",
+      "Pop Team Epic": "cult",
+      "Excel Saga": "cult",
+      "Pani Poni Dash!": "deep-cut",
+      "Nurse Witch Komugi-chan": "obscure",
+      "Magical Shopping Arcade Abenobashi": "deep-cut",
+      "Robot Girls Z": "obscure",
+      "Puni Puni Poemy": "obscure",
+      "Super Milk Chan": "obscure"
+    },
+    "l-fictional-book": {
+      "Necronomicon": "familiar",
+      "The King in Yellow": "cult",
+      "The Grasshopper Lies Heavy": "cult",
+      "The Navidson Record": "underground",
+      "The Approach to Al-Mu'tasim": "obscure",
+      "Unaussprechlichen Kulten": "obscure",
+      "The Seven Cryptical Books of Hsan": "rare",
+      "The Pnakotic Manuscripts": "obscure",
+      "The Book of Bokonon": "cult"
+    },
+    "f-title-song": {
+      "Purple Rain": "iconic",
+      "Yesterday": "iconic",
+      "Blue Velvet": "cult",
+      "Pretty in Pink": "familiar",
+      "Stand by Me": "iconic",
+      "Shaft": "familiar",
+      "The Crying Game": "cult",
+      "Love Me Tender": "familiar",
+      "24 Hour Party People": "underground",
+      "Hedwig and the Angry Inch": "cult",
+      "Velvet Goldmine": "cult"
+    }
+  }
+}
