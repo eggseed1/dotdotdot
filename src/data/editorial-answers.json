@@ -1,0 +1,162 @@
+{
+  "f-lynch-directed": {
+    "answers": [
+      "Eraserhead",
+      "The Elephant Man",
+      "Dune",
+      "Blue Velvet",
+      "Wild at Heart",
+      "Twin Peaks: Fire Walk with Me",
+      "Lost Highway",
+      "The Straight Story",
+      "Mulholland Drive",
+      "Inland Empire"
+    ],
+    "type": "film"
+  },
+  "f-park-directed": {
+    "answers": [
+      "The Moon Is... the Sun's Dream",
+      "Trio",
+      "Joint Security Area",
+      "Sympathy for Mr. Vengeance",
+      "Oldboy",
+      "Lady Vengeance",
+      "I'm a Cyborg, But That's OK",
+      "Thirst",
+      "Stoker",
+      "The Handmaiden",
+      "Decision to Leave",
+      "No Other Choice"
+    ],
+    "type": "film"
+  },
+  "a-evangelion-character": {
+    "answers": [
+      "Shinji Ikari",
+      "Rei Ayanami",
+      "Asuka Langley Soryu",
+      "Misato Katsuragi",
+      "Gendo Ikari",
+      "Ritsuko Akagi",
+      "Kaworu Nagisa",
+      "Ryoji Kaji",
+      "Toji Suzuhara",
+      "Kensuke Aida",
+      "Hikari Horaki",
+      "Kozo Fuyutsuki",
+      "Pen Pen",
+      "Yui Ikari",
+      "Maya Ibuki",
+      "Makoto Hyuga",
+      "Shigeru Aoba",
+      "Naoko Akagi"
+    ],
+    "type": "character"
+  },
+  "a-ghibli-movie": {
+    "answers": [
+      "Castle in the Sky",
+      "Grave of the Fireflies",
+      "My Neighbor Totoro",
+      "Kiki's Delivery Service",
+      "Only Yesterday",
+      "Porco Rosso",
+      "Ocean Waves",
+      "Pom Poko",
+      "Whisper of the Heart",
+      "Princess Mononoke",
+      "My Neighbors the Yamadas",
+      "Spirited Away",
+      "The Cat Returns",
+      "Howl's Moving Castle",
+      "Tales from Earthsea",
+      "Ponyo",
+      "Arrietty",
+      "From Up on Poppy Hill",
+      "The Wind Rises",
+      "The Tale of the Princess Kaguya",
+      "When Marnie Was There",
+      "Earwig and the Witch",
+      "The Boy and the Heron"
+    ],
+    "type": "film"
+  },
+  "g-fromsoftware-game": {
+    "answers": [
+      "King's Field",
+      "King's Field II",
+      "King's Field III",
+      "Shadow Tower",
+      "Echo Night",
+      "Armored Core",
+      "Armored Core 2",
+      "Armored Core 3",
+      "Otogi: Myth of Demons",
+      "Metal Wolf Chaos",
+      "Enchanted Arms",
+      "Demon's Souls",
+      "Dark Souls",
+      "Dark Souls II",
+      "Bloodborne",
+      "Dark Souls III",
+      "Sekiro: Shadows Die Twice",
+      "Elden Ring",
+      "Armored Core VI: Fires of Rubicon"
+    ],
+    "type": "game"
+  },
+  "l-murakami-novel": {
+    "answers": [
+      "Hear the Wind Sing",
+      "Pinball, 1973",
+      "A Wild Sheep Chase",
+      "Hard-Boiled Wonderland and the End of the World",
+      "Norwegian Wood",
+      "Dance Dance Dance",
+      "South of the Border, West of the Sun",
+      "The Wind-Up Bird Chronicle",
+      "Sputnik Sweetheart",
+      "Kafka on the Shore",
+      "After Dark",
+      "1Q84",
+      "Colorless Tsukuru Tazaki and His Years of Pilgrimage",
+      "Killing Commendatore",
+      "The City and Its Uncertain Walls"
+    ],
+    "type": "novel"
+  },
+  "tv-twinpeaks-character": {
+    "answers": [
+      "Dale Cooper",
+      "Laura Palmer",
+      "Audrey Horne",
+      "Leland Palmer",
+      "Sarah Palmer",
+      "Bobby Briggs",
+      "Shelly Johnson",
+      "Donna Hayward",
+      "James Hurley",
+      "Lucy Moran",
+      "Andy Brennan",
+      "Harry S. Truman",
+      "Benjamin Horne",
+      "Catherine Martell",
+      "Pete Martell",
+      "Margaret Lanterman",
+      "Mike Nelson",
+      "Nadine Hurley",
+      "Ed Hurley",
+      "Albert Rosenfield",
+      "Gordon Cole",
+      "Leo Johnson",
+      "Josie Packard",
+      "Norma Jennings",
+      "Annie Blackburn",
+      "Phillip Jeffries",
+      "The Man from Another Place",
+      "Bob"
+    ],
+    "type": "character"
+  }
+}
