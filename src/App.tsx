@@ -62,6 +62,29 @@ const exactCuratedAnswer=(promptId:string,input:string)=>{
  const tier=idx<0?2:idx;
  return {title,titleKo:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||'',points:thematicRarity.tiers[tier].points,tier:5-tier};
 };
+type DirectoryEntry={title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean};
+const allCuratedAnswers=(promptId:string):DirectoryEntry[]=>{
+ const list=(thematicAnswers as Record<string,{answers?:string[]}>)[promptId]?.answers||[];
+ const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
+ const rarityOverrides=(thematicRarity.overrides as Record<string,Record<string,string>>)[promptId]||{};
+ return list.map(title=>{
+   const raw=rarityOverrides[title]||thematicRarity.defaults.tier;
+   const tierKey=(thematicRarity.aliases as Record<string,string>)[raw]||raw;
+   const tier=thematicRarity.tiers.find(t=>t.key===tierKey);
+   return {title,titleKo:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||'',points:tier?.points??30,rarityCategory:tier?.key,rarityLabelKo:tier?.labelKo,rarityLabelEn:tier?.labelEn,rarityReviewed:Boolean(rarityOverrides[title])};
+ });
+};
+const mergeDirectory=(curated:DirectoryEntry[],server:DirectoryEntry[]):DirectoryEntry[]=>{
+ const map=new Map<string,DirectoryEntry>();
+ for(const work of [...curated,...server]){
+   if(!work?.title)continue;
+   const key=normalizeAnswer(work.title);
+   const prev=map.get(key);
+   if(!prev){map.set(key,work);continue;}
+   map.set(key,{...prev,...work,titleKo:work.titleKo||prev.titleKo,points:typeof work.points==='number'?work.points:prev.points});
+ }
+ return [...map.values()];
+};
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
   'xvvxvvvvvvvvxvvx','xvvxvvvggvvvxvvx','xxvvxvggggvxvvxx','.xvvxxvggvxxvvx.','.xxvvxxxxxxvvxx.','..xxvvxxxxvvxx..',
@@ -263,7 +286,7 @@ export default function App(){
         <div className="result-stars">✦ <span>✳</span> ✦</div><p className="eyebrow centered">{t.completed}</p><h1>{t.resultTitle}</h1>
         <div className="final-score"><strong>{activeScore}</strong><span>/ 700</span></div><p className="score-caption">{t.yourScore} · {modeLabel(session.mode)}</p>{publicResults&&<p className="share-flag">{lang==='ko'?'공유된 결과 · 서버 미검증':'SHARED RESULTS · NOT SERVER VERIFIED'}</p>}
         <Hellscape lang={lang} score={activeScore} compact/>
-        <div className="result-recap">{session.results.map((r,i)=>{const work=r.title?{title:r.title,titleKo:r.titleKo}:r.rawAnswer?{title:r.rawAnswer,titleKo:''}:undefined;const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,10000);const examples: Array<{title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}> = serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang}/></div></details>;})}</div>
+        <div className="result-recap">{session.results.map((r,i)=>{const work=r.title?{title:r.title,titleKo:r.titleKo}:r.rawAnswer?{title:r.rawAnswer,titleKo:''}:undefined;const p=promptById.get(r.promptId);const localExamples=allCuratedAnswers(r.promptId);const examples: DirectoryEntry[] = mergeDirectory(localExamples.length?localExamples:sampleAnswers(r.promptId,10000),serverExamples[r.promptId]||[]);return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang} complete={localExamples.length>0}/></div></details>;})}</div>
         <div className="result-actions"><button className="action-button" onClick={share}><Clipboard size={16}/>{copied?t.copied:t.copy}</button><button className="secondary-button" onClick={()=>start(session.mode,true)}><RotateCcw size={16}/>{t.playAgain}</button><button className="text-button" onClick={home}>{t.back} →</button></div>
         <p className="warning-note">{t.local}</p>
       </section>:<section className="question-shell krillion-game-screen">
