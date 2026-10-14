@@ -3,7 +3,7 @@ import {decodeShare,encodeShare,sampleAnswers} from './sharing';
 import {newGame} from './engine';
 describe('shareable result pages',()=>{
   it('round trips a valid seven-prompt result',()=>{
-    const s=newGame('all','2026-10-13',false);
+    const s=newGame('all','2026-10-14',false);
     s.state='finished'; s.results=s.prompts.map(promptId=>({promptId,rawAnswer:'',points:0,tier:-1}));
     const value=decodeShare(encodeShare(s));
     expect(value?.session.prompts).toEqual(s.prompts);
