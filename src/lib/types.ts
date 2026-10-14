@@ -1,6 +1,6 @@
 export type Lang = 'en' | 'ko';
 export type Mode = 'music' | 'all';
-export type Kind = 'music' | 'film' | 'literature' | 'anime' | 'games' | 'any';
+export type Kind = 'music' | 'film' | 'literature' | 'anime' | 'games' | 'tv' | 'any';
 export type I18n = { en: string; ko: string };
 export type Work = {
   id: string;
