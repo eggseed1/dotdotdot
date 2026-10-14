@@ -6,7 +6,7 @@ import path from 'node:path';
 
 const grams=word=>{const v=canonical(word).replaceAll(' ','');if(v.length<3)return [];return [...new Set(Array.from({length:v.length-2},(_,i)=>v.slice(i,i+3)))].slice(0,80);};
 const KINDS=new Set(['music','film','literature','anime','games']);
-const SOURCES=new Set(['musicbrainz','wikidata','lastfm','bandcamp','rym','spotify','letterboxd','imdb','tmdb','openlibrary','myanimelist','anilist','backloggd','igdb','custom']);
+const SOURCES=new Set(['musicbrainz','discogs','wikidata','lastfm','bandcamp','rym','spotify','letterboxd','imdb','tmdb','openlibrary','myanimelist','anilist','backloggd','igdb','custom']);
 
 export function createCatalogStore(dbPath){
   if(dbPath!==':memory:')fs.mkdirSync(path.dirname(dbPath),{recursive:true});
