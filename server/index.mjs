@@ -144,7 +144,7 @@ const server=http.createServer((req,res)=>{
     req.on('data',chunk=>{bytes+=chunk.length;if(bytes>4096){req.destroy();return;}chunks+=chunk.toString('utf8');});
     req.on('end',async()=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
-      const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
+      const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,500);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
       if(editorialAnswers[prompt.id]){
         let match=editorialMatch(prompt.id,raw);
@@ -273,7 +273,7 @@ const server=http.createServer((req,res)=>{
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
       res.end(JSON.stringify({examples,complete:false,curation:'ongoing'}));return;
     }
-    const prepared=sourceCatalog.promptExamples(promptId,80);
+    const prepared=sourceCatalog.promptExamples(promptId,100);
     const imported=prepared.length?prepared:sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w));
     const curated=eligible(prompt).slice(0,24);
     const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i).slice(0,80);
