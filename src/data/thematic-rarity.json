@@ -1,42 +1,42 @@
 {
   "version": 2,
-  "method": "krillion-inspired-six-tier-editorial-estimate-v2",
-  "disclaimer": "Krillion published fixed points 10/15/30/60/85/100, but its private prompt-specific familiarity thresholds are not public. These are our editorial estimates, not official Krillion scores.",
+  "method": "infernal-six-tier-editorial-estimate-v3",
+  "disclaimer": "Custom hell-themed rarity labels using six point intervals (10,15,30,60,85,100); estimated editorial tiers and not empirical ranking.",
   "tiers": [
     {
       "key": "plankton",
-      "labelKo": "플랑크톤",
-      "labelEn": "PLANKTON",
+      "labelKo": "지옥 입구",
+      "labelEn": "HELLGATE",
       "points": 10
     },
     {
       "key": "too-clever",
-      "labelKo": "뻔한 딥컷",
-      "labelEn": "TOO CLEVER",
+      "labelKo": "잿불 구덩이",
+      "labelEn": "EMBER PIT",
       "points": 15
     },
     {
       "key": "schooler",
-      "labelKo": "좀 아는 사람",
-      "labelEn": "SCHOOLER",
+      "labelKo": "망자의 회랑",
+      "labelEn": "CRYPT WALKER",
       "points": 30
     },
     {
       "key": "rare",
-      "labelKo": "레어",
-      "labelEn": "RARE",
+      "labelKo": "저주받은 심층",
+      "labelEn": "CURSED DEPTHS",
       "points": 60
     },
     {
       "key": "deep-cut",
-      "labelKo": "딥컷",
-      "labelEn": "DEEP CUT",
+      "labelKo": "심연의 사도",
+      "labelEn": "ABYSS HERALD",
       "points": 85
     },
     {
       "key": "one-in-a-krillion",
-      "labelKo": "심연의 한 방",
-      "labelEn": "ONE IN A KRILLION",
+      "labelKo": "지옥의 군주",
+      "labelEn": "INFERNAL SOVEREIGN",
       "points": 100
     }
   ],
