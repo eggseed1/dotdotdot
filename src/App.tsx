@@ -95,7 +95,7 @@ export default function App(){
   },[session?.state,session?.id]);
 
 
-  const start=(mode:Mode,practice=false)=>{
+  const start=async(mode:Mode,practice=false)=>{
     mode='all';
     setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);
     const finished=getSaved<{score:number}>(gameKey(mode,date));
@@ -103,7 +103,32 @@ export default function App(){
     if(!practice&&!finished&&existing?.date===date&&existing?.mode===mode&&existing.state!=='finished'&&existing.prompts.every(id=>!id.startsWith('m-'))){
       setSession(existing);setAnswer('');setFeedback('');setCopied(false);return;
     }
+    const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?location.protocol+'//'+location.hostname+':8787':location.origin;
+    let eligibleIds:string[];
+    try{
+      const response=await fetch(api+'/api/questions',{signal:AbortSignal.timeout(11000)});
+      if(!response.ok)throw Error('question service not ready');
+      const body=await response.json() as {questions?:Array<{promptId:string;answers:number}>};
+      eligibleIds=(body.questions||[]).filter(x=>x.answers>=5&&promptById.has(x.promptId)).map(x=>x.promptId);
+    }catch{
+      setFeedback(lang==='ko'?'문제별 정답 데이터 서버에 연결할 수 없어. 잠시 후 다시 시도해 줘.':'Cannot reach verified question database. Please try again.');
+      return;
+    }
+    // Editorial questions are published only if enough verified answers exist.
+    const categories=['film','anime','games','tv','literature'];
+    const selected:string[]=[];
+    const prepared=eligibleIds.map(id=>promptById.get(id)!).filter(Boolean);
+    for(const kind of categories){
+      const group=prepared.filter(p=>p.kind===kind).sort((a,b)=>a.id.localeCompare(b.id));
+      if(group.length)selected.push(group[(date.charCodeAt(date.length-1)+kind.length)%group.length].id);
+    }
+    for(const p of prepared.sort((a,b)=>a.id.localeCompare(b.id)))if(selected.length<7&&!selected.includes(p.id))selected.push(p.id);
+    if(selected.length<7){
+      setFeedback(lang==='ko'? `현재 검증된 문제가 ${selected.length}개뿐이라 아직 7문제를 출제할 수 없어. 작품 데이터 수집 후 다시 열릴 거야.` : `Only ${selected.length} sufficiently verified questions are available. Seven are required.`);
+      return;
+    }
     const game=newGame(mode,date,practice||Boolean(finished)?false:true);
+    game.prompts=selected.slice(0,7);
     setSession(game);setAnswer('');setFeedback('');setCopied(false);setTimeLeft(ROUND_SECONDS);
   };
   const lock=(result:RoundResult)=>{
