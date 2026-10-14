@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node scripts/check-fallback.mjs && vitest run src/lib/engine.test.ts src/lib/sharing.test.ts && node --test server/*.test.mjs src/lib/title-match.test.mjs src/lib/rarity-model.test.mjs && npm run test:catalog-pipelines",
+    "test": "node scripts/check-fallback.mjs && vitest run src/lib/engine.test.ts src/lib/sharing.test.ts && node --test server/*.test.mjs src/lib/title-match.test.mjs src/lib/rarity-model.test.mjs && npm run test:catalog-pipelines && npm run test:discogs",
     "server": "node server/index.mjs",
     "start": "node server/index.mjs",
     "test:duel": "node --test server/*.test.mjs",
@@ -21,7 +21,9 @@
     "fetch:anilist": "node scripts/fetch-anilist.mjs",
     "fetch:tmdb": "node scripts/fetch-tmdb.mjs",
     "fetch:igdb": "node scripts/fetch-igdb.mjs",
-    "test:catalog-pipelines": "node --test scripts/import-musicbrainz-core.test.mjs scripts/fetch-anilist.test.mjs scripts/fetch-tmdb.test.mjs scripts/fetch-igdb.test.mjs"
+    "test:catalog-pipelines": "node --test scripts/import-musicbrainz-core.test.mjs scripts/fetch-anilist.test.mjs scripts/fetch-tmdb.test.mjs scripts/fetch-igdb.test.mjs",
+    "test:discogs": "python3 -m unittest discover -s scripts -p test_import_discogs.py",
+    "import:discogs": "python3 scripts/import-discogs-dump.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
