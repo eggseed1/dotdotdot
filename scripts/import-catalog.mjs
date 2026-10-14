@@ -14,7 +14,7 @@ const restricted=new Set(['rym','lastfm','bandcamp','letterboxd','backloggd','sp
 if(restricted.has(source)&&!args.includes('--authorized')){console.error(`Source ${source} requires a permitted/authorized dataset and explicit --authorized flag; nothing imported.`);process.exit(1);}
 const dbPath=opt('--db')||path.resolve('data/catalog.sqlite');
 const store=createCatalogStore(dbPath);
-const stream=readline.createInterface({input:createReadStream(filename),crlfDelay:Infinity});
+const stream=readline.createInterface({input:filename==='-'?process.stdin:createReadStream(filename),crlfDelay:Infinity});
 let header=null,rows=0,failed=0;
 const parseCsv=line=>{const cells=[];let token='',quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quoted&&line[i+1]==='"'){token+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){cells.push(token);token='';}else token+=c;}cells.push(token);return cells;};
 const parseList=s=>Array.isArray(s)?s:String(s||'').split(/[|;]/).map(x=>x.trim()).filter(Boolean);
@@ -22,9 +22,9 @@ store.begin();
 try{
  for await(const line of stream){if(!line.trim())continue;
   let row;
-  try{if(filename.endsWith('.jsonl')||filename.endsWith('.ndjson'))row=JSON.parse(line);
+  try{if(filename==='-'||filename.endsWith('.jsonl')||filename.endsWith('.ndjson'))row=JSON.parse(line);
     else{const columns=filename.endsWith('.tsv')?line.split('\t'):parseCsv(line);if(!header){header=columns;continue;}row=Object.fromEntries(header.map((k,i)=>[k,columns[i]]));}
-    const w={kind:row.kind,title:row.title,titleKo:row.titleKo||row.title_ko,creator:row.creator,year:row.year?Number(row.year):null,country:row.country,genres:parseList(row.genres),aliases:parseList(row.aliases),source,sourceId:String(row.sourceId||row.source_id||row.id||''),ratingCount:row.ratingCount===undefined&&row.rating_count===undefined?null:Number(row.ratingCount??row.rating_count),verified:row.verified===true||row.verified==='true'||row.verified===1||row.verified==='1',sourceUrl:row.sourceUrl||row.source_url};
+    const w={kind:row.kind,title:row.title,titleKo:row.titleKo||row.title_ko,creator:row.creator,year:row.year?Number(row.year):null,country:row.country,genres:parseList(row.genres),aliases:parseList(row.aliases),source,sourceId:String(row.sourceId||row.source_id||row.id||''),ratingCount:row.ratingCount==null&&row.rating_count==null?null:Number(row.ratingCount??row.rating_count),verified:row.verified===true||row.verified==='true'||row.verified===1||row.verified==='1',sourceUrl:row.sourceUrl||row.source_url};
     store.put(w);rows++;
   }catch(e){failed++;if(failed<=5)console.error('Skipped invalid record:',String(e.message||e));}
   if((rows+failed)%1000===0){store.commit();store.begin();}
