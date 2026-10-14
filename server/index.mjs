@@ -152,6 +152,17 @@ const server=http.createServer((req,res)=>{
         if(!match&&prompt.id==='f-title-number'){
           const work=sourceCatalog.lookup('film',raw).find(w=>w.verified&&/[0-9０-９]/u.test(w.title));
           if(work)match={title:work.title,...editorialScore(prompt.id,work.title)};
+          // A small curated list must never reject an exact film title found in
+          // public film databases. Confirm the result as a film before accepting.
+          if(!match&&/[0-9０-９]/u.test(raw)){
+            const found=await Promise.allSettled([searchWikidataFilms(raw,{limit:35}),searchTmdbMovies(raw)]);
+            const candidates=[
+              ...(found[0].status==='fulfilled'?exactFilmMatches(raw,found[0].value):[]),
+              ...(found[1].status==='fulfilled'?exactTmdbMovies(raw,found[1].value):[])
+            ];
+            const confirmed=candidates.find(w=>w.verified&&/[0-9０-９]/u.test(w.title));
+            if(confirmed)match={title:confirmed.title,...editorialScore(prompt.id,confirmed.title)};
+          }
         }
         res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
         res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title},points:match.points,tier:match.tier,provisional:true,rarityCategory:match.rarityCategory,rarityLabelKo:match.rarityLabelKo,rarityLabelEn:match.rarityLabelEn,rarityReviewed:match.rarityReviewed,rarityMethod:match.rarityMethod}:{status:'missing',reason:'not-in-curated-answer-set'}));
