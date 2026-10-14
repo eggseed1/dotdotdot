@@ -188,9 +188,9 @@ const server=http.createServer((req,res)=>{
       for(const w of valid){
         const storedSource=sourceNames[w.source];
         const sourceId=String(w.id||'').split(':').slice(1).join(':');
-        if(!storedSource||!sourceId||!w.verified||!w.title||w.kind==='anime')continue; // Preserve AniList format until the catalog schema supports it.
+        if(!storedSource||!sourceId||!w.verified||!w.title)continue;
         try{sourceCatalog.put({kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country,
-          genres:w.genres,aliases:w.aliases,source:storedSource,sourceId,ratingCount:w.ratingCount,
+          genres:w.genres,format:w.format||'',aliases:w.aliases,source:storedSource,sourceId,ratingCount:w.ratingCount,
           sourceUrl:w.sourceUrl,verified:true});}catch{/* Read-only data volume: live verification still works. */}
       }
       const response=metadataMissing?{status:'unverified',reason:'provider-metadata-unavailable'}:!found.length?{status:'missing',reason:'no-exact-match-in-available-sources'}:!valid.length?
