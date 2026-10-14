@@ -19,8 +19,10 @@ export async function searchMusicBrainz(input,{limit=12}={}){
  if(cache.size>MAX)cache.delete(cache.keys().next().value);
  const items=await enqueue(async()=>{
   const url=new URL('https://musicbrainz.org/ws/2/release-group/');
-  url.searchParams.set('query',`releasegroup:"${q.replace(/["\\]/g,' ').trim()}"`);
-  url.searchParams.set('fmt','json');url.searchParams.set('limit',String(Math.min(25,Math.max(7,limit))));
+  const term=q.replace(/["\\\\]/g,' ').replace(/[^\\p{L}\\p{N} -]/gu,' ').trim();
+  const lucene=term.includes(' ')?`releasegroup:"${term}"`:`releasegroup:${term}*`;
+  url.searchParams.set('query',lucene);
+  url.searchParams.set('fmt','json');url.searchParams.set('limit',String(Math.min(50,Math.max(15,limit))));
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),9000);
   try{
    const response=await fetch(url,{signal:controller.signal,headers:{'User-Agent':`larper101/0.3 (contact: ${process.env.CATALOG_CONTACT_EMAIL||'https://github.com/eggseed1/dotdotdot'})`,'Accept':'application/json'}});
