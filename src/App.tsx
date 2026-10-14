@@ -1,6 +1,6 @@
 import {rarityRank} from './lib/rarity-ranks.mjs';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen, Gamepad2, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Film, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
 import { catalog } from './data/catalog';
 
 import { Hellscape } from './components/Hellscape';
@@ -13,8 +13,6 @@ import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, RO
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
 
-type IconType = typeof Disc3;
-const mediaIcons: Record<Exclude<Kind, 'any'>, IconType> = { music:Disc3,film:Film,literature:BookOpen,anime:Star,games:Gamepad2,tv:Film };
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
   'xvvxvvvvvvvvxvvx','xvvxvvvggvvvxvvx','xxvvxvggggvxvvxx','.xvvxxvggvxxvvx.','.xxvvxxxxxxvvxx.','..xxvvxxxxvvxx..',
