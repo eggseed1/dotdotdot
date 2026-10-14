@@ -234,12 +234,12 @@ export default function App(){
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
           </div></div>}
-        </Hellscape></div>
-        {session.state==='play'?<></>:<div className="reveal-panel">
+        {session.state==='play'?<></>:<div className="reveal-panel reveal-panel--inside-hell">
           {activeWork?<><div className="reveal-status good"><Check size={16}/>{t.accepted}</div><p className="reveal-work-label">{t.yourPick}</p><h2>{lang==='ko'&&activeWork.titleKo?activeWork.titleKo:activeWork.title}</h2><p className="reveal-creator">{activeWork.creator} <span>·</span> {activeWork.year} <span>·</span> {activeWork.country}</p><p className="genre-line">{activeWork.genres.slice(0,3).join(' · ')}</p><div className={`points-won points-won--tier-${activeResult?.points||0}`}><span className="rarity-label">{activeResult?`${activeResult.points>=100?(lang==="ko"?"이걸 안다고?":"WHAT EVEN"):activeResult.points>=85?(lang==="ko"?"진짜 마이너":"DEEP CUT"):activeResult.points>=60?(lang==="ko"?"꽤 마이너":"OBSCURE"):activeResult.points>=30?(lang==="ko"?"좀 아는 편":"NICHE"):activeResult.points>=15?(lang==="ko"?"흔한 답":"COMMON"):(lang==="ko"?"너무 쉬움":"OBVIOUS")} · ${rarityRank(activeResult.points)[lang]}`:''}</span><strong>+{activeResult?.points}</strong><span>{t.points}</span></div></>:<><div className="reveal-status missing"><X size={16}/>{activeResult?.timedOut?t.noMore:t.skipped}</div><h2 className="miss-title">{t.noAnswer}</h2><div className="points-won empty-points"><strong>+0</strong><span>{t.points}</span></div></>}
           <button className="action-button next-button" onClick={next}>{session.index===ROUNDS-1?t.seeResults:t.next}<ArrowRight size={17}/></button>
           
         </div>}
+        </Hellscape></div>
       </section>}
     </main>}
     <footer className="site-footer"><span>© 2026 larper101 <span className="footer-dot">✦</span> {lang==='ko'?'꺼드럭대마왕':'THE CULTURE SNOB OLYMPICS'}</span><span><button onClick={()=>setInfoOpen(true)}>{t.about}</button> <span className="footer-dash">/</span> {t.demo}</span></footer>
