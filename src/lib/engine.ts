@@ -24,6 +24,11 @@ export const promptPool: Prompt[] = [
   {id:'m-uk',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a British artist.',ko:'영국 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='United Kingdom'},
   {id:'m-krautrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a krautrock album.',ko:'크라우트록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('krautrock')},
   {id:'m-experimental',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an experimental music album.',ko:'실험음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('experimental')},
+  {id:'f-korean-2000s',kind:'film',badge:{en:'COUNTRY + DECADE',ko:'국가 + 시대'},label:{en:'Name a South Korean film from the 2000s.',ko:'2000년대 한국 영화 하나를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009},
+  {id:'f-japan-90s',kind:'film',badge:{en:'COUNTRY + DECADE',ko:'국가 + 시대'},label:{en:'Name a Japanese film released during the 1990s.',ko:'1990년대 일본 영화 하나를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=1990&&w.year<=1999},
+  {id:'a-2000s-sci-fi',kind:'anime',badge:{en:'GENRE + DECADE',ko:'장르 + 시대'},label:{en:'Name a science-fiction anime from the 2000s.',ko:'2000년대 SF 애니메이션 하나를 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&(w.genres.includes('sci-fi')||w.genres.includes('science fiction'))},
+  {id:'a-90s-drama',kind:'anime',badge:{en:'GENRE + DECADE',ko:'장르 + 시대'},label:{en:'Name a drama anime released in the 1990s.',ko:'1990년대 드라마 애니메이션 하나를 대보세요.'},match:w=>w.year>=1990&&w.year<=1999&&w.genres.includes('drama')},
+  {id:'g-2010s-rpg',kind:'games',badge:{en:'GENRE + DECADE',ko:'장르 + 시대'},label:{en:'Name an RPG game from the 2010s.',ko:'2010년대 RPG 게임 하나를 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('rpg')},
   {id:'f-korean',kind:'film',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a South Korean film.',ko:'한국 영화를 하나 대보세요.'},match:w=>w.country==='South Korea'},
   {id:'f-90s',kind:'film',badge:{en:'DECADE',ko:'시대'},label:{en:'Name a film from the 1990s.',ko:'90년대 영화를 하나 대보세요.'},match:w=>w.year>=1990&&w.year<=1999},
   {id:'f-japanese',kind:'film',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a Japanese film.',ko:'일본 영화를 하나 대보세요.'},match:w=>w.country==='Japan'},
@@ -60,8 +65,8 @@ export function eligible(prompt:Prompt):Work[] {
   return catalog.filter(w=>(prompt.kind==='any'||w.kind===prompt.kind)&&prompt.match(w));
 }
 export function selectPrompts(mode:Mode,date:string):Prompt[] {
-  if(mode==='music')return shuffle(promptPool.filter(p=>p.kind==='music'&&eligible(p).length>=3),date+mode).slice(0,ROUNDS);
-  const counts: Array<[Kind,number]>=[['music',2],['film',2],['literature',1],['anime',1],['games',1]];
+  if(mode==='music')return shuffle(promptPool.filter(p=>p.kind!=='music'&&eligible(p).length>=2),date+mode).slice(0,ROUNDS);
+  const counts: Array<[Kind,number]>=[['film',2],['literature',1],['anime',2],['games',2]];
   return shuffle(counts.flatMap(([kind,amount])=>shuffle(promptPool.filter(p=>p.kind===kind&&eligible(p).length>=2),date+kind).slice(0,amount)),date+mode);
 }
 
