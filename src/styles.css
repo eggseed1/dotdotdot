@@ -941,3 +941,11 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 .typo-confirm button{background:#f2bf88;border:2px solid #592f3f;color:#261121;font:700 11px 'Galmuri11','Noto Sans KR',sans-serif;cursor:pointer;padding:9px 12px}
 .typo-confirm button:focus-visible{outline:3px solid white;outline-offset:2px}
 @media(max-width:600px){.typo-confirm{padding:8px;gap:4px;margin-top:6px}.typo-confirm button{font-size:10px;padding:7px}}
+
+
+/* 2026-10-14 strict no-zoom patch: scene movement is translation only. */
+@keyframes devil-plunge{0%{transform:translate(-50%,-95%);opacity:.5}16%{transform:translate(-50%,-65%);opacity:1}42%{transform:translate(-50%,-30%)}68%{transform:translate(-50%,2%)}86%{transform:translate(-50%,-55%)}100%{transform:translate(-50%,-50%)}}
+@keyframes infernal-camera-drop{0%{transform:translateY(0)}15%{transform:translateY(-3%)}45%{transform:translateY(-10%)}75%{transform:translateY(-16%)}100%{transform:translateY(-20%)}}
+.krillion-game-screen .infernal-devil--descending{animation:devil-plunge 1.5s cubic-bezier(.18,.72,.18,1) both!important}
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{animation:infernal-camera-drop 2.25s cubic-bezier(.14,.76,.12,1) both!important}
+@media(max-width:800px){.krillion-game-screen input,.krillion-game-screen input[type=text],.krillion-game-screen input[type=search]{font-size:16px!important}}
