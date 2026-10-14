@@ -1,12 +1,12 @@
 {
   "_instructions": "매일 네가 고른 문제 ID를 정확히 7개 입력해. 날짜가 없으면 그날 게임은 공개되지 않아. 자동 선별/로테이션 없음. 문제 ID는 src/lib/engine.ts 의 promptPool 참고.",
   "2026-10-14": [
-    "f-90s-one-word",
-    "a-ova-90s",
-    "g-rpg-2000s-japan",
-    "f-1970s-scifi",
-    "a-movie-2000s-fantasy",
-    "l-20c-experimental",
-    "tv-2000s-scifi"
+    "f-lynch-directed",
+    "a-evangelion-character",
+    "g-fromsoftware-game",
+    "f-park-directed",
+    "a-ghibli-movie",
+    "l-murakami-novel",
+    "tv-twinpeaks-character"
   ]
 }
