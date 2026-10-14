@@ -102,7 +102,7 @@ export default function App(){
     const found=lookupAnswer(answer,activePrompt.kind);
     if(found.status==='missing'){
       try{
-        const api=location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
+        const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
         const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:answer.trim()})});
         if(response.ok){
           const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
