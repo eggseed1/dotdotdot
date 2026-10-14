@@ -138,41 +138,45 @@ const server=http.createServer((req,res)=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
-      let found=['film','anime','games','tv'].includes(prompt.kind)?[]:sourceCatalog.lookup(prompt.kind,raw);
-      if(!found.length&&prompt.kind==='tv'){
-        try{found=exactTV(raw,await searchTVMaze(raw));}catch{}
+      // Search imported records and external providers together. Never allow a sparse
+      // Wikidata hit to hide a richly tagged TMDB, AniList, or imported match.
+      let found=sourceCatalog.lookup(prompt.kind,raw);
+      if(prompt.kind==='tv'){
+        try{found.push(...exactTV(raw,await searchTVMaze(raw)));}catch{}
       }
-      if(!found.length&&prompt.kind==='games'){
+      if(prompt.kind==='games'){
         const q=raw.split(/\s+[—–]\s+/u)[0];
         const responses=await Promise.allSettled([searchVNDB(q,{limit:30}),searchWikidataGames(q,{limit:25})]);
-        const vns=responses[0].status==='fulfilled'?exactVNDB(raw,responses[0].value):[];
-        const games=responses[1].status==='fulfilled'?exactGameMatches(raw,responses[1].value):[];
-        found=vns.length?vns:games;
+        if(responses[0].status==='fulfilled')found.push(...exactVNDB(raw,responses[0].value));
+        if(responses[1].status==='fulfilled')found.push(...exactGameMatches(raw,responses[1].value));
       }
-      if(prompt.kind==='games'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-games')return w;try{return await enrichWikidataGame(w);}catch{return {...w,metadataUnavailable:true};}}));}
-      if(!found.length&&prompt.kind==='anime'){
-        try{found=exactAniList(raw,await searchAniList(raw,{limit:25}));}catch{}
+      if(prompt.kind==='anime'){
+        try{found.push(...exactAniList(raw,await searchAniList(raw,{limit:25})));}catch{}
       }
-      if(!found.length&&prompt.kind==='film'){
-        const searchTitle=raw.split(/\\s+[—–]\\s+/u)[0];
-        const responses=await Promise.allSettled([searchWikidataFilms(searchTitle,{limit:35}),searchTmdbMovies(searchTitle)]);
-        const wikidata=responses[0].status==='fulfilled'?exactFilmMatches(raw,responses[0].value):[];
-        const tmdb=responses[1].status==='fulfilled'?exactTmdbMovies(raw,responses[1].value):[];
-        found=wikidata.length?wikidata:tmdb;
+      if(prompt.kind==='film'){
+        const q=raw.split(/\s+[—–]\s+/u)[0];
+        const responses=await Promise.allSettled([searchWikidataFilms(q,{limit:35}),searchTmdbMovies(q)]);
+        if(responses[0].status==='fulfilled')found.push(...exactFilmMatches(raw,responses[0].value));
+        if(responses[1].status==='fulfilled')found.push(...exactTmdbMovies(raw,responses[1].value));
       }
-      if(prompt.kind==='film'&&found.length){found=await Promise.all(found.map(async w=>{
-        try{return w.source==='wikidata-live'?await enrichWikidataFilm(w):w.source==='tmdb-live'?await enrichTmdbMovie(w):w;}
-        catch{return {...w,metadataUnavailable:true};}
-      }));}
+      found=await Promise.all(found.map(async w=>{
+        try{
+          if(w.source==='wikidata-games')return await enrichWikidataGame(w);
+          if(w.source==='wikidata-live')return await enrichWikidataFilm(w);
+          if(w.source==='tmdb-live')return await enrichTmdbMovie(w);
+          return w;
+        }catch{return {...w,metadataUnavailable:true};}
+      }));
+      found=[...new Map(found.map(w=>[w.id,w])).values()];
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
-      const chosen=valid.length?valid[0]:found[0];
-      const response=metadataMissing?{status:'unverified',reason:'genre-or-country-metadata-unavailable'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
-        !chosen.verified?{status:'unverified'}:(()=>{
+      const chosen=[...valid].sort((a,b)=>Number(Boolean(b.ratingCount||b.popularity))-Number(Boolean(a.ratingCount||a.popularity)))[0];
+      const response=metadataMissing?{status:'unverified',reason:'provider-metadata-unavailable'}:!found.length?{status:'missing',reason:'no-exact-match-in-available-sources'}:!valid.length?
+        {status:found.some(w=>w.metadataUnavailable||!w.genres?.length||!w.year)?'unverified':'notEligible',reason:'no-candidate-matched-all-conditions',candidates:found.slice(0,3).map(w=>({title:w.title,year:w.year,country:w.country,genres:w.genres,format:w.format,source:w.source}))}:
+        !chosen.verified?{status:'unverified',reason:'source-not-verified'}:(()=>{
         const w=chosen;
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
         const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
-        // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
           points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='vndb-live'?'vndb-votes-provisional':w.source==='anilist-live'?'anilist-popularity-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
