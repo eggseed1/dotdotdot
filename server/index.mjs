@@ -136,7 +136,7 @@ const server=http.createServer((req,res)=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
-      let found=sourceCatalog.lookup(prompt.kind,raw);
+      let found=['film','anime','games'].includes(prompt.kind)?[]:sourceCatalog.lookup(prompt.kind,raw);
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
