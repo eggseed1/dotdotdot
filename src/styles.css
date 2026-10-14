@@ -220,3 +220,53 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .cinematic-play-stage .answer-feedback{margin:9px 0 0;color:#ffb3a6;font-size:12px}
 .cinematic-play-stage .title-suggestions{bottom:calc(100% + 9px);top:auto;z-index:40;background:#1c1330;border:2px solid #9b6f9e;color:#fff2dc}
 @media(max-width:700px){.cinematic-play-stage .hellscape{height:clamp(560px,78dvh,720px)}.cinematic-stage-top{top:20px;width:calc(100% - 38px);padding:15px 13px}.cinematic-stage-top h1{font-size:clamp(17px,5vw,24px)}.cinematic-play-stage .hell-character-zone{top:49%;width:160px;height:170px}.cinematic-play-stage .hell-depth{top:175px;left:16px}.cinematic-play-stage .hell-route{right:12px;top:175px;bottom:180px}.cinematic-play-stage .hell-answer-ui.cinematic-answer-ui{padding:19px 12px 20px}.cinematic-play-stage #answer{height:52px;font-size:14px}.cinematic-play-stage .submit-button{min-width:85px;font-size:8px;padding:8px}.cinematic-play-stage .skip-button{top:0}.cinematic-stage-top p{font-size:8px}}
+
+
+/* Full-screen reference-inspired pixel arcade layout: ONE scene, no detached cards. */
+.app-shell:has(.krillion-game-screen){background:#060b20;min-height:100dvh}
+.app-shell:has(.krillion-game-screen) .site-header,
+.app-shell:has(.krillion-game-screen) .site-footer{display:none}
+.app-shell:has(.krillion-game-screen) .game-main{width:100%;max-width:none;flex:1;margin:0;padding:0}
+.krillion-game-screen{width:100%;min-height:100dvh;margin:0;padding:0!important;background:#070b20}
+.krillion-game-screen .cinematic-play-stage{margin:0;width:100%;height:100dvh}
+.krillion-game-screen .cinematic-play-stage>.hellscape{width:100%;height:100dvh;min-height:600px;border:4px solid #181432;border-radius:9px;box-shadow:inset 0 0 0 2px #625078;overflow:hidden;background:linear-gradient(180deg,#080d2a 0%,#0c1637 20%,#6c2e7a 42%,#d25b89 53%,#1a2544 54%,#0d0e22 100%)}
+.krillion-game-screen .hellscape .hell-backdrop{opacity:0}
+.krillion-game-screen .hellscape .hell-pixel-sky{opacity:.04}
+.krillion-game-screen .hellscape .hell-world{z-index:3;opacity:.65}
+.krillion-game-screen .hellscape .hell-scene-overlay{z-index:3;opacity:.18!important}
+.krillion-game-screen .hellscape .hell-foreground-ridge{opacity:0}
+.krillion-game-screen .hellscape .hell-route,
+.krillion-game-screen .hellscape .hell-depth{display:none}
+.krillion-game-screen .hellscape .hell-character-zone{z-index:8;top:68%;height:136px;width:136px;transform:translate(-50%,-40%);animation:hell-fall 1.2s steps(3,end) infinite}
+.krillion-game-screen .hellscape .hell-character{filter:drop-shadow(5px 6px 0 #050718)}
+.krillion-scene-decor{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;image-rendering:pixelated}
+.krillion-stars{position:absolute;inset:0 0 44%;background-image:radial-gradient(1px 1px at 5% 14%,#a1afd3 98%,transparent),radial-gradient(2px 2px at 17% 32%,#d8b9c9 98%,transparent),radial-gradient(1px 1px at 35% 11%,#ffddaa 98%,transparent),radial-gradient(2px 2px at 74% 20%,#c5d9ff 98%,transparent),radial-gradient(1px 1px at 90% 40%,#c2b4e8 98%,transparent);background-size:239px 179px}
+.krillion-moon{position:absolute;right:15%;top:11%;width:clamp(72px,10vw,145px);aspect-ratio:1;border-radius:50%;background:repeating-linear-gradient(90deg,#dbd8ae 0 8px,#a5c7c9 8px 16px,#f6dfa7 16px 26px);box-shadow:0 0 0 12px #1d2b58,0 0 0 20px #1c285482,0 0 55px #f2c5ac66}
+.krillion-city{position:absolute;bottom:38%;width:100%;height:33%;background:repeating-linear-gradient(90deg,#152845 0 3%,#264363 3% 3.4%,#17233e 3.4% 5.7%,#324e68 5.7% 6.1%,#1b2744 6.1% 10%,#10203a 10% 12%);clip-path:polygon(0 36%,5% 36%,5% 15%,11% 15%,11% 51%,16% 51%,16% 4%,24% 4%,24% 45%,29% 45%,29% 29%,35% 29%,35% 58%,42% 58%,42% 21%,48% 21%,48% 51%,54% 51%,54% 13%,62% 13%,62% 48%,69% 48%,69% 34%,74% 34%,74% 2%,80% 2%,80% 54%,85% 54%,85% 21%,92% 21%,92% 40%,100% 40%,100% 100%,0 100%);box-shadow:inset 0 -20px #101324}
+.krillion-city:after{content:"";position:absolute;inset:19% 0 0;background:repeating-linear-gradient(90deg,transparent 0 18px,#f3b05d 18px 23px,transparent 23px 38px),repeating-linear-gradient(0deg,transparent 0 29px,#ef9a55 29px 36px,transparent 36px 48px);opacity:.58;mix-blend-mode:screen}
+.krillion-street{position:absolute;bottom:29%;width:100%;height:9%;background:linear-gradient(#4d3860 0 7%,#29243e 7% 85%,#090d22 85% 100%);border-top:4px solid #84658c;border-bottom:5px solid #07091b}
+.krillion-street:after{content:"";position:absolute;top:55%;width:100%;border-top:2px dashed #c2a1a0}
+.krillion-road{position:absolute;inset:71% 0 0;background:repeating-linear-gradient(0deg,#101126 0 18px,#111327 18px 23px,#101126 23px 44px)}
+.krillion-road:after{content:"";position:absolute;top:52%;left:0;width:100%;height:4px;background:repeating-linear-gradient(90deg,#cb974f 0 52px,transparent 52px 89px);opacity:.7}
+.krillion-hud{position:absolute;z-index:16;top:0;left:50%;transform:translateX(-50%);width:min(960px,85%);display:flex;justify-content:space-between;align-items:flex-start;text-align:center;color:#f9d995}
+.krillion-hud-block,.krillion-hud-score{padding:16px 24px;background:#120b24d9;min-width:105px;clip-path:polygon(14% 0,86% 0,100% 20%,100% 81%,85% 100%,15% 100%,0 81%,0 20%)}
+.krillion-hud small{display:block;font:8px/2 var(--pixel);letter-spacing:2px;color:#9e94bf}
+.krillion-hud strong{font:20px/1.8 var(--pixel);color:#efb97b}
+.krillion-hud-round{padding-top:20px}
+.krillion-round-pips{display:flex;gap:5px;justify-content:center;margin-bottom:6px}
+.krillion-round-pips span{width:16px;height:16px;border:3px solid #38415e;background:#0b152a}
+.krillion-round-pips span.active{background:#f07eaa;border-color:#813e6b}
+.krillion-game-screen .cinematic-stage-top{top:11%;width:min(650px,72%);background:#140e26ef;border:0;border-bottom:4px solid #3d2e57;border-radius:0;box-shadow:8px 10px 0 #080b1c;padding:30px 35px;text-align:left}
+.krillion-game-screen .cinematic-stage-top h1{font:clamp(17px,2.3vw,34px)/1.5 var(--pixel);text-shadow:4px 4px #342044}
+.krillion-game-screen .cinematic-stage-top p{font:10px/1.8 var(--pixel);color:#9e93b3}
+.krillion-game-screen .cinematic-stage-kind{font:9px var(--pixel);color:#cba4d6}
+.krillion-game-screen .hell-answer-ui.cinematic-answer-ui{bottom:0;min-height:112px;padding:17px 8% 16px;border-top:3px solid #423653;background:#09091aee}
+.krillion-game-screen .answer-card{max-width:820px}
+.krillion-game-screen .answer-card form{gap:14px}
+.krillion-game-screen .answer-label{display:flex;justify-content:space-between}
+.krillion-game-screen #answer{height:62px;font:16px var(--pixel);background:#1a1229;border:3px solid #513568;color:#fff2e2}
+.krillion-game-screen .submit-button{height:62px;min-width:128px;background:#c8a366;color:#150f21}
+.krillion-game-screen .timer-rail{height:5px;margin:7px 0 9px}
+.krillion-game-screen .skip-button{top:3px;font-size:10px}
+.krillion-game-screen .hell-bottom-copy{display:none}
+@media(max-width:700px){.krillion-game-screen .cinematic-play-stage>.hellscape{min-height:640px}.krillion-game-screen .cinematic-stage-top{top:16%;width:calc(100% - 28px);padding:20px 17px}.krillion-game-screen .cinematic-stage-top h1{font-size:clamp(14px,4vw,20px)}.krillion-hud{width:95%}.krillion-hud-block,.krillion-hud-score{padding:12px 9px;min-width:70px}.krillion-hud strong{font-size:12px}.krillion-hud small{font-size:6px}.krillion-round-pips span{width:11px;height:11px}.krillion-game-screen .hellscape .hell-character-zone{top:68%;height:105px;width:105px}.krillion-game-screen .hell-answer-ui.cinematic-answer-ui{padding:12px 10px 19px}.krillion-game-screen .submit-button{min-width:78px;font-size:8px}.krillion-game-screen #answer{height:53px;font-size:11px}.krillion-game-screen .submit-button{height:53px}}
