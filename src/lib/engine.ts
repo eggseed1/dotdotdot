@@ -14,6 +14,14 @@ export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
 };
 
 export const promptPool: Prompt[] = [
+  {id:'f-title-number',kind:'film',badge:{en:'FILM · TITLES',ko:'영화 · 제목'},label:{en:'Name a film with a number in its title.',ko:'제목에 숫자가 들어가는 영화를 대보세요.'},match:w=>/[0-9０-９]/u.test(w.title)},
+  {id:'f-nonhuman-romance',kind:'film',badge:{en:'FILM · STRANGE LOVE',ko:'영화 · 이상한 사랑'},label:{en:'Name a film where a human falls in love with a nonhuman being.',ko:'인간이 인간이 아닌 존재와 사랑에 빠지는 영화를 대보세요.'},match:()=>false},
+  {id:'f-after-death-protagonist',kind:'film',badge:{en:'FILM · AFTERLIFE',ko:'영화 · 사후 세계'},label:{en:'Name a film whose central character remains part of the story after dying.',ko:'주인공이 죽은 뒤에도 이야기에 등장하는 영화를 대보세요.'},match:()=>false},
+  {id:'g-fictional-corporation',kind:'games',badge:{en:'GAMES · BRANDS',ko:'게임 · 가상 기업'},label:{en:'Name a fictional corporation or business that exists inside a video game.',ko:'비디오 게임 속에 존재하는 가상의 기업·회사 이름을 대보세요.'},match:()=>false},
+  {id:'a-anime-parodies-anime',kind:'anime',badge:{en:'ANIME · META',ko:'애니 · 패러디'},label:{en:'Name an anime that directly parodies another anime.',ko:'다른 애니메이션을 직접 패러디한 애니메이션을 대보세요.'},match:()=>false},
+  {id:'l-fictional-book',kind:'literature',badge:{en:'BOOKS · BOOKS IN BOOKS',ko:'문학 · 책 속의 책'},label:{en:'Name an imaginary book mentioned inside a novel or work of fiction.',ko:'소설이나 허구 작품 속에만 존재하는 가상의 책 제목을 대보세요.'},match:()=>false},
+  {id:'f-title-song',kind:'film',badge:{en:'FILM · MUSIC',ko:'영화 · 노래'},label:{en:'Name a film that shares its title with a song.',ko:'노래 제목과 같은 제목을 가진 영화를 대보세요.'},match:()=>false},
+
   {id:'f-tsai-feature',kind:'film',badge:{en:'CINEMA · TAIWAN',ko:'영화 · 대만'},label:{en:'Name a feature film directed by Tsai Ming-liang.',ko:'차이밍량이 감독한 장편영화 한 편을 대보세요.'},match:()=>false},
   {id:'a-serial-experiments-character',kind:'anime',badge:{en:'ANIME · LAIN',ko:'애니 · 레인'},label:{en:'Name a character from Serial Experiments Lain.',ko:'《serial experiments lain》에 등장하는 인물 한 명을 대보세요.'},match:()=>false},
   {id:'g-cave-arcade',kind:'games',badge:{en:'GAMES · BULLET HELL',ko:'게임 · 탄막 슈팅'},label:{en:'Name a shoot-em-up developed by CAVE for arcades.',ko:'CAVE가 만든 아케이드 탄막 슈팅 게임을 대보세요.'},match:()=>false},
