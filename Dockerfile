@@ -8,4 +8,4 @@ RUN npm run build
 ENV NODE_ENV=production PORT=8787 DATA_DIR=/data CATALOG_DB=/data/catalog.sqlite
 VOLUME /data
 EXPOSE 8787
-CMD ["npm","start"]
+CMD ["sh","-c","node scripts/restore-catalog.mjs; exec npm start"]
