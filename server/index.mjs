@@ -160,9 +160,10 @@ const server=http.createServer((req,res)=>{
       if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return {...w,metadataUnavailable:true};}}));}
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
-      const response=metadataMissing?{status:'unverified',reason:'genre-or-country-metadata-unavailable'}:found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
-        !valid[0].verified?{status:'unverified'}:(()=>{
-        const w=valid[0];
+      const chosen=valid.length?valid[0]:found[0];
+      const response=metadataMissing?{status:'unverified',reason:'genre-or-country-metadata-unavailable'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
+        !chosen.verified?{status:'unverified'}:(()=>{
+        const w=chosen;
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
         const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
         // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
