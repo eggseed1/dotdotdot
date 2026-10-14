@@ -486,3 +486,45 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 }
 @media(max-height:600px){.krillion-game-screen .infernal-game-scene .cinematic-stage-top{top:11%!important;max-height:34dvh!important}.infernal-devil{top:65%;width:98px;height:98px}.infernal-depth-meter{display:none}}
 @media(prefers-reduced-motion:reduce){.infernal-devil,.infernal-sparks i,.infernal-devil-trail{animation:none}.infernal-world{transition:none}}
+
+
+/* Shared full-viewport start / play stage: no disconnected landing page. */
+.app-shell.is-integrated-home{height:100dvh;min-height:520px;overflow:hidden;background:#090719}
+.is-integrated-home .site-header{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:150;width:calc(100% - 30px);height:58px;max-width:1250px;background:transparent;border:0;box-shadow:none}
+.is-integrated-home .site-footer{display:none}
+.integrated-home-main{width:100%!important;max-width:none!important;min-height:0!important;height:100dvh!important;margin:0!important;padding:0!important;flex:1;overflow:hidden}
+.integrated-home,.integrated-home .cinematic-play-stage,.integrated-home .hellscape{width:100%!important;height:100dvh!important;min-height:520px!important;margin:0!important;max-width:none!important}
+.integrated-home .cinematic-play-stage{overflow:hidden}
+.integrated-home .hellscape{border:0!important;border-radius:0!important;box-shadow:none!important}
+.integrated-home .home-stage-title{top:clamp(90px,16dvh,165px)!important;left:50%!important;transform:translateX(-50%)!important;width:min(730px,calc(100% - 46px))!important;padding:clamp(18px,3vh,36px)!important;text-align:center;z-index:80!important;background:#170c22eb!important;border:3px solid #854b69!important;box-shadow:9px 9px 0 #090511!important}
+.integrated-home .home-stage-title h1{font:clamp(23px,3.4vw,47px)/1.6 var(--pixel)!important;word-break:keep-all;color:#ffe7d2!important;letter-spacing:.025em;text-shadow:4px 4px #813d68!important;margin:12px 0!important}
+.integrated-home .home-stage-title .cinematic-stage-count{font-size:clamp(8px,1vw,11px);color:#edb96e}
+.integrated-home .home-stage-title p{font-size:clamp(9px,1vw,12px);line-height:1.8;word-break:keep-all}
+.home-category-choice{margin:14px auto 0;display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;font:10px/1.7 var(--pixel);color:#ffc880}
+.home-category-choice button{opacity:.3;cursor:not-allowed;border:2px solid #ba8c8d;background:#312638;color:#ffdbb0;padding:8px 12px;font:9px var(--pixel)}
+.integrated-home .home-start-dock{bottom:0!important;left:0!important;right:0!important;width:100%!important;z-index:100!important;padding:13px 18px max(17px,env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,#100b20e8,#0c0816fa)!important;border-top:3px solid #81546f!important}
+.home-start-actions{width:min(790px,100%);margin:0 auto;display:flex;align-items:stretch;justify-content:center;gap:12px}
+.home-start-dial{width:66px;height:62px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid #8c5865;border-radius:50%;font:16px var(--pixel);color:#ffcc87}
+.home-start-dial small{font:7px var(--pixel);margin-top:6px}
+.home-start-actions .pixel-landing-start{flex:1;min-width:0;max-width:510px;height:62px!important;display:flex;align-items:center;justify-content:center;gap:12px;border:3px solid #b08455;background:#d8b579;color:#1a1222;font:clamp(10px,1.2vw,14px)/1.5 var(--pixel);box-shadow:4px 4px #080612;padding:9px 16px}
+.home-start-actions .pixel-landing-duel{height:62px;display:flex;align-items:center;justify-content:center;gap:8px;border:2px solid #a66b83;padding:10px 13px;background:#321a34;color:#ffcfb2;font:9px var(--pixel)}
+.home-start-footnote{text-align:center;margin:8px auto 0;color:#bb95a3;font:8px/1.4 var(--pixel)}
+.is-integrated-home .infernal-depth-meter{bottom:150px;top:auto}
+@media(max-width:700px){
+ .is-integrated-home .site-header{height:48px}
+ .is-integrated-home .header-mini,.is-integrated-home .header-divider{display:none}
+ .integrated-home .home-stage-title{top:clamp(70px,13dvh,110px)!important;width:calc(100% - 24px)!important;padding:17px 12px!important;max-height:40dvh!important}
+ .integrated-home .home-stage-title h1{font-size:clamp(17px,5.2vw,29px)!important;line-height:1.5!important;text-shadow:2px 2px #813d68!important}
+ .integrated-home .home-stage-title p{font-size:9px!important}
+ .home-category-choice{font-size:8px;gap:6px;margin-top:8px}
+ .home-category-choice button{padding:6px;font-size:7px}
+ .home-start-actions{gap:6px}
+ .home-start-dial{height:50px;width:49px;font-size:11px;border-width:2px}
+ .home-start-dial small{font-size:6px}
+ .home-start-actions .pixel-landing-start{height:50px!important;font-size:clamp(8px,2.6vw,12px);padding:5px 7px;gap:4px}
+ .home-start-actions .pixel-landing-duel{height:50px;font-size:8px;padding:5px}
+ .home-start-footnote{font-size:7px}
+ .integrated-home .infernal-devil{top:59%;width:clamp(75px,20vh,140px);height:clamp(75px,20vh,140px)}
+ .is-integrated-home .infernal-depth-meter{display:none}
+}
+@media(max-height:650px){.integrated-home .home-stage-title{top:65px!important;padding:9px 15px!important}.integrated-home .home-stage-title h1{margin:3px 0!important}.home-category-choice{margin-top:3px}.integrated-home .infernal-devil{top:64%;width:90px;height:90px}.home-start-footnote{display:none}}
