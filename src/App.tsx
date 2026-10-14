@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen, Gamepad2, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
 import { catalog } from './data/catalog';
-import { staticCatalogExact } from './lib/static-catalog';
+
 import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
@@ -101,35 +101,30 @@ export default function App(){
     if(!session||session.state!=='play'||!activePrompt)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     if(!entry.trim()){setFeedback(t.empty);return;}
-    const found=lookupAnswer(entry,activePrompt.kind);
-    if(found.status==='missing'){
+    // Never let the tiny bundled demo override the live film/anime/game catalog.
+    const serverKind=activePrompt.kind!=='literature';
+    if(serverKind){
       try{
         const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
         const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:entry.trim()})});
-        if(response.ok){
-          const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
-          if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
-            if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-            lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
-          }
-          if(data.status==='ambiguous'){setFeedback(t.ambiguous);return;}
-          if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
+        if(!response.ok)throw Error('Live validation unavailable');
+        const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
+        if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
+          if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
+          lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
         }
-      }catch{/* Static-only mode has no live catalog API. */}
-      // GitHub Pages has no Node API. Validate exact entries from the published static catalog.
-      const records=await staticCatalogExact(entry,activePrompt.kind);
-      if(records.length>1){setFeedback(t.ambiguous);return;}
-      if(records.length===1){
-        const work=records[0];
-        if(!activePrompt.match(work)){setFeedback(t.notEligible);return;}
-        if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-        // This is *neutral provisional credit*: metadata presence never proves rarity.
-        lock({promptId:activePrompt.id,workId:work.id,title:work.title,titleKo:work.titleKo,
-          creator:work.creator,year:work.year,country:work.country,rawAnswer:entry.trim(),points:44,tier:5});return;
+        if(data.status==='ambiguous'){setFeedback(t.ambiguous);return;}
+        if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
+        if(data.status==='unverified'){setFeedback(lang==='ko'?'데이터가 부족해 조건을 확인할 수 없습니다.':'Source metadata is incomplete. This answer cannot be verified.');return;}
+        setFeedback(t.invalid);return;
+      }catch{
+        setFeedback(lang==='ko'?'검증 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.':'Live answer verification is unavailable. Try again shortly.');
+        return;
       }
-      setFeedback(t.invalid);return;
     }
+    const found=lookupAnswer(entry,activePrompt.kind);
     if(found.status==='ambiguous'){setFeedback(t.ambiguous);return;}
+    if(found.status==='missing'){setFeedback(t.invalid);return;}
     if(!activePrompt.match(found.work)){setFeedback(t.notEligible);return;}
     const points=rarity(found.work,activePrompt);
     lock({promptId:activePrompt.id,workId:found.work.id,rawAnswer:entry.trim(),points:points.points,tier:points.tier});
