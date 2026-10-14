@@ -1,5 +1,6 @@
 import type {ReactNode,CSSProperties} from 'react';
 import {devilArt} from '../data/art';
+import infernalCity from '../assets/infernal-city.svg';
 import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
 
@@ -20,7 +21,7 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
  const skyStars=Array.from({length:45},(_,i)=>({x:(i*67+13)%100,y:(i*37+19)%78}));
  const sparks=Array.from({length:32},(_,i)=>({x:(i*47+9)%97,y:(i*61+7)%97,d:(i%8)*-.37}));
  return <div className={`hellscape infernal-game-scene ${compact?'hellscape--compact':''}`} role={children?'group':'img'} aria-label={lang==='ko'?`악마가 지옥 ${depth}미터에 있습니다`:`Devil descended ${depth} meters into hell`}>
-   <div className="infernal-sky" aria-hidden="true" style={{backgroundPositionY:`${-travel*.07}px`}}>
+   <div className="infernal-sky" aria-hidden="true" style={{backgroundImage:`url(${infernalCity})`,backgroundPosition:`center ${50+Math.min(25,travel*.004)}%`}}>
      <div className="infernal-moon"/>
      {skyStars.map((v,i)=><i key={i} className="infernal-star" style={{left:`${v.x}%`,top:`${v.y}%`}}/>)}
      <div className="infernal-mountains far"/><div className="infernal-mountains near"/>
