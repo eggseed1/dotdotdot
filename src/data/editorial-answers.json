@@ -158,5 +158,130 @@
       "Bob"
     ],
     "type": "character"
+  },
+  "f-tsai-feature": {
+    "type": "film",
+    "answers": [
+      "Rebels of the Neon God",
+      "Vive L'Amour",
+      "The River",
+      "The Hole",
+      "What Time Is It There?",
+      "Good Bye, Dragon Inn",
+      "The Wayward Cloud",
+      "I Don't Want to Sleep Alone",
+      "Face",
+      "Stray Dogs",
+      "Days"
+    ]
+  },
+  "f-svankmajer-feature": {
+    "type": "film",
+    "answers": [
+      "Alice",
+      "Faust",
+      "Conspirators of Pleasure",
+      "Little Otik",
+      "Lunacy",
+      "Surviving Life",
+      "Insects"
+    ]
+  },
+  "a-yuasa-directed": {
+    "type": "anime",
+    "answers": [
+      "Mind Game",
+      "Kemonozume",
+      "Kaiba",
+      "The Tatami Galaxy",
+      "Kick-Heart",
+      "Ping Pong the Animation",
+      "The Night Is Short, Walk on Girl",
+      "Lu Over the Wall",
+      "Devilman Crybaby",
+      "Ride Your Wave",
+      "Japan Sinks: 2020",
+      "Inu-Oh"
+    ]
+  },
+  "g-cave-arcade": {
+    "type": "games",
+    "answers": [
+      "DonPachi",
+      "DoDonPachi",
+      "Esp Ra.De.",
+      "Dangun Feveron",
+      "Guwange",
+      "Progear",
+      "Ketsui",
+      "DoDonPachi DaiOuJou",
+      "Mushihimesama",
+      "Ibara",
+      "Espgaluda",
+      "Espgaluda II",
+      "Deathsmiles",
+      "Muchi Muchi Pork!",
+      "Pink Sweets: Ibara Sorekara",
+      "DoDonPachi Daifukkatsu",
+      "Mushihimesama Futari",
+      "Akai Katana"
+    ]
+  },
+  "l-perec-book": {
+    "type": "literature",
+    "answers": [
+      "Things: A Story of the Sixties",
+      "A Man Asleep",
+      "A Void",
+      "The Exeter Text",
+      "W, or the Memory of Childhood",
+      "Life: A User's Manual",
+      "An Attempt at Exhausting a Place in Paris",
+      "Species of Spaces",
+      "The Art of Asking Your Boss for a Raise",
+      "53 Days"
+    ]
+  },
+  "tv-twilight-episode": {
+    "type": "tv",
+    "answers": [
+      "Where Is Everybody?",
+      "Time Enough at Last",
+      "The Monsters Are Due on Maple Street",
+      "Eye of the Beholder",
+      "To Serve Man",
+      "Nightmare at 20,000 Feet",
+      "The After Hours",
+      "Five Characters in Search of an Exit",
+      "The Invaders",
+      "The Midnight Sun",
+      "A Stop at Willoughby",
+      "The Hitch-Hiker",
+      "The Obsolete Man",
+      "The Living Doll",
+      "It's a Good Life",
+      "A Game of Pool",
+      "Walking Distance",
+      "The Masks",
+      "The Howling Man",
+      "The Shelter",
+      "The Last Flight",
+      "The Silence",
+      "The Fever"
+    ]
+  },
+  "a-serial-experiments-character": {
+    "type": "anime",
+    "answers": [
+      "Lain Iwakura",
+      "Alice Mizuki",
+      "Masami Eiri",
+      "Yasuo Iwakura",
+      "Miho Iwakura",
+      "Mika Iwakura",
+      "Taro",
+      "Myu-Myu",
+      "Masayuki"
+    ]
   }
 }
