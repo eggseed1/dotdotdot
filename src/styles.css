@@ -786,3 +786,26 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 .krillion-game-screen .infernal-game-scene .infernal-sky:after{display:none!important}
 .krillion-game-screen .cinematic-stage-top h1{font-family:'Galmuri11',monospace!important;font-weight:800!important}
 @media(max-width:700px){.krillion-game-screen .submit-button,.integrated-home button{font-size:clamp(11px,3vw,14px)!important}}
+
+
+/* Expandable round archive: readable, pixel-framed, one round at a time. */
+.results-panel .result-recap{display:grid;gap:9px;margin:24px auto;width:min(920px,100%)}
+.results-panel .recap-expand{border:2px solid #6e3547;background:#180c1b;overflow:hidden}
+.results-panel .recap-expand[open]{border-color:#d68d61}
+.results-panel .recap-expand>.recap-row{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;list-style:none;min-width:0}
+.results-panel .recap-expand>.recap-row::-webkit-details-marker{display:none}
+.results-panel .recap-expand .recap-work{flex:1;min-width:0;overflow-wrap:anywhere}
+.results-panel .recap-expand .recap-work strong{display:block;color:#f5dbc7;font-size:14px}
+.results-panel .recap-expand .recap-work small{display:block;line-height:1.6;color:#af8e94;font-size:11px;margin-top:5px}
+.results-panel .recap-chevron{color:#efaa75;font:18px 'Galmuri11',monospace;transition:transform 120ms steps(2,end)}
+.results-panel .recap-expand[open] .recap-chevron{transform:rotate(180deg)}
+.results-panel .recap-detail{padding:18px;border-top:2px solid #6e3547;color:#ead2c3}
+.results-panel .recap-detail h3{font:14px 'Galmuri11',monospace;color:#ffbd80;margin:20px 0 12px}
+.results-panel .recap-reason{color:#d8b3a4;font-size:12px;line-height:1.7}
+.results-panel .recap-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.results-panel .recap-example{display:flex;gap:8px;align-items:center;min-width:0;padding:12px;background:#280f20;border:1px solid #6d3345}
+.results-panel .recap-example strong{font-size:12px;overflow-wrap:anywhere;flex:1}
+.results-panel .recap-example small{font-size:10px;color:#ac8a8b}
+.results-panel .recap-example b{font:12px 'Galmuri11',monospace;color:#ffd096}
+.results-panel .recap-detail>small{display:block;color:#a78689;line-height:1.6;margin-top:12px}
+@media(max-width:650px){.results-panel .recap-examples{grid-template-columns:1fr}.results-panel .recap-expand>.recap-row{padding:11px 9px;gap:8px}.results-panel .recap-detail{padding:12px}.results-panel .recap-example{flex-wrap:wrap}}
