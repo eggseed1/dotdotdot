@@ -22,9 +22,10 @@
     "fetch:tmdb": "node scripts/fetch-tmdb.mjs",
     "fetch:igdb": "node scripts/fetch-igdb.mjs",
     "test:catalog-pipelines": "node --test scripts/import-musicbrainz-core.test.mjs scripts/fetch-anilist.test.mjs scripts/fetch-tmdb.test.mjs scripts/fetch-igdb.test.mjs",
-    "test:discogs": "python3 -m unittest discover -s scripts -p 'test_import_discogs*.py'",
+    "test:discogs": "python3 -m unittest discover -s scripts -p 'test_import_discogs*.py' && python3 -m unittest discover -s scripts -p 'test_import_openlibrary_online.py'",
     "import:discogs": "python3 scripts/import-discogs-dump.py",
-    "import:discogs:full": "python3 scripts/import-discogs-online.py"
+    "import:discogs:full": "python3 scripts/import-discogs-online.py",
+    "import:books:full": "python3 scripts/import-openlibrary-online.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
