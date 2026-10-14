@@ -10,7 +10,7 @@ on:
       limit:
         description: "Maximum albums to export (0 = all in dump mode)"
         type: number
-        default: 500
+        default: 5000
       include_community_tags:
         description: "I confirm noncommercial CC BY-NC-SA 3.0 obligations; fetch derived tags and rating counts"
         type: boolean
@@ -22,7 +22,7 @@ on:
       publish_release:
         description: "Publish resulting small catalog as GitHub Release assets (no site deployment)"
         type: boolean
-        default: false
+        default: true
 permissions:
   contents: write
   pages: write
@@ -50,12 +50,13 @@ jobs:
         if: ${{ inputs.mode == 'sample' }}
         env:
           CATALOG_CONTACT_EMAIL: ${{ secrets.CATALOG_CONTACT_EMAIL }}
+          MAX_ALBUMS: ${{ inputs.limit }}
         run: |
           if [ -z "$CATALOG_CONTACT_EMAIL" ]; then
             echo "Set Actions secret CATALOG_CONTACT_EMAIL to a real contact email, required for MusicBrainz API etiquette."
             exit 1
           fi
-          node scripts/fetch-musicbrainz.mjs --limit 500 --out /tmp/music-sample.jsonl
+          node scripts/fetch-musicbrainz.mjs --limit "$MAX_ALBUMS" --out /tmp/music-sample.jsonl
           node scripts/import-catalog.mjs --source musicbrainz --file /tmp/music-sample.jsonl --db data/catalog.sqlite
       - name: Fetch official MusicBrainz core and optional supplementary archive
         if: ${{ inputs.mode == 'dump' }}
@@ -136,14 +137,24 @@ jobs:
           name: catalog-shards-${{ github.run_number }}
           path: out/larper101-catalog-shards.tar.gz
           retention-days: 7
-      - name: Publish optional immutable GitHub Release asset
+      - name: Publish current catalog for future deployments
         if: ${{ inputs.publish_release }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          TAG="catalog-${GITHUB_RUN_ID}"
-          gh release create "$TAG" out/larper101-catalog-shards.tar.gz \
-            --title "Catalog batch $GITHUB_RUN_ID" \
-            --notes "Unverified completeness. Official MusicBrainz metadata. Community-derived tags only if enabled and subject to CC BY-NC-SA 3.0." \
-            --latest=false
+          SIZE=$(stat -c %s out/larper101-catalog-shards.tar.gz)
+          if [ "$SIZE" -gt 1900000000 ]; then
+            echo "Catalog archive is too large for one Release asset; split exports are needed."
+            exit 1
+          fi
+          cp out/larper101-catalog-shards.tar.gz out/catalog-shards.tar.gz
+          if gh release view catalog-current --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload catalog-current out/catalog-shards.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create catalog-current out/catalog-shards.tar.gz \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Current searchable music catalog" \
+              --notes "Imported MusicBrainz catalog; metadata coverage and rarity evidence may be incomplete." \
+              --latest=false
+          fi
