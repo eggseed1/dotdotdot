@@ -53,6 +53,7 @@ export default function App(){
   const [timeLeft,setTimeLeft]=useState(ROUND_SECONDS);
   const [infoOpen,setInfoOpen]=useState(false);
   const [copied,setCopied]=useState(false);
+  const [serverExamples,setServerExamples]=useState<Record<string,Array<{title:string;titleKo?:string;creator?:string;year?:number;source?:string}>>>({});
   const inputRef=useRef<HTMLInputElement>(null);
   const t=strings[lang];
   const date=todayKey();
@@ -77,6 +78,22 @@ export default function App(){
     tick();const id=window.setInterval(tick,100);return ()=>clearInterval(id);
   },[session?.id,session?.index,session?.state,session?.roundStartedAt]);
   useEffect(()=>{if(session?.state==='play')inputRef.current?.focus();},[session?.index,session?.state]);
+  useEffect(()=>{
+    if(session?.state!=='finished')return;
+    const ids=[...new Set(session.prompts)];
+    const controller=new AbortController();
+    const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?location.protocol+'//'+location.hostname+':8787':location.origin;
+    Promise.all(ids.map(async id=>{
+      try{
+        const response=await fetch(api+'/api/examples?promptId='+encodeURIComponent(id),{signal:controller.signal});
+        if(!response.ok)return [id,[]] as const;
+        const body=await response.json() as {examples?:Array<{title:string;titleKo?:string;creator?:string;year?:number;source?:string}>};
+        return [id,body.examples||[]] as const;
+      }catch{return [id,[]] as const;}
+    })).then(rows=>{if(!controller.signal.aborted)setServerExamples(Object.fromEntries(rows));});
+    return ()=>controller.abort();
+  },[session?.state,session?.id]);
+
 
   const start=(mode:Mode,practice=false)=>{
     mode='all';
@@ -191,7 +208,7 @@ export default function App(){
         <div className="result-stars">✦ <span>✳</span> ✦</div><p className="eyebrow centered">{t.completed}</p><h1>{t.resultTitle}</h1>
         <div className="final-score"><strong>{activeScore}</strong><span>/ 700</span></div><p className="score-caption">{t.yourScore} · {modeLabel(session.mode)}</p>{publicResults&&<p className="share-flag">{lang==='ko'?'공유된 결과 · 서버 미검증':'SHARED RESULTS · NOT SERVER VERIFIED'}</p>}
         <Hellscape lang={lang} score={activeScore} compact/>
-        <div className="result-recap">{session.results.map((r,i)=>{const work=selectedWork(r.workId);const p=promptById.get(r.promptId);const examples=sampleAnswers(r.promptId,12);return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'예시 정답':'EXAMPLE ANSWERS'}</h3>{examples.length?<div className="recap-examples">{examples.map(w=><div className="recap-example" key={w.id}><strong>{lang==='ko'&&w.titleKo?w.titleKo:w.title}</strong><small>{w.creator} · {w.year}</small><b>+{w.points}</b></div>)}</div>:<p>{lang==='ko'?'검증 가능한 샘플이 아직 부족해.':'Not enough available sample answers.'}</p>}<small>{lang==='ko'?'샘플 점수는 참고용이며 실시간 검증과 다를 수 있어.':'Sample scores may differ from live validation.'}</small></div></details>;})}</div>
+        <div className="result-recap">{session.results.map((r,i)=>{const work=selectedWork(r.workId);const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,12);const examples=serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'예시 정답':'EXAMPLE ANSWERS'}</h3>{examples.length?<div className="recap-examples">{examples.map(w=><div className="recap-example" key={w.id}><strong>{lang==='ko'&&w.titleKo?w.titleKo:w.title}</strong><small>{w.creator} · {w.year}</small>{'points' in w&&typeof w.points==='number'?<b>+{w.points}</b>:null}</div>)}</div>:<p>{lang==='ko'?'검증 가능한 샘플이 아직 부족해.':'Not enough available sample answers.'}</p>}<small>{lang==='ko'?'샘플 점수는 참고용이며 실시간 검증과 다를 수 있어.':'Sample scores may differ from live validation.'}</small></div></details>;})}</div>
         <div className="result-actions"><button className="action-button" onClick={share}><Clipboard size={16}/>{copied?t.copied:t.copy}</button><button className="secondary-button" onClick={()=>start(session.mode,true)}><RotateCcw size={16}/>{t.playAgain}</button><button className="text-button" onClick={home}>{t.back} →</button></div>
         <p className="warning-note">{t.local}</p>
       </section>:<section className="question-shell krillion-game-screen">
