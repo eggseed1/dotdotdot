@@ -5,38 +5,38 @@
   "tiers": [
     {
       "key": "plankton",
-      "labelKo": "지옥 입구",
-      "labelEn": "HELLGATE",
+      "labelKo": "너무 쉬움",
+      "labelEn": "OBVIOUS",
       "points": 10
     },
     {
       "key": "too-clever",
-      "labelKo": "잿불 구덩이",
-      "labelEn": "EMBER PIT",
+      "labelKo": "흔한 답",
+      "labelEn": "COMMON",
       "points": 15
     },
     {
       "key": "schooler",
-      "labelKo": "망자의 회랑",
-      "labelEn": "CRYPT WALKER",
+      "labelKo": "좀 아는 편",
+      "labelEn": "NICHE",
       "points": 30
     },
     {
       "key": "rare",
-      "labelKo": "저주받은 심층",
-      "labelEn": "CURSED DEPTHS",
+      "labelKo": "꽤 마이너",
+      "labelEn": "OBSCURE",
       "points": 60
     },
     {
       "key": "deep-cut",
-      "labelKo": "심연의 사도",
-      "labelEn": "ABYSS HERALD",
+      "labelKo": "진짜 마이너",
+      "labelEn": "DEEP CUT",
       "points": 85
     },
     {
       "key": "one-in-a-krillion",
-      "labelKo": "지옥의 군주",
-      "labelEn": "INFERNAL SOVEREIGN",
+      "labelKo": "이걸 안다고?",
+      "labelEn": "WHAT EVEN",
       "points": 100
     }
   ],
