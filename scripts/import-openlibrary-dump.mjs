@@ -6,10 +6,12 @@ import {createGunzip} from 'node:zlib';
 import readline from 'node:readline';
 import {createCatalogStore} from '../server/catalog-store.mjs';
 const args=process.argv.slice(2),flag=k=>args.includes(k)?args[args.indexOf(k)+1]:undefined;
-const file=flag('--file'),limit=Math.min(Math.max(Number(flag('--limit')||100000),1),5000000);
-if(!file){console.error('Usage: node scripts/import-openlibrary-dump.mjs --file works.txt.gz [--limit 100000] [--db data/catalog.sqlite]');process.exit(1);}
+const file=flag('--file'),specified=flag('--limit');
+const limit=specified===undefined?Infinity:Math.max(1,Number(specified)||1);
+if(!file){console.error('Usage: node scripts/import-openlibrary-dump.mjs --file works.txt.gz [--limit 100000] (default: all works) [--db data/catalog.sqlite]');process.exit(1);}
 const store=createCatalogStore(flag('--db')||path.resolve('data/catalog.sqlite'));
-const stream=fs.createReadStream(file),input=file.endsWith('.gz')?stream.pipe(createGunzip()):stream;
+const stream=file==='-'?process.stdin:fs.createReadStream(file);
+const input=(file.endsWith('.gz')||args.includes('--gzip'))?stream.pipe(createGunzip()):stream;
 let seen=0,imported=0,skipped=0;
 store.begin();
 try{
