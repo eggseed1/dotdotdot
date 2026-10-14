@@ -25,7 +25,11 @@ const works=[];
 const genreIds=new Set(),countryIds=new Set();
 for(const id of ids){const e=entities.entities?.[id];if(e){for(const g of claimIds(e,'P136'))genreIds.add(g);for(const c of claimIds(e,'P495'))countryIds.add(c);}}
 const metadataIds=[...new Set([...genreIds,...countryIds])].slice(0,200);
-const metadata=metadataIds.length?await get({action:'wbgetentities',ids:metadataIds.join('|'),props:'labels',languages:'en'}):{entities:{}};
+const metadata={entities:{}};
+for(let i=0;i<metadataIds.length;i+=50){
+ const result=await get({action:'wbgetentities',ids:metadataIds.slice(i,i+50).join('|'),props:'labels',languages:'en'});
+ Object.assign(metadata.entities,result.entities||{});
+}
 const labelFor=id=>String(metadata.entities?.[id]?.labels?.en?.value||'').toLowerCase();
 for(const id of ids){
  const e=entities.entities?.[id];if(!e)continue;
