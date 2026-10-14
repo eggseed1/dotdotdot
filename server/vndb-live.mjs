@@ -1,3 +1,4 @@
+import {evidenceRarity} from './evidence-rarity.mjs';
 import {canonical} from '../src/lib/title-match.mjs';
 const cache=new Map(),TTL=6*60*60*1000;
 function yearOf(value){const year=Number(String(value||'').slice(0,4));return year>=1980&&year<=2100?year:0;}
@@ -27,8 +28,4 @@ export function exactVNDB(raw,items){
  const key=canonical(raw);
  return items.filter(w=>[w.title,...w.aliases,w.title+' — '+w.creator].some(n=>canonical(n)===key));
 }
-export function vnRarity(votes){
- if(!Number.isInteger(votes)||votes<1)return {points:44,tier:5,unrated:true};
- const points=Math.max(12,Math.min(90,Math.round(85-14*Math.log10(1+votes))));
- return {points,tier:points>=75?8:points>=65?7:points>=55?6:points>=45?5:points>=35?4:3,unrated:false};
-}
+export function vnRarity(count){return evidenceRarity(count,{typical:600,ceiling:15000,minimum:4});}
