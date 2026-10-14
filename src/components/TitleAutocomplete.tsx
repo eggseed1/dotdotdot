@@ -5,7 +5,7 @@ import {staticCatalogMatches} from '../lib/static-catalog';
 import type {Kind,Lang} from '../lib/types';
 
 type Item={id:string;kind:string;title:string;titleKo?:string;creator?:string;year?:number;source?:string};
-const apiOrigin=()=>location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
+const apiOrigin=()=>location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
 export function useTitleAutocomplete(value:string,kind:Kind,lang:Lang,enabled=true){
  const [remote,setRemote]=useState<Item[]>([]);
  const [active,setActive]=useState(-1);
