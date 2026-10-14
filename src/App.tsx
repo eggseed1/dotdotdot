@@ -12,7 +12,7 @@ import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutoco
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
-import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
+import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Lang, Mode, RoundResult } from './lib/types';
 
