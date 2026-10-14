@@ -8,7 +8,7 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
-import {searchMusicBrainz,exactLiveMatches} from './musicbrainz-live.mjs';
+import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz} from './musicbrainz-live.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
@@ -134,6 +134,7 @@ const server=http.createServer((req,res)=>{
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
+      if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return w;}}));}
       const valid=found.filter(w=>prompt.match(w));
       const response=found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
         !valid[0].verified?{status:'unverified'}:(()=>{
