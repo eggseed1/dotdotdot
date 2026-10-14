@@ -3,21 +3,41 @@ import {devilArt} from '../data/art';
 import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
 
-/** Original neon-city journey: a camera-follow road scene, no fantasy/hell elements. */
+const zones=[
+ {at:0,en:'THE GATES',ko:'지옥문',tone:'#a14c37'},
+ {at:850,en:'EMBER FALLS',ko:'잿불 폭포',tone:'#c55c33'},
+ {at:1850,en:'CRYPT OF BONES',ko:'백골의 지하묘지',tone:'#8b4661'},
+ {at:3050,en:'THE FORGOTTEN',ko:'망각의 땅',tone:'#5b3d73'},
+ {at:4450,en:'ABYSSAL RIFT',ko:'심연의 균열',tone:'#4e365e'},
+ {at:5650,en:'DEMON CITADEL',ko:'마왕성',tone:'#933645'},
+ {at:6650,en:'THE INFERNAL CORE',ko:'지옥의 핵',tone:'#ed8b4f'}
+];
 export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName,previewDepth=0,children}:{score?:number;opponentScore?:number;lang:Lang;compact?:boolean;opponentName?:string;previewDepth?:number;children?:ReactNode}){
- const distance=Math.max(0,Math.min(7000,score*10));
- const moving=Math.max(0,Math.min(7000,distance+previewDepth));
+ const depth=Math.max(0,Math.min(7000,score*10));
+ const travel=Math.max(0,Math.min(7000,depth+previewDepth));
  const rank=rarityRank(score>0?score/7:10);
- const lights=Array.from({length:40},(_,i)=>({x:(i*73+17)%100,y:(i*47+13)%42,size:i%4===0?3:1}));
- return <div className={`hellscape cityscape-scene ${compact?'hellscape--compact':''}`} role={children?'group':'img'} aria-label={lang==='ko'?`도시를 ${distance}미터 이동했습니다`:`Travelled ${distance} meters through the city`}>
-  <div className="neon-sky" aria-hidden="true"><div className="neon-moon"/>{lights.map((l,i)=><i className="neon-star" key={i} style={{left:`${l.x}%`,top:`${l.y}%`,width:l.size,height:l.size}}/>)}</div>
-  <div className="neon-hills" aria-hidden="true"/>
-  <div className="neon-skyline skyline-back" aria-hidden="true" style={{transform:`translateX(-${moving*.016%80}px)`}}>{Array.from({length:19},(_,i)=><i key={i} style={{height:`${28+(i*47)%51}%`}}/>)}</div>
-  <div className="neon-skyline skyline-front" aria-hidden="true" style={{transform:`translateX(-${moving*.039%130}px)`}}>{Array.from({length:17},(_,i)=><i key={i} style={{height:`${38+(i*29)%53}%`}}/>)}</div>
-  <div className="neon-sidewalk" aria-hidden="true"/><div className="neon-road" aria-hidden="true"><div className="neon-road-stripes" style={{backgroundPositionX:`-${moving*.35}px`}}/></div>
-  <div className="neon-player" aria-hidden="true"><div className="neon-travel-car"><span className="car-roof"/><span className="car-window"/><span className="car-driver"/><img className="neon-devil-rider" src={devilArt} alt=""/><span className="car-body"/><span className="car-light"/><span className="car-wheel wheel-left"/><span className="car-wheel wheel-right"/></div></div>
-  <div className="city-distance-readout"><small>{lang==='ko'?'이동 거리':'DISTANCE'}</small><b>{distance.toLocaleString()}m</b><span>{rank[lang]} · {rank.division}</span></div>
-  {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {distance}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
-  {children}
+ const zone=zones.reduce((a,b)=>travel>=b.at?b:a,zones[0]);
+ const skyStars=Array.from({length:45},(_,i)=>({x:(i*67+13)%100,y:(i*37+19)%78}));
+ const sparks=Array.from({length:32},(_,i)=>({x:(i*47+9)%97,y:(i*61+7)%97,d:(i%8)*-.37}));
+ return <div className={`hellscape infernal-game-scene ${compact?'hellscape--compact':''}`} role={children?'group':'img'} aria-label={lang==='ko'?`악마가 지옥 ${depth}미터에 있습니다`:`Devil descended ${depth} meters into hell`}>
+   <div className="infernal-sky" aria-hidden="true" style={{backgroundPositionY:`${-travel*.07}px`}}>
+     <div className="infernal-moon"/>
+     {skyStars.map((v,i)=><i key={i} className="infernal-star" style={{left:`${v.x}%`,top:`${v.y}%`}}/>)}
+     <div className="infernal-mountains far"/><div className="infernal-mountains near"/>
+   </div>
+   <div className="infernal-world" style={{transform:`translate3d(0,${100-travel*.135}px,0)`}} aria-hidden="true">
+     {zones.map((z,i)=><div key={z.at} className={`infernal-zone zone-${i}`} style={{top:`${z.at*.135}px`,'--zone-tone':z.tone} as React.CSSProperties}>
+       <div className="infernal-zone-sign"><b>{z.at.toLocaleString()}m</b><span>{z[lang]}</span></div>
+       <div className="infernal-ruins"><i/><i/><i/><i/><i/><i/><i/></div>
+       <div className="infernal-stalactites"><i/><i/><i/><i/><i/></div>
+     </div>)}
+   </div>
+   <div className="infernal-depth-wash" style={{opacity:Math.min(.75,travel/8500)}} aria-hidden="true"/>
+   <div className="infernal-sparks" aria-hidden="true">{sparks.map((p,i)=><i key={i} style={{left:`${p.x}%`,top:`${p.y}%`,animationDelay:`${p.d}s`}}/>)}</div>
+   <div className="infernal-cliff left"/><div className="infernal-cliff right"/>
+   <div className="infernal-devil" aria-hidden="true"><div className="infernal-devil-glow"/><img src={devilArt} alt=""/><span className="infernal-devil-trail"/></div>
+   <div className="infernal-depth-meter"><small>{lang==='ko'?'현재 심도':'DEPTH'}</small><strong>{depth.toLocaleString()}m</strong><span>{zone[lang]} · {rank[lang]}</span></div>
+   {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
+   {children}
  </div>;
 }
