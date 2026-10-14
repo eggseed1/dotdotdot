@@ -126,9 +126,13 @@ const server=http.createServer((req,res)=>{
       if(!prompt||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
       const found=sourceCatalog.lookup(prompt.kind,raw),valid=found.filter(w=>prompt.match(w));
       const response=found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
-        !valid[0].verified||!Number.isFinite(valid[0].ratingCount)||valid[0].ratingCount<1?{status:'unverified'}:(()=>{
-        const w=valid[0],score=sourceCatalog.score(prompt.id,w.ratingCount);
-        return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},points:score.points,tier:score.tier,provisional:true};
+        !valid[0].verified?{status:'unverified'}:(()=>{
+        const w=valid[0];
+        const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
+        const score=hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
+        return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
+          points:score.points,tier:score.tier,provisional:true,unrated:!hasVotes};
       })();
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
     });return;
