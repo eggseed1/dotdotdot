@@ -31,6 +31,7 @@ export const promptPool: Prompt[] = [
   {id:'a-2000s-movie-fantasy',kind:'anime',badge:{en:'DECADE · GENRE · FORMAT',ko:'시대 · 장르 · 형식'},label:{en:'Name a fantasy anime film released from 2000 to 2009.',ko:'2000년대 개봉한 판타지 애니메이션 영화를 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&w.genres.includes('fantasy')&&w.format==='MOVIE'},
   {id:'a-2010s-mystery-tv',kind:'anime',badge:{en:'DECADE · GENRE · FORMAT',ko:'시대 · 장르 · 형식'},label:{en:'Name a mystery TV anime that began airing in the 2010s.',ko:'2010년대 방영을 시작한 미스터리 TV 애니메이션을 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('mystery')&&w.format==='TV'},
   {id:'a-2000s-psych-tv',kind:'anime',badge:{en:'DECADE · TAG · FORMAT',ko:'시대 · 태그 · 형식'},label:{en:'Name a 2000s TV anime with a strong psychological tag.',ko:'2000년대 방영한 심리물 태그의 TV 애니메이션을 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&w.genres.includes('psychological')&&w.format==='TV'},
+  {id:'g-2010s-psych',kind:'games',badge:{en:'DECADE · THEME',ko:'시대 · 테마'},label:{en:'Name a psychological or surreal video game released from 2010 to 2019.',ko:'2010년대 출시된 심리적이거나 초현실적인 비디오 게임을 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&(w.genres.includes('psychological')||w.genres.includes('surrealism'))},
   {id:'g-2010s-indie-rpg',kind:'games',badge:{en:'DECADE · GENRE · STYLE',ko:'시대 · 장르 · 성격'},label:{en:'Name an indie RPG released between 2010 and 2019.',ko:'2010년부터 2019년 사이 나온 인디 RPG 게임을 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('rpg')&&w.genres.includes('indie')},
   {id:'g-2000s-japan-rpg',kind:'games',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a Japanese-developed RPG released in the 2000s.',ko:'2000년대에 출시된 일본 개발 RPG를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=2000&&w.year<=2009&&w.genres.includes('rpg')},
   {id:'f-korean-2000s',kind:'film',badge:{en:'COUNTRY + DECADE',ko:'국가 + 시대'},label:{en:'Name a South Korean film from the 2000s.',ko:'2000년대 한국 영화 하나를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009},
@@ -76,9 +77,9 @@ export function eligible(prompt:Prompt):Work[] {
 export function selectPrompts(_mode:Mode,date:string):Prompt[] {
   // Server-backed genres, country and format replace the tiny demo's eligibility gate.
   const groups: Array<[Kind,number,string[]]>=[
-    ['film',2,['f-korean-2000s-drama','f-japan-90s-horror','f-70s-sci-fi','f-korean-2000s','f-japan-90s']],
-    ['anime',2,['a-90s-sci-fi-tv','a-2000s-movie-fantasy','a-2010s-mystery-tv','a-2000s-psych-tv','a-2000s-sci-fi','a-90s-drama']],
-    ['games',2,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-indie-rpg','g-japan']],
+    ['film',2,['f-korean-2000s-drama','f-japan-90s-horror','f-70s-sci-fi']],
+    ['anime',2,['a-90s-sci-fi-tv','a-2000s-movie-fantasy','a-2010s-mystery-tv','a-2000s-psych-tv']],
+    ['games',2,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-psych']],
     ['literature',1,['l-experimental','l-japanese','l-asia','l-1900s']]
   ];
   const chosen=groups.flatMap(([kind,count,ids])=>{
