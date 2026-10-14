@@ -78,6 +78,25 @@ jobs:
         run: |
           node scripts/catalog-snapshot.mjs --db "$CATALOG_DB"
           npm run catalog:audit -- --db "$CATALOG_DB"
+      - name: Build exhaustive local film candidate queues
+        run: |
+          node scripts/discover-prompt-candidates.mjs --db "$CATALOG_DB" --out data/prompt-discovery.jsonl
+      - name: Cross-check film titles with MusicBrainz song works
+        continue-on-error: true
+        run: |
+          WEEK=$(date -u +%V)
+          OFFSET=$((10#$WEEK * 45))
+          node scripts/discover-film-song-crossmatches.mjs --db "$CATALOG_DB" --offset "$OFFSET" --limit 45 --out data/song-film-candidates.jsonl
+      - name: Upload research candidate lists
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deep-answer-candidates
+          path: |
+            data/prompt-discovery.jsonl
+            data/song-film-candidates.jsonl
+          if-no-files-found: warn
+          retention-days: 30
       - name: Publish public database snapshot
         run: |
           if gh release view catalog-latest >/dev/null 2>&1; then
