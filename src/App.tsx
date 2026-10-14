@@ -5,6 +5,7 @@ import { catalog } from './data/catalog';
 
 import { Hellscape } from './components/Hellscape';
 import { AnswerDirectory } from './components/AnswerDirectory';
+import thematicAliases from './data/thematic-aliases-ko.json';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
@@ -14,6 +15,13 @@ import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selec
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Lang, Mode, RoundResult } from './lib/types';
 
+// Defend against stale servers returning the first catalog item instead of the submitted title.
+const normalizeAnswer=(s:string)=>s.normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+const isMatchingReturnedAnswer=(promptId:string,submitted:string,work:{title:string;titleKo?:string})=>{
+ const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
+ const names=[work.title,work.titleKo,...(aliases?.[work.title]||[])];
+ return names.some(name=>typeof name==='string'&&normalizeAnswer(name)===normalizeAnswer(submitted));
+};
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
   'xvvxvvvvvvvvxvvx','xvvxvvvggvvvxvvx','xxvvxvggggvxvvxx','.xvvxxvggvxxvvx.','.xxvvxxxxxxvvxx.','..xxvvxxxxvvxx..',
@@ -144,6 +152,10 @@ export default function App(){
         const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number;candidates?:Array<{title:string;year?:number;country?:string;genres?:string[];format?:string;source?:string;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}>;reason?:string};
         if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
           if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
+          if(!isMatchingReturnedAnswer(activePrompt.id,entry.trim(),data.work)){
+            setFeedback(lang==='ko'?'서버가 입력한 작품과 다른 답을 반환했어. 잘못된 자동 정답은 적용하지 않았어.':'The server returned a different title. The incorrect match was rejected.');
+            return;
+          }
           lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
         }
         if(data.status==='ambiguous'){setFeedback(lang==='ko'?'동명의 작품이 여러 개야. 연도나 제작자를 붙여서 입력해 줘.':'Several titles match. Add a year or creator.');return;}
@@ -227,7 +239,7 @@ export default function App(){
         <div className="result-stars">✦ <span>✳</span> ✦</div><p className="eyebrow centered">{t.completed}</p><h1>{t.resultTitle}</h1>
         <div className="final-score"><strong>{activeScore}</strong><span>/ 700</span></div><p className="score-caption">{t.yourScore} · {modeLabel(session.mode)}</p>{publicResults&&<p className="share-flag">{lang==='ko'?'공유된 결과 · 서버 미검증':'SHARED RESULTS · NOT SERVER VERIFIED'}</p>}
         <Hellscape lang={lang} score={activeScore} compact/>
-        <div className="result-recap">{session.results.map((r,i)=>{const work=selectedWork(r.workId);const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,10000);const examples: Array<{title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}> = serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang}/></div></details>;})}</div>
+        <div className="result-recap">{session.results.map((r,i)=>{const work=r.title?{title:r.title,titleKo:r.titleKo}:selectedWork(r.workId);const p=promptById.get(r.promptId);const localExamples=sampleAnswers(r.promptId,10000);const examples: Array<{title:string;titleKo?:string;creator?:string;year?:number;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}> = serverExamples[r.promptId]?.length?serverExamples[r.promptId]:localExamples;return <details className="recap-expand" key={i}><summary className="recap-row"><span className="recap-n">{String(i+1).padStart(2,'0')}</span><span className="recap-work"><strong>{work?(lang==='ko'&&work.titleKo?work.titleKo:work.title):(r.title||t.noAnswer)}</strong><small>{p?.label[lang]}</small></span><b>+{r.points}</b><span className="recap-chevron">▾</span></summary><div className="recap-detail"><p>{p?.label[lang]}</p><p className="recap-reason">{r.rawAnswer?(lang==='ko'?'제출한 답: ':'Submitted: ')+r.rawAnswer:(lang==='ko'?(r.timedOut?'시간 종료로 제출하지 못했어.':'답을 제출하지 않았어.'):'No answer submitted.')}</p><h3>{lang==='ko'?'전체 정답 목록':'ALL KNOWN ANSWERS'}</h3><AnswerDirectory answers={examples} lang={lang}/></div></details>;})}</div>
         <div className="result-actions"><button className="action-button" onClick={share}><Clipboard size={16}/>{copied?t.copied:t.copy}</button><button className="secondary-button" onClick={()=>start(session.mode,true)}><RotateCcw size={16}/>{t.playAgain}</button><button className="text-button" onClick={home}>{t.back} →</button></div>
         <p className="warning-note">{t.local}</p>
       </section>:<section className="question-shell krillion-game-screen">
