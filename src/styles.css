@@ -862,11 +862,11 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
  top:32%!important;font-size:11px!important;animation:infernal-drop-counter 2s steps(8,end) both!important;
 }
 @keyframes infernal-camera-drop{
- 0%{transform:translateY(0) scale(1);filter:brightness(1)}
- 15%{transform:translateY(-4%) scale(1.05);filter:brightness(1.3)}
- 45%{transform:translateY(-25%) scale(1.22);filter:brightness(.75)}
- 75%{transform:translateY(-55%) scale(1.28);filter:brightness(.5)}
- 100%{transform:translateY(-74%) scale(1.18);filter:brightness(.66)}
+ 0%{transform:translateY(0);filter:brightness(1)}
+ 15%{transform:translateY(-4%);filter:brightness(1.15)}
+ 45%{transform:translateY(-12%);filter:brightness(.85)}
+ 75%{transform:translateY(-19%);filter:brightness(.7)}
+ 100%{transform:translateY(-22%);filter:brightness(.7)}
 }
 @keyframes infernal-world-shake{0%,100%{filter:brightness(1)}26%,37%{filter:brightness(2)}34%,48%{filter:brightness(.7)}}
 @keyframes infernal-speed-lines{0%,100%{opacity:1}25%,65%{opacity:1;transform:translateY(-65px) scaleY(1.8)}}
@@ -928,3 +928,6 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 .results-panel .answer-directory-item>b{flex:0 0 38px;text-align:right;color:#ffd392;font:700 13px 'Galmuri11',monospace}
 .answer-directory>small{display:block;color:#af96a2;line-height:1.6;margin-top:10px}
 @media(max-width:600px){.answer-directory-controls{grid-template-columns:minmax(0,1fr)}.answer-directory-tier{font-size:9px;padding:4px}.results-panel .answer-directory-item{padding:10px 7px}.results-panel .answer-directory-list{max-height:55dvh}}
+
+/* Preserve fixed camera framing throughout the descent: no zoom or scaling. */
+.krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{transform-origin:center center}
