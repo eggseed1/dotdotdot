@@ -183,18 +183,16 @@ export default function App(){
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     const typed=answer.trim();
     if(!typed){setFeedback(t.empty);return;}
-    const acceptedTypo=typoSuggestion?.typed===typed?typoSuggestion:null;
-    const submitted=acceptedTypo?acceptedTypo.title:typed;
-    const exact=exactCuratedAnswer(activePrompt.id,submitted);
-    if(exact){
+    const exact=exactCuratedAnswer(activePrompt.id,typed);
+    // A unique 1-2 character typo is accepted immediately. Never pick the first
+    // suggestion when several works tie: ambiguous titles stay unsubmitted.
+    const correction=exact?null:suggestSmallTypo(activePrompt.id,typed);
+    const resolved=exact||(correction?exactCuratedAnswer(activePrompt.id,correction.title):null);
+    if(resolved){
       submittingRef.current=true;
       setTypoSuggestion(null);
-      lock({promptId:activePrompt.id,workId:'editorial:'+activePrompt.id+':'+normalizeAnswer(exact.title),title:exact.title,titleKo:exact.titleKo,rawAnswer:typed,points:exact.points,tier:exact.tier});
+      lock({promptId:activePrompt.id,workId:'editorial:'+activePrompt.id+':'+normalizeAnswer(resolved.title),title:resolved.title,titleKo:resolved.titleKo,rawAnswer:typed,points:resolved.points,tier:resolved.tier});
       return;
-    }
-    if(!acceptedTypo){
-      const suggestion=suggestSmallTypo(activePrompt.id,typed);
-      if(suggestion){setTypoSuggestion(suggestion);setFeedback('');return;}
     }
     setTypoSuggestion(null);
     setFeedback(lang==='ko'?`“${typed}”은 정답이 아닙니다.`:`“${typed}” is not a correct answer.`);
