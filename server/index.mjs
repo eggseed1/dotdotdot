@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
+import {searchMusicBrainz,exactLiveMatches} from './musicbrainz-live.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
@@ -108,23 +109,32 @@ tick.unref();
 
 const mimetypes={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.json':'application/json','.png':'image/png','.woff2':'font/woff2'};
 const server=http.createServer((req,res)=>{
+  const origin=req.headers.origin||'';
+  if(/^https:\/\/(eggseed1\.github\.io|dotdotdot-7yot\.onrender\.com)$/.test(origin)){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');}
+  if(req.method==='OPTIONS'){res.writeHead(204,{'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'});res.end();return;}
   const parsedUrl=new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname=parsedUrl.pathname;
   if(pathname==='/api/suggest' && req.method==='GET'){
     const kind=parsedUrl.searchParams.get('kind'),q=(parsedUrl.searchParams.get('q')||'').slice(0,100);
     const allowed=new Set(['music','film','literature','anime','games']);
-    const suggestions=allowed.has(kind)&&q.trim().length>=2?sourceCatalog?.suggest(kind,q,7)||[]:[];
-    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-    res.end(JSON.stringify({suggestions:suggestions.map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));return;
+    const local=allowed.has(kind)&&q.trim().length>=2?sourceCatalog.suggest(kind,q,7):[];
+    const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
+    if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
+    else respond();
+    return;
   }
   if(pathname==='/api/validate' && req.method==='POST'){
     let chunks='',bytes=0;
     req.on('data',chunk=>{bytes+=chunk.length;if(bytes>4096){req.destroy();return;}chunks+=chunk.toString('utf8');});
-    req.on('end',()=>{
+    req.on('end',async()=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
-      const found=sourceCatalog.lookup(prompt.kind,raw),valid=found.filter(w=>prompt.match(w));
+      let found=sourceCatalog.lookup(prompt.kind,raw);
+      if(!found.length&&prompt.kind==='music'){
+        try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
+      }
+      const valid=found.filter(w=>prompt.match(w));
       const response=found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
         !valid[0].verified?{status:'unverified'}:(()=>{
         const w=valid[0];
