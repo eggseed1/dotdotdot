@@ -17,6 +17,9 @@ import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidat
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
+const editorialAnswers=JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8'));
+const normEditorial=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],points:Math.min(100,10+5*i),tier:Math.min(7,Math.max(1,Math.ceil((10+5*i)/15)))};};
 const lineupFor=date=>{const ids=dailyEditorial[date];return Array.isArray(ids)&&ids.length===7&&new Set(ids).size===7&&ids.every(id=>promptById.has(id))?ids:null;};
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
 const ratingsFile = path.join(dataDir, 'guest-ratings.json');
@@ -140,6 +143,12 @@ const server=http.createServer((req,res)=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
+      if(editorialAnswers[prompt.id]){
+        const match=editorialMatch(prompt.id,raw);
+        res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+        res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title},points:match.points,tier:match.tier,provisional:true,rarityMethod:'editorial-order-provisional'}:{status:'missing',reason:'not-in-curated-answer-set'}));
+        return;
+      }
       // The published per-question answer set is authoritative and fast.
       const prepared=sourceCatalog.promptLookup(prompt.id,prompt.kind,raw);
       if(prepared.length){
@@ -226,7 +235,7 @@ const server=http.createServer((req,res)=>{
     const date=String(parsedUrl.searchParams.get('date')||todayKey());
     const ids=lineupFor(date);
     const coverage=new Map(sourceCatalog.promptCoverage().map(x=>[x.promptId,x]));
-    const questions=(ids||[]).map(promptId=>({promptId,answers:coverage.get(promptId)?.answers||0}));
+    const questions=(ids||[]).map(promptId=>({promptId,answers:editorialAnswers[promptId]?.answers?.length||coverage.get(promptId)?.answers||0}));
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
     res.end(JSON.stringify({date,questions,ready:Boolean(ids),editorial:true,revision:'manual-daily-v1'}));
     return;
@@ -235,6 +244,11 @@ const server=http.createServer((req,res)=>{
     const promptId=String(parsedUrl.searchParams.get('promptId')||'');
     const prompt=promptById.get(promptId);
     if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
+    if(editorialAnswers[promptId]){
+      const examples=editorialAnswers[promptId].answers.map((title,i)=>({title,source:'editorial-verified',points:Math.min(100,10+5*i)}));
+      res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+      res.end(JSON.stringify({examples,complete:true}));return;
+    }
     const prepared=sourceCatalog.promptExamples(promptId,80);
     const imported=prepared.length?prepared:sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w));
     const curated=eligible(prompt).slice(0,24);
