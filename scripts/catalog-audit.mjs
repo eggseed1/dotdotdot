@@ -8,5 +8,5 @@ try{
  const summaries=store.stats();
  const total=summaries.reduce((n,r)=>n+r.entries,0);
  const distribution=store.db.prepare("SELECT kind,COUNT(*) total,SUM(CASE WHEN verified=1 THEN 1 ELSE 0 END) verified,SUM(CASE WHEN length(genres)>2 THEN 1 ELSE 0 END) tagged,SUM(CASE WHEN format IS NOT NULL AND format!='' THEN 1 ELSE 0 END) formatted FROM works GROUP BY kind ORDER BY kind").all();
- console.log(JSON.stringify({db:dbPath,total,distribution,sources:summaries,warning:total===0?'Database empty: import a dataset on your persistent volume.':null},null,2));
+ console.log(JSON.stringify({db:dbPath,total,distribution,promptCoverage:store.promptCoverage(),sources:summaries,warning:total===0?'Database empty: import a dataset on your persistent volume.':null},null,2));
 }finally{store.close();}
