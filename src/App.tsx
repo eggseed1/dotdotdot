@@ -212,4 +212,3 @@ export default function App(){
     {infoOpen&&<div className="modal-backdrop" onClick={()=>setInfoOpen(false)} role="presentation"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setInfoOpen(false)} aria-label={t.close}><X size={20}/></button><div className="modal-pixel"><Pixel pattern={pixelRecord}/></div><p className="eyebrow">larper101 // PREVIEW BUILD</p><h2 id="modal-heading">{t.infoTitle}</h2><p>{t.infoBody}</p><p className="source-stats">{catalog.length} {lang==='ko'?'개 샘플 항목':'HAND-CURATED DEMO ENTRIES'} · 5 {lang==='ko'?'개 분야':'MEDIUMS'}</p><button className="action-button" onClick={()=>setInfoOpen(false)}>{t.close}<ArrowRight size={16}/></button></div></div>}
   </div>;
 }
-function MediaGlyph({kind}:{kind:Kind}){const Icon=kind==='any'?Star:mediaIcons[kind];return <Icon size={15} strokeWidth={2.2}/>;}
