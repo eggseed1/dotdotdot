@@ -11,7 +11,7 @@ import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
 import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare } from './lib/sharing';
-import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
+import type { GameSession, Lang, Mode, RoundResult } from './lib/types';
 
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
