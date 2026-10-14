@@ -119,8 +119,13 @@
       "Carnival Phantasm",
       "Bobobo-bo Bo-bobo",
       "Panty & Stocking with Garterbelt",
-      "Nyaruko: Crawling with Love!"
-    ]
+      "Nyaruko: Crawling with Love!",
+      "Miami Guns",
+      "Kanokon",
+      "Zoku Sayonara Zetsubou-Sensei",
+      "Cosplay Complex"
+    ],
+    "source": "https://www.animenation.net/blog/ask-john-what-are-some-major-anime-parodies/"
   },
   "l-fictional-book": {
     "type": "fictional_book",
@@ -134,9 +139,18 @@
       "The Junior Woodchucks' Guidebook",
       "The Book of Eibon",
       "The Pnakotic Manuscripts",
-      "The Book of Sand"
+      "The Book of Sand",
+      "The Approach to Al-Mu'tasim",
+      "April March",
+      "The Book of Bokonon",
+      "The Orange Catholic Bible",
+      "The Azhar Book"
     ],
-    "source": "https://en.wikipedia.org/wiki/Imaginary_book"
+    "source": "https://en.wikipedia.org/wiki/Imaginary_book",
+    "additionalSources": [
+      "https://imaginedlibrary.com/shelf/books-within-books/",
+      "https://www.borges.pitt.edu/documents/0108.pdf"
+    ]
   },
   "f-title-song": {
     "type": "film",
