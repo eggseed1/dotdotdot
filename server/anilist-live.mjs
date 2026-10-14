@@ -1,3 +1,4 @@
+import {evidenceRarity} from './evidence-rarity.mjs';
 const cache=new Map(),TTL=6*60*60*1000;
 const GQL=`query($search:String,$perPage:Int){Page(perPage:$perPage){media(search:$search,type:ANIME){id title{romaji english native}startDate{year}seasonYear format genres tags{name rank}popularity favourites countryOfOrigin isAdult}}}`;
 function normalize(m){
@@ -28,8 +29,4 @@ export function exactAniList(raw,items){
  const key=norm(raw);
  return items.filter(w=>[w.title,...w.aliases].some(v=>norm(v)===key));
 }
-export function aniListScore(popularity){
- if(!Number.isFinite(popularity)||popularity<=0)return {points:44,tier:5,unrated:true};
- const p=Math.max(10,Math.min(90,Math.round(92-12*Math.log10(popularity))));
- return {points:p,tier:p>=76?8:p>=65?7:p>=55?6:p>=45?5:p>=35?4:3,unrated:false};
-}
+export function aniListScore(count){return evidenceRarity(count,{typical:18000,ceiling:1200000,minimum:6});}
