@@ -270,3 +270,12 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .krillion-game-screen .skip-button{top:3px;font-size:10px}
 .krillion-game-screen .hell-bottom-copy{display:none}
 @media(max-width:700px){.krillion-game-screen .cinematic-play-stage>.hellscape{min-height:640px}.krillion-game-screen .cinematic-stage-top{top:16%;width:calc(100% - 28px);padding:20px 17px}.krillion-game-screen .cinematic-stage-top h1{font-size:clamp(14px,4vw,20px)}.krillion-hud{width:95%}.krillion-hud-block,.krillion-hud-score{padding:12px 9px;min-width:70px}.krillion-hud strong{font-size:12px}.krillion-hud small{font-size:6px}.krillion-round-pips span{width:11px;height:11px}.krillion-game-screen .hellscape .hell-character-zone{top:68%;height:105px;width:105px}.krillion-game-screen .hell-answer-ui.cinematic-answer-ui{padding:12px 10px 19px}.krillion-game-screen .submit-button{min-width:78px;font-size:8px}.krillion-game-screen #answer{height:53px;font-size:11px}.krillion-game-screen .submit-button{height:53px}}
+
+
+/* Use dedicated pixel-art city composition as one continuous scene. */
+.krillion-game-screen .hellscape .krillion-scene-decor{background-image:url('/pixel-city.svg');background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated}
+.krillion-game-screen .krillion-moon,.krillion-game-screen .krillion-city,.krillion-game-screen .krillion-street,.krillion-game-screen .krillion-road{display:none}
+.krillion-game-screen .krillion-stars{opacity:.3}
+.krillion-game-screen .hellscape .hell-world{opacity:0;transition:transform 1500ms cubic-bezier(.12,.74,.16,1),opacity 1100ms ease}
+.krillion-game-screen .hellscape.infernal-phase-2 .hell-world,.krillion-game-screen .hellscape.infernal-phase-3 .hell-world,.krillion-game-screen .hellscape.infernal-phase-4 .hell-world,.krillion-game-screen .hellscape.infernal-phase-5 .hell-world{opacity:.85}
+.krillion-game-screen .hellscape.infernal-phase-2 .krillion-scene-decor,.krillion-game-screen .hellscape.infernal-phase-3 .krillion-scene-decor,.krillion-game-screen .hellscape.infernal-phase-4 .krillion-scene-decor,.krillion-game-screen .hellscape.infernal-phase-5 .krillion-scene-decor{opacity:.23;transition:opacity 1300ms}
