@@ -24,7 +24,7 @@ try{
   let row;
   try{if(filename==='-'||filename.endsWith('.jsonl')||filename.endsWith('.ndjson'))row=JSON.parse(line);
     else{const columns=filename.endsWith('.tsv')?line.split('\t'):parseCsv(line);if(!header){header=columns;continue;}row=Object.fromEntries(header.map((k,i)=>[k,columns[i]]));}
-    const w={kind:row.kind,title:row.title,titleKo:row.titleKo||row.title_ko,creator:row.creator,year:row.year?Number(row.year):null,country:row.country,genres:parseList(row.genres),aliases:parseList(row.aliases),source,sourceId:String(row.sourceId||row.source_id||row.id||''),ratingCount:row.ratingCount==null&&row.rating_count==null?null:Number(row.ratingCount??row.rating_count),verified:row.verified===true||row.verified==='true'||row.verified===1||row.verified==='1',sourceUrl:row.sourceUrl||row.source_url};
+    const w={kind:row.kind,title:row.title,titleKo:row.titleKo||row.title_ko,creator:row.creator,year:row.year?Number(row.year):null,country:row.country,format:row.format||'',genres:parseList(row.genres),aliases:parseList(row.aliases),source,sourceId:String(row.sourceId||row.source_id||row.id||''),ratingCount:row.ratingCount==null&&row.rating_count==null?null:Number(row.ratingCount??row.rating_count),verified:row.verified===true||row.verified==='true'||row.verified===1||row.verified==='1',sourceUrl:row.sourceUrl||row.source_url};
     store.put(w);rows++;
   }catch(e){failed++;if(failed<=5)console.error('Skipped invalid record:',String(e.message||e));}
   if((rows+failed)%1000===0){store.commit();store.begin();}
