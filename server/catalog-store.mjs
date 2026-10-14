@@ -17,7 +17,7 @@ export function createCatalogStore(dbPath){
     creator TEXT, year INTEGER, country TEXT, genres TEXT NOT NULL DEFAULT '[]',
     aliases TEXT NOT NULL DEFAULT '[]', source TEXT NOT NULL, source_id TEXT NOT NULL,
     rating_count INTEGER, verified INTEGER NOT NULL DEFAULT 0, source_url TEXT,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(source,source_id)
+    format TEXT, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(source,source_id)
   );
   CREATE INDEX IF NOT EXISTS works_kind ON works(kind);
   CREATE INDEX IF NOT EXISTS works_title ON works(kind,title COLLATE NOCASE);
@@ -30,10 +30,11 @@ export function createCatalogStore(dbPath){
   CREATE INDEX IF NOT EXISTS gram_lookup ON work_grams(gram,work_id);
   CREATE TABLE IF NOT EXISTS source_attribution (source TEXT PRIMARY KEY, terms TEXT, attribution TEXT, permitted_at TEXT);
   `);
-  const insert=db.prepare(`INSERT INTO works(id,kind,title,title_ko,creator,year,country,genres,aliases,source,source_id,rating_count,verified,source_url)
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,title_ko=excluded.title_ko,
+  if(!db.prepare('PRAGMA table_info(works)').all().some(c=>c.name==='format'))db.exec('ALTER TABLE works ADD COLUMN format TEXT');
+  const insert=db.prepare(`INSERT INTO works(id,kind,title,title_ko,creator,year,country,genres,aliases,source,source_id,rating_count,verified,source_url,format)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,title_ko=excluded.title_ko,
   creator=excluded.creator,year=excluded.year,country=excluded.country,genres=excluded.genres,aliases=excluded.aliases,
-  rating_count=excluded.rating_count,verified=excluded.verified,source_url=excluded.source_url,updated_at=CURRENT_TIMESTAMP`);
+  rating_count=excluded.rating_count,verified=excluded.verified,source_url=excluded.source_url,format=excluded.format,updated_at=CURRENT_TIMESTAMP`);
   const clearGenres=db.prepare('DELETE FROM work_genres WHERE work_id=?');
   const clearAliases=db.prepare('DELETE FROM work_aliases WHERE work_id=?');
   const aliasInsert=db.prepare('INSERT OR IGNORE INTO work_aliases(work_id,alias_norm) VALUES(?,?)');
@@ -46,7 +47,7 @@ export function createCatalogStore(dbPath){
     const genres=[...new Set((w.genres||[]).map(s=>String(s).trim().toLowerCase()).filter(Boolean))];
     const aliases=(w.aliases||[]).filter(Boolean);
     const id=`${w.source}:${w.sourceId}`;
-    insert.run(id,w.kind,w.title,w.titleKo||null,w.creator||null,w.year??null,w.country||null,JSON.stringify(genres),JSON.stringify(aliases),w.source,w.sourceId,w.ratingCount??null,Number(Boolean(w.verified)),w.sourceUrl||null);
+    insert.run(id,w.kind,w.title,w.titleKo||null,w.creator||null,w.year??null,w.country||null,JSON.stringify(genres),JSON.stringify(aliases),w.source,w.sourceId,w.ratingCount??null,Number(Boolean(w.verified)),w.sourceUrl||null,w.format||null);
     clearGenres.run(id);for(const genre of genres)genreInsert.run(id,genre);
     clearAliases.run(id);clearGrams.run(id);indexAliases(id,{...w,aliases});
     return id;
@@ -126,4 +127,4 @@ export function createCatalogStore(dbPath){
   }
   return {db,put,begin,commit,rollback,stats,lookup,suggest,eligible,score,possible,close:()=>db.close()};
 }
-function hydrate(row){return {id:row.id,kind:row.kind,title:row.title,titleKo:row.title_ko,creator:row.creator,year:row.year,country:row.country,genres:JSON.parse(row.genres||'[]'),aliases:JSON.parse(row.aliases||'[]'),source:row.source,sourceId:row.source_id,ratingCount:row.rating_count,verified:Boolean(row.verified),sourceUrl:row.source_url};}
+function hydrate(row){return {id:row.id,kind:row.kind,title:row.title,titleKo:row.title_ko,creator:row.creator,year:row.year,country:row.country,genres:JSON.parse(row.genres||'[]'),aliases:JSON.parse(row.aliases||'[]'),source:row.source,sourceId:row.source_id,ratingCount:row.rating_count,format:row.format||'',verified:Boolean(row.verified),sourceUrl:row.source_url};}
