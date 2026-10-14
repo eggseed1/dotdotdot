@@ -357,3 +357,39 @@ accepted as exact answers without verification.
 
 Do not distribute proprietary RYM, Spotify or Bandcamp content or
 noncommercial MusicBrainz supplementary tags/ratings without suitable rights.
+
+
+## Build MusicBrainz catalog entirely inside GitHub Actions
+
+Go to [Actions → Build music catalog in the cloud](https://github.com/eggseed1/dotdotdot/actions/workflows/build-music-catalog.yml)
+and select **Run workflow**. No Oracle or PC downloads required.
+
+For the **first run**, use `mode=sample`, `limit=500`,
+`include_community_tags=false`, `deploy_pages=true`, and
+`publish_release=false`. Set repository
+**Settings → Secrets and variables → Actions → New repository secret**:
+`CATALOG_CONTACT_EMAIL` = a working address identifying this MusicBrainz API
+client. The sample builds ~500 real album entries, builds static search
+shards and, when small enough, deploys them directly to GitHub Pages.
+
+For experimental full database processing, use `mode=dump` and set
+`limit` to the desired album count (`0` means unlimited).
+This downloads official MusicBrainz core **onto the temporary GitHub runner**,
+not your PC, then processes the supported album and EP tables. The full
+snapshot + indexes can exhaust GitHub's free runner disk or time; there
+is no guarantee that this mode completes. Start with a bounded count,
+monitor Actions logs and free disk, and use an external bulk-processing
+solution if the entire database is too large.
+
+`include_community_tags=true` downloads the derived MusicBrainz snapshot
+for community-voted genres and user rating counts; **only enable this for
+noncommercial CC BY-NC-SA 3.0-compliant uses**, and retain required attribution
+and share-alike terms. This is not RYM or AOTY data. ListenBrainz is
+not yet integrated; do not describe its listener scores as available.
+
+The default `deploy_pages=true` deploys only if the built site is below
+900 MB; large archives are uploaded as short-lived GitHub Actions
+artifacts instead. Optional `publish_release` stores a small compressed
+catalog snapshot as a GitHub Release asset, **but current browser search
+does not load Release archives directly**. Neither the sample nor a
+bounded `dump` constitutes the entire MusicBrainz/Rym/AOTY catalog.
