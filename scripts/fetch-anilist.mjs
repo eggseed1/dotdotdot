@@ -7,14 +7,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 const args=process.argv.slice(2),opt=(name,def)=>{const i=args.indexOf(name);return i<0?def:args[i+1];};
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-const query=`query ($page:Int!,$perPage:Int!){Page(page:$page,perPage:$perPage){pageInfo{hasNextPage} media(type:ANIME,sort:ID){id title{romaji english native} synonyms startDate{year} countryOfOrigin genres studios(isMain:true){nodes{name}} stats{scoreDistribution{amount}} siteUrl}}}`;
+const query=`query ($page:Int!,$perPage:Int!){Page(page:$page,perPage:$perPage){pageInfo{hasNextPage} media(type:ANIME,sort:ID){id title{romaji english native} synonyms startDate{year} format countryOfOrigin genres studios(isMain:true){nodes{name}} stats{scoreDistribution{amount}} siteUrl}}}`;
 export function normalizeAniList(media){
  const title=media.title?.english||media.title?.romaji||media.title?.native;
  if(!media.id||!title)return null;
  const count=media.stats?.scoreDistribution?.reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0)||null;
  return {kind:'anime',sourceId:String(media.id),title,titleKo:/[가-힣]/.test(media.title?.native||'')?media.title.native:undefined,
   creator:media.studios?.nodes?.[0]?.name||'',year:media.startDate?.year||null,
-  country:({JP:'Japan',KR:'South Korea',CN:'China',TW:'Taiwan'})[media.countryOfOrigin]||'',
+  country:({JP:'Japan',KR:'South Korea',CN:'China',TW:'Taiwan'})[media.countryOfOrigin]||'',format:media.format||'',
   genres:media.genres||[],aliases:[media.title?.romaji,media.title?.english,media.title?.native,...(media.synonyms||[])].filter(Boolean),
   ratingCount:count,verified:true,sourceUrl:media.siteUrl||`https://anilist.co/anime/${media.id}`};
 }
