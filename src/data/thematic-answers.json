@@ -30,8 +30,7 @@
       "20th Century Women",
       "The 39 Steps",
       "One, Two, Three",
-      "District 9",
-      "The 5,000 Fingers of Dr. T"
+      "District 9"
     ]
   },
   "f-nonhuman-romance": {
@@ -45,14 +44,11 @@
       "The Little Mermaid",
       "Splash",
       "I Married a Monster from Outer Space",
-      "The Bride of Frankenstein",
       "Bicentennial Man",
-      "I'm a Cyborg, But That's OK",
-      "A.I. Artificial Intelligence",
       "Ex Machina",
-      "Lisa Frankenstein",
-      "The Man Who Fell to Earth"
-    ]
+      "Lisa Frankenstein"
+    ],
+    "source": "https://www.janusfilms.com/films/1838"
   },
   "f-after-death-protagonist": {
     "type": "film",
@@ -67,9 +63,7 @@
       "The Lovely Bones",
       "The Others",
       "Wristcutters: A Love Story",
-      "Defending Your Life",
-      "Dead Man",
-      "Uncle Boonmee Who Can Recall His Past Lives"
+      "Defending Your Life"
     ]
   },
   "g-fictional-corporation": {
@@ -98,18 +92,15 @@
       "Maliwan",
       "Dahl Corporation",
       "Vladof",
-      "Atlas",
-      "Cerberus",
       "Dexter Industries",
       "TranStar Corporation",
-      "Kronos Corporation",
       "Union Aerospace Corporation",
       "Weyland-Yutani Corporation",
       "RuptureFarms",
       "SoulStorm Brew",
-      "MomCorp",
       "Aperture Laboratories"
-    ]
+    ],
+    "source": "https://www.gamespot.com/articles/100-fictional-game-brands-and-logos/1100-6452901/"
   },
   "a-anime-parodies-anime": {
     "type": "anime",
@@ -139,16 +130,13 @@
       "The Theory and Practice of Oligarchical Collectivism",
       "The King in Yellow",
       "The Navidson Record",
-      "The Book of the New Sun",
       "The Princess Bride by S. Morgenstern",
-      "The Hitchhiker's Guide to the Galaxy",
       "The Junior Woodchucks' Guidebook",
-      "The Nine Gates of the Kingdom of Shadows",
       "The Book of Eibon",
       "The Pnakotic Manuscripts",
-      "The Book of Sand",
-      "A History of the World in 10½ Chapters"
-    ]
+      "The Book of Sand"
+    ],
+    "source": "https://en.wikipedia.org/wiki/Imaginary_book"
   },
   "f-title-song": {
     "type": "film",
@@ -166,12 +154,10 @@
       "Yellow Submarine",
       "Mamma Mia!",
       "I Wanna Hold Your Hand",
-      "The Killing Moon",
       "Love Me Tender",
       "The Crying Game",
-      "The Man Who Fell to Earth",
-      "Wild at Heart",
-      "Only Lovers Left Alive"
+      "Wild at Heart"
     ]
-  }
+  },
+  "_notes": "These lists are hand-curated candidates, not exhaustive or independently verified per entry. Do not assign empirical rarity from array order. Verify ambiguous plot claims before final acceptance."
 }
