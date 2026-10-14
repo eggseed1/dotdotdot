@@ -113,3 +113,23 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .pixel-landing-fineprint {font:10px 'DM Mono',monospace;color:#edc0a6;letter-spacing:.12em;margin-top:20px;}
 @media(max-width:540px) {.app-shell:has(.pixel-landing) .site-header {padding:10px 12px}.app-shell:has(.pixel-landing) .site-header .brand-name {font-size:12px}.pixel-landing{padding-top:100px;background-position:50% 50%}.pixel-landing-kicker{margin-bottom:10px}.pixel-landing-devil{width:175px;margin:16px auto 4px}.pixel-landing-title{font-size:clamp(23px,6.5vw,34px)}.pixel-landing-choices button{font-size:11px}.pixel-landing-start{font-size:14px;padding:18px 12px}}
 @media(prefers-reduced-motion:reduce){.pixel-landing-devil{animation:none}}
+
+
+/* Camera-follow infernal descent: layered, scrollable pixel world inspired by the
+   presentation mechanic of Krillion, with original hell landmarks and styling. */
+.hell-world{position:absolute;inset:0;z-index:1;pointer-events:none;transition:transform 1250ms cubic-bezier(.18,.75,.2,1);will-change:transform}
+.hell-world-layer{position:absolute;left:5%;right:9%;height:4px;border-top:3px dashed #b9654f;opacity:.85;transform:translateY(0);image-rendering:pixelated}
+.hell-world-depth{position:absolute;top:-26px;left:2%;font:8px var(--pixel);color:#ffc793;text-shadow:2px 2px #24040b}
+.hell-world-layer>strong{position:absolute;right:2%;top:7px;color:#f6b480;font:7px var(--pixel);opacity:.8}
+.hell-world-feature{position:absolute;top:17px;left:18%;display:flex;gap:5px;align-items:end;height:55px;filter:drop-shadow(4px 4px 0 #17040e)}
+.hell-world-feature i{display:block;width:20px;height:24px;background:#723b48;clip-path:polygon(0 35%,35% 35%,35% 0,70% 0,70% 35%,100% 35%,100% 100%,0 100%)}
+.hell-world-feature i:nth-child(2){height:44px;width:29px;background:#9a4b46}
+.hell-world-feature i:nth-child(3){height:18px;background:#62334b}
+.hell-world-feature.feature-1 i{background:#b65a35}
+.hell-world-feature.feature-2 i,.hell-world-feature.feature-4 i{background:#6a5476}
+.hell-world-feature.feature-5 i{background:#d09248}
+.hell-world-ember{position:absolute;height:4px;width:4px;background:#ffbd6d;box-shadow:4px -4px 0 #b74e31;animation:hell-world-glow 1.9s steps(2,end) infinite}
+@keyframes hell-world-glow{0%,100%{opacity:.2}50%{opacity:.9}}
+.hellscape .hell-character-zone{z-index:4}
+.hellscape .hell-depth,.hellscape .hell-headline,.hellscape .hell-route,.hellscape .hell-bottom-copy{z-index:5}
+@media(prefers-reduced-motion:reduce){.hell-world{transition:none}.hell-world-ember{animation:none}}
