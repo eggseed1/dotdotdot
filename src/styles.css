@@ -902,3 +902,29 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 @keyframes fall-meter-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @media(max-width:700px){.infernal-fall-depth{top:37%}.infernal-fall-depth strong{font-size:clamp(35px,12vw,64px)}}
 @media(prefers-reduced-motion:reduce){.infernal-fall-overlay{animation:none;display:none}}
+
+
+/* Full answer list, available after finishing all seven questions */
+.answer-directory{min-width:0;width:100%;margin-top:12px}
+.answer-directory-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;font-size:12px}
+.answer-directory-head strong{color:#ffe4aa}
+.answer-directory-head strong span{font-weight:400;color:#c7a7ab;margin-left:6px}
+.answer-directory-head>span,.answer-directory-count{font-size:10px;color:#b99caa}
+.answer-directory-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(118px,155px);gap:8px;margin:12px 0}
+.answer-directory-controls input,.answer-directory-controls select{width:100%;min-width:0;box-sizing:border-box;background:#180c20;color:#ffeac8;border:2px solid #87556c;border-radius:0;padding:10px;font:12px 'Galmuri11','Noto Sans KR',sans-serif}
+.answer-directory-controls input:focus-visible,.answer-directory-controls select:focus-visible{outline:2px solid #ffc37c;outline-offset:2px}
+.results-panel .answer-directory-list{display:flex!important;flex-direction:column;gap:5px;max-height:440px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:3px 5px 3px 0}
+.results-panel .answer-directory-item{display:flex;gap:8px;align-items:center;min-width:0;padding:10px 12px;background:#280f20;border:1px solid #6d3345;flex-wrap:nowrap!important}
+.answer-directory-title{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px;overflow-wrap:anywhere}
+.results-panel .answer-directory-title strong{font-size:12px;color:#f8e7de}
+.results-panel .answer-directory-title small{font-size:10px;color:#a98e9a}
+.answer-directory-tier{flex:0 0 auto;padding:5px 7px;border:1px solid #986d8b;font-size:10px;color:#dfb8c4;background:#372037}
+.answer-directory-tier--10{color:#ddd1ca;border-color:#655a64}
+.answer-directory-tier--15{color:#9ed5d1;border-color:#45787b}
+.answer-directory-tier--30{color:#d0b6ff;border-color:#7455a5}
+.answer-directory-tier--60{color:#ffe2a1;border-color:#a37636}
+.answer-directory-tier--85{color:#ffb18b;border-color:#ab5845}
+.answer-directory-tier--100{color:#ffdf88;border-color:#f4bc60;background:#612449}
+.results-panel .answer-directory-item>b{flex:0 0 38px;text-align:right;color:#ffd392;font:700 13px 'Galmuri11',monospace}
+.answer-directory>small{display:block;color:#af96a2;line-height:1.6;margin-top:10px}
+@media(max-width:600px){.answer-directory-controls{grid-template-columns:minmax(0,1fr)}.answer-directory-tier{font-size:9px;padding:4px}.results-panel .answer-directory-item{padding:10px 7px}.results-panel .answer-directory-list{max-height:55dvh}}
