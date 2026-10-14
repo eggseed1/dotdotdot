@@ -9,7 +9,7 @@ import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutoco
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
-import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
+import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare } from './lib/sharing';
 import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
 
@@ -165,7 +165,7 @@ export default function App(){
           <Hellscape lang={lang} score={0} previewDepth={0}>
             <div className="krillion-hud home-hud">
               <div className="krillion-hud-block"><small>{lang==='ko'?'깊이':'DEPTH'}</small><strong>0m</strong></div>
-              <div className="krillion-hud-round"><div className="krillion-round-pips">{Array.from({length:ROUNDS},(_,i)=><span key={i} className={i===0?'active':''}/>)}</div><small>{lang==='ko'?'7개의 관문':'7 SCENES'}</small></div>
+              <div className="krillion-hud-round"><div className="krillion-round-pips">{Array.from({length:ROUNDS},(_,i)=><span key={i} className={i===0?'active':''}/>)}</div></div>
               <div className="krillion-hud-score"><small>{lang==='ko'?'점수':'SCORE'}</small><strong>0</strong></div>
             </div>
             <div className="cinematic-stage-top home-stage-title">
@@ -197,7 +197,7 @@ export default function App(){
       </section>:<section className="question-shell krillion-game-screen">
         <div className="cinematic-play-stage"><button type="button" className="scene-back-button" onClick={home} aria-label={lang==='ko'?'홈으로':'Back to home'}><ArrowLeft size={16}/><span>{lang==='ko'?'나가기':'EXIT'}</span></button><Hellscape lang={lang} score={activeScore} previewDepth={session.state==='play'?Math.min(680,answer.trim().length*27):0}>
           <div className="krillion-hud"><div className="krillion-hud-block"><small>{lang==='ko'?'깊이':'DEPTH'}</small><strong>{(activeScore*10).toLocaleString()}m</strong></div><div className="krillion-hud-round"><div className="krillion-round-pips">{Array.from({length:ROUNDS},(_,i)=><span key={i} className={i<=session.index?'active':''}/>)}</div><small>{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</small></div><div className="krillion-hud-score"><small>{lang==='ko'?'점수':'SCORE'}</small><strong>{activeScore}</strong></div></div>
-          <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><div className="cinematic-stage-kind">{activePrompt?kindNames[activePrompt.kind as Exclude<Kind,'any'>]?.[lang]:''} / {activePrompt?.badge[lang]}</div><h1>{activePrompt?.label[lang]}</h1></div>
+          <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><h1>{activePrompt?.label[lang]}</h1></div>
           {session.state==='play'&&<div className="hell-answer-ui cinematic-answer-ui"><div className="answer-card">
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
             <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={e=>autocomplete.onKeyDown(e,setAnswer,selected=>{void submit(undefined,selected);})}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
