@@ -1,6 +1,6 @@
 import type {ReactNode,CSSProperties} from 'react';
 import devilArt from '../assets/devil-original.svg';
-import infernalCity from '../assets/hell-cathedral-v2.svg';
+import infernalCity from '../assets/hell-wasteland.svg';
 import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
 
