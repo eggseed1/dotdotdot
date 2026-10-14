@@ -177,7 +177,7 @@ const server=http.createServer((req,res)=>{
       for(const w of valid){
         const storedSource=sourceNames[w.source];
         const sourceId=String(w.id||'').split(':').slice(1).join(':');
-        if(!storedSource||!sourceId||!w.verified||!w.title)continue;
+        if(!storedSource||!sourceId||!w.verified||!w.title||w.kind==='anime')continue; // Preserve AniList format until the catalog schema supports it.
         try{sourceCatalog.put({kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country,
           genres:w.genres,aliases:w.aliases,source:storedSource,sourceId,ratingCount:w.ratingCount,
           sourceUrl:w.sourceUrl,verified:true});}catch{/* Read-only data volume: live verification still works. */}
@@ -187,7 +187,8 @@ const server=http.createServer((req,res)=>{
         !chosen.verified?{status:'unverified',reason:'source-not-verified'}:(()=>{
         const w=chosen;
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
-        const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        const counted=hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):null;
+        const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):counted&&counted.points>0?counted:{points:44,tier:5};
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
           points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='vndb-live'?'vndb-votes-provisional':w.source==='anilist-live'?'anilist-popularity-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
