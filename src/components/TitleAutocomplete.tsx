@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState,type KeyboardEvent} from 'react';
 import {catalog} from '../data/catalog';
 import {suggestWorks} from '../lib/title-match.mjs';
+import {staticCatalogMatches} from '../lib/static-catalog';
 import type {Kind,Lang} from '../lib/types';
 
 type Item={id:string;kind:string;title:string;titleKo?:string;creator?:string;year?:number;source?:string};
@@ -19,8 +20,9 @@ export function useTitleAutocomplete(value:string,kind:Kind,lang:Lang,enabled=tr
   setRemote([]);setOpen(true);
   const controller=new AbortController();
   const timer=window.setTimeout(()=>{
+   staticCatalogMatches(value,kind,7).then(items=>{if(!controller.signal.aborted&&items.length)setRemote(items);}).catch(()=>{});
    fetch(`${apiOrigin()}/api/suggest?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(value.slice(0,90))}`,{signal:controller.signal})
-    .then(res=>res.ok?res.json():null).then(data=>{if(data?.suggestions)setRemote(data.suggestions);}).catch(()=>{});
+    .then(res=>res.ok?res.json():null).then(data=>{if(data?.suggestions)setRemote(current=>{const merged=[...current,...data.suggestions];return merged.filter((w,i)=>merged.findIndex(x=>x.id===w.id)===i);});}).catch(()=>{});
   },180);
   return ()=>{window.clearTimeout(timer);controller.abort();};
  },[enabled,value,kind]);
