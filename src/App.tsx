@@ -130,7 +130,7 @@ export default function App(){
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     if(!entry.trim()){setFeedback(t.empty);return;}
     // Never let the tiny bundled demo override the live film/anime/game catalog.
-    const serverKind=activePrompt.kind!=='literature';
+    const serverKind=true;
     if(serverKind){
       try{
         const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
