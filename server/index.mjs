@@ -19,7 +19,7 @@ const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
 const editorialAnswers={...JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8')),...JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-answers.json'),'utf8'))};
 const normEditorial=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
-const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],points:Math.min(100,10+5*i),tier:Math.min(7,Math.max(1,Math.ceil((10+5*i)/15)))};};
+const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],points:44,tier:4};};
 const lineupFor=date=>{const ids=dailyEditorial[date];return Array.isArray(ids)&&ids.length===7&&new Set(ids).size===7&&ids.every(id=>promptById.has(id))?ids:null;};
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
 const ratingsFile = path.join(dataDir, 'guest-ratings.json');
@@ -144,9 +144,14 @@ const server=http.createServer((req,res)=>{
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
       if(editorialAnswers[prompt.id]){
-        const match=editorialMatch(prompt.id,raw);
+        let match=editorialMatch(prompt.id,raw);
+        // Title-pattern prompts can safely accept additional already verified database entries.
+        if(!match&&prompt.id==='f-title-number'){
+          const work=sourceCatalog.lookup('film',raw).find(w=>w.verified&&/[0-9０-９]/u.test(w.title));
+          if(work)match={title:work.title,points:44,tier:4};
+        }
         res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-        res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title},points:match.points,tier:match.tier,provisional:true,rarityMethod:'editorial-order-provisional'}:{status:'missing',reason:'not-in-curated-answer-set'}));
+        res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title},points:match.points,tier:match.tier,provisional:true,rarityMethod:'editorial-unranked-provisional'}:{status:'missing',reason:'not-in-curated-answer-set'}));
         return;
       }
       // The published per-question answer set is authoritative and fast.
@@ -245,7 +250,7 @@ const server=http.createServer((req,res)=>{
     const prompt=promptById.get(promptId);
     if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
     if(editorialAnswers[promptId]){
-      const examples=editorialAnswers[promptId].answers.map((title,i)=>({title,source:'editorial-verified',points:Math.min(100,10+5*i)}));
+      const examples=editorialAnswers[promptId].answers.map((title,i)=>({title,source:'editorial-verified',points:44}));
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
       res.end(JSON.stringify({examples,complete:true}));return;
     }
