@@ -187,6 +187,17 @@ const server=http.createServer((req,res)=>{
     const players=Object.entries(ratings).filter(([,v])=>Number.isFinite(v.rating)&&v.played>0).map(([id,v])=>({id:id.slice(0,8),name:v.name,rating:v.rating,played:v.played,wins:v.wins||0})).sort((a,b)=>b.rating-a.rating).slice(0,100);
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
   }
+  if(pathname==='/api/examples' && req.method==='GET'){
+    const promptId=String(parsedUrl.searchParams.get('promptId')||'');
+    const prompt=promptById.get(promptId);
+    if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
+    const imported=sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w)).slice(0,24);
+    const curated=eligible(prompt).slice(0,24);
+    const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i).slice(0,24);
+    const examples=combined.map(w=>({title:w.title,titleKo:w.titleKo||'',creator:w.creator||'',year:w.year||0,source:w.source||'curated-demo',ratingCount:w.ratingCount??null}));
+    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({examples,complete:false}));
+    return;
+  }
   if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),liveSearch:{music:{provider:'MusicBrainz',enabled:false},film:{provider:'Wikidata',enabled:true,coverage:'live-search-not-exhaustive'},anime:{provider:'AniList',enabled:true,coverage:'live-search-not-exhaustive'},games:{providers:['VNDB','Wikidata'],enabled:true,coverage:'live-search-not-exhaustive'},literature:{provider:'imported-catalog',enabled:true,coverage:'local-only'}},catalogComplete:false,coverageVerified:false,tmdbConfigured:tmdbEnabled,live:true}));return;}
   if(/^\/api\/matches\/[A-Za-z0-9]{12}$/.test(pathname)){const id=pathname.split('/').pop();const item=completedMatches[id];res.writeHead(item?200:404,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(item||{error:'not_found'}));return;}
   if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({ok:true,players:clients.size,matches:matches.size}));return;}
