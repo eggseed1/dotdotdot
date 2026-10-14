@@ -16,17 +16,23 @@ export function Hellscape({ score = 0, opponentScore, lang, compact = false, opp
   const opposingDepth = Math.max(0, Math.min(7000, (opponentScore ?? 0) * 10));
   const phase = Math.min(5, layers.filter(l => depth >= l.at).length - 1);
   const current = layers[phase];
-  const cameraY = 90 - depth * 0.18;
+  // Camera follows the devil as layers scroll past; CSS interpolates depth changes.
+  const cameraY = 115 - depth * 0.18;
+  const sceneProgress=depth/7000;
   const landmarks = layers.map((layer,i)=>({ ...layer, color:['#a75a43','#bd6b43','#775469','#7b454b','#49315c','#d08b49'][i] }));
   return <div className={`hellscape ${compact ? 'hellscape--compact' : ''} infernal-phase-${phase}`} role="img" aria-label={lang === 'ko' ? `악마가 지옥 ${depth}미터까지 내려왔습니다` : `Devil has descended ${depth} meters into hell`}>
     <div className="hell-backdrop" style={{ backgroundImage: `url(${hellBackdrop})`, transform: `translate3d(0,${Math.min(0, -depth / 95)}px,0) scale(1.22)` }} />
     <div className="hell-pixel-sky" />
+    <div className="hell-scene-overlay" style={{opacity:Math.min(.72,sceneProgress*.68)}} />
+    <div className="hell-speedlines" aria-hidden="true">{Array.from({length:12},(_,i)=><i key={i} style={{left:`${7+(i*17)%86}%`,animationDelay:`-${i*.17}s`,height:`${15+(i%4)*17}px`}} />)}</div>
     <div className="hell-world" style={{transform:`translate3d(0,${cameraY}px,0)`}}>
-      {landmarks.map((layer,i)=><div className="hell-world-layer" key={layer.at} style={{top:`${layer.at*.18}px`,borderColor:layer.color}}><span className="hell-world-depth">▼ {layer.at.toLocaleString()}m</span><strong>{layer[lang]}</strong><div className={`hell-world-feature feature-${i}`}><i/><i/><i/></div></div>)}
+      {landmarks.map((layer,i)=><div className="hell-world-layer" key={layer.at} style={{top:`${layer.at*.18}px`,borderColor:layer.color}}><span className="hell-world-depth">▼ {layer.at.toLocaleString()}m</span><strong>{layer[lang]}</strong><div className={`hell-world-feature feature-${i}`}><i/><i/><i/><i/><i/></div><div className={`hell-biome hell-biome-${i}`}><span/><span/><span/><span/><span/><span/></div></div>)}
       {Array.from({length:26},(_,i)=><div className="hell-world-ember" key={i} style={{top:`${80+i*49}px`,left:`${6+(i*37)%85}%`,animationDelay:`-${(i%7)*.41}s`}}/>)}
     </div>
     <div className="hell-particle hell-particle-a">✦</div><div className="hell-particle hell-particle-b">✧</div><div className="hell-particle hell-particle-c">+</div>
     <div className="hell-headline"><span>▼ {lang === 'ko' ? '지옥 탐험 중' : 'DESCENDING INTO HELL'}</span><strong>{current[lang]}</strong><small className="hell-rank-label">{rank.symbol} {rank[lang]} · {rank.division}</small></div>
+    <div className="hell-foreground-ridge ridge-left" />
+    <div className="hell-foreground-ridge ridge-right" />
     <div className="hell-character-zone">
       <div className="hell-character-halo" />
       <img className="hell-character" src={devilArt} draggable="false" alt={lang === 'ko' ? '빨간 픽셀 악마' : 'Red pixel devil adventurer'} />
