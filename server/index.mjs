@@ -172,8 +172,9 @@ const server=http.createServer((req,res)=>{
       }
       // The published per-question answer set is authoritative and fast.
       const prepared=sourceCatalog.promptLookup(prompt.id,prompt.kind,raw);
-      if(prepared.length){
-        const w=prepared[0];
+      const exactPrepared=prepared.filter(w=>[w.title,w.titleKo,...(Array.isArray(w.aliases)?w.aliases:[])].some(name=>name&&normEditorial(name)===normEditorial(raw)));
+      if(exactPrepared.length){
+        const w=exactPrepared[0];
         res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
         res.end(JSON.stringify({status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,
           creator:w.creator,year:w.year,country:w.country},points:w.points,tier:w.tier,
