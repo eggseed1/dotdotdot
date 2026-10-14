@@ -393,3 +393,22 @@ artifacts instead. Optional `publish_release` stores a small compressed
 catalog snapshot as a GitHub Release asset, **but current browser search
 does not load Release archives directly**. Neither the sample nor a
 bounded `dump` constitutes the entire MusicBrainz/Rym/AOTY catalog.
+
+
+## Grow and inspect the real catalog
+
+The SQLite catalog must live on a persistent disk. For Render use `CATALOG_DB=/data/catalog.sqlite` and run imports in an environment where `/data` is mounted. A fresh container filesystem is not persistent.
+
+```bash
+# Check the live disk for records and metadata completeness
+npm run catalog:audit -- --db /data/catalog.sqlite
+
+# Import up to 1,000 AniList records into that same database.
+# Increase --anime-pages gradually and respect upstream usage limits.
+npm run catalog:bootstrap -- --anime-pages 20 --db /data/catalog.sqlite
+
+# Optional TMDB movie import. Requires permitted TMDB API credentials.
+TMDB_READ_TOKEN=YOUR_TOKEN npm run catalog:bootstrap -- --anime-pages 0 --movies --movie-from 1990 --movie-to 1999 --db /data/catalog.sqlite
+```
+
+The bootstrap script does not automatically run on deployment. Avoid heavy API imports at server startup. TMDB use requires appropriate API authorization and attribution; AniList use is subject to its API terms and rate limits. Movie country and anime format coverage remain source-dependent. `/api/catalog/status` exposes current import totals, and the postgame examples endpoint reads the same catalog. Live lookup may find titles even if the import count is zero, but it is not a complete database.
