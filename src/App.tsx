@@ -7,6 +7,7 @@ import { Hellscape } from './components/Hellscape';
 import { AnswerDirectory } from './components/AnswerDirectory';
 import thematicAliases from './data/thematic-aliases-ko.json';
 import thematicAnswers from './data/thematic-answers.json';
+import thematicRarity from './data/thematic-rarity.json';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
@@ -53,6 +54,20 @@ const suggestSmallTypo=(promptId:string,raw:string):TypoSuggestion|null=>{
   }
  }
  return best&&!ambiguous?{typed:raw.trim(),title:best.title,display:best.display}:null;
+};
+const exactCuratedAnswer=(promptId:string,input:string)=>{
+ const list=(thematicAnswers as Record<string,{answers?:string[]}>)[promptId]?.answers||[];
+ const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
+ const wanted=normalizeAnswer(input);
+ if(!wanted)return null;
+ const matches=list.filter(title=>[title,...(aliases?.[title]||[])].some(a=>normalizeAnswer(a)===wanted));
+ if(matches.length!==1)return null;
+ const title=matches[0];
+ const override=(thematicRarity.overrides as Record<string,Record<string,string>>)[promptId]?.[title]||thematicRarity.defaults.tier;
+ const tierKey=(thematicRarity.aliases as Record<string,string>)[override]||override;
+ const idx=thematicRarity.tiers.findIndex(t=>t.key===tierKey);
+ const tier=idx<0?2:idx;
+ return {title,titleKo:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||'',points:thematicRarity.tiers[tier].points,tier:5-tier};
 };
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
@@ -177,6 +192,14 @@ export default function App(){
     if(!entry.trim()){setFeedback(t.empty);return;}
     if(submittingRef.current)return;
     submittingRef.current=true;
+    // Curated daily answers are matched LOCALLY first. Stale Render responses may never
+    // swap a submitted title for the first unrelated server/catalog record.
+    const exact=exactCuratedAnswer(activePrompt.id,entry.trim());
+    if(exact){
+      lock({promptId:activePrompt.id,workId:'editorial:'+activePrompt.id+':'+normalizeAnswer(exact.title),title:exact.title,titleKo:exact.titleKo,rawAnswer:answer.trim(),points:exact.points,tier:exact.tier});
+      submittingRef.current=false;
+      return;
+    }
     // Never let the tiny bundled demo override the live film/anime/game catalog.
     const serverKind=true;
     if(serverKind){
