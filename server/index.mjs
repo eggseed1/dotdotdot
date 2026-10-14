@@ -18,11 +18,13 @@ import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidat
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
 const editorialAnswers={...JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8')),...JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-answers.json'),'utf8'))};
+const editorialAliases=JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-aliases-ko.json'),'utf8'));
+const localizedAnswer=(id,title)=>({titleKo:editorialAliases[id]?.[title]?.[0]||'',aliases:editorialAliases[id]?.[title]||[]});
 const editorialRarity=JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-rarity.json'),'utf8'));
 const rarityTiers=new Map(editorialRarity.tiers.map((t,i)=>[t.key,{...t,tier:5-i}]));
 const editorialScore=(id,title)=>{const previousKey=editorialRarity.overrides[id]?.[title]||editorialRarity.defaults.tier;const key=editorialRarity.aliases?.[previousKey]||previousKey;const t=rarityTiers.get(key)||rarityTiers.get('schooler');return {points:t.points,tier:t.tier,rarityCategory:t.key,rarityLabelKo:t.labelKo,rarityLabelEn:t.labelEn,rarityMethod:editorialRarity.method,rarityReviewed:Boolean(editorialRarity.overrides[id]?.[title])};};
 const normEditorial=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
-const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],...editorialScore(id,list[i])};};
+const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw)||(editorialAliases[id]?.[title]||[]).some(alias=>normEditorial(alias)===normEditorial(raw)));return i<0?null:{title:list[i],...localizedAnswer(id,list[i]),...editorialScore(id,list[i])};};
 const lineupFor=date=>{const ids=dailyEditorial[date];return Array.isArray(ids)&&ids.length===7&&new Set(ids).size===7&&ids.every(id=>promptById.has(id))?ids:null;};
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
 const ratingsFile = path.join(dataDir, 'guest-ratings.json');
@@ -165,7 +167,7 @@ const server=http.createServer((req,res)=>{
           }
         }
         res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-        res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title},points:match.points,tier:match.tier,provisional:true,rarityCategory:match.rarityCategory,rarityLabelKo:match.rarityLabelKo,rarityLabelEn:match.rarityLabelEn,rarityReviewed:match.rarityReviewed,rarityMethod:match.rarityMethod}:{status:'missing',reason:'not-in-curated-answer-set'}));
+        res.end(JSON.stringify(match?{status:'found',work:{id:'editorial:'+prompt.id+':'+normEditorial(match.title),kind:prompt.kind,title:match.title,titleKo:match.titleKo||''},points:match.points,tier:match.tier,provisional:true,rarityCategory:match.rarityCategory,rarityLabelKo:match.rarityLabelKo,rarityLabelEn:match.rarityLabelEn,rarityReviewed:match.rarityReviewed,rarityMethod:match.rarityMethod}:{status:'missing',reason:'not-in-curated-answer-set'}));
         return;
       }
       // The published per-question answer set is authoritative and fast.
@@ -264,7 +266,7 @@ const server=http.createServer((req,res)=>{
     const prompt=promptById.get(promptId);
     if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
     if(editorialAnswers[promptId]){
-      const curated=editorialAnswers[promptId].answers.map(title=>({title,source:'editorial-candidate',...editorialScore(promptId,title)}));
+      const curated=editorialAnswers[promptId].answers.map(title=>({title,...localizedAnswer(promptId,title),source:'editorial-candidate',...editorialScore(promptId,title)}));
       const discovered=promptId==='f-title-number'
         ?sourceCatalog.db.prepare("SELECT title FROM works WHERE kind='film' AND verified=1 ORDER BY title LIMIT 100000").all()
           .filter(w=>/[0-9０-９]/u.test(w.title)).map(w=>({title:w.title,source:'catalog-metadata',...editorialScore(promptId,w.title)}))
