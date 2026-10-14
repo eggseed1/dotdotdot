@@ -60,10 +60,11 @@ export default function App(){
   const activePrompt=useMemo(()=>session?promptById.get(session.prompts[session.index]):undefined,[session]);
   const autocomplete=useTitleAutocomplete(answer,activePrompt?.kind||'any',lang,session?.state==='play');
   const activeResult=session?.state==='reveal'?session.results[session.index]:undefined;
-  const activeWork=selectedWork(activeResult?.workId) || (activeResult?.title ? {
+  // Live validation titles take precedence: bundled demo IDs must NEVER override a user's answer.
+  const activeWork=activeResult?.title ? {
     id:activeResult.workId||'',title:activeResult.title,titleKo:activeResult.titleKo,creator:activeResult.creator||'',
     year:activeResult.year||0,country:activeResult.country||'',genres:[] as string[]
-  } : undefined);
+  } : activeResult?.workId ? selectedWork(activeResult.workId) : undefined;
   const activeScore=session?totalScore(session.results):0;
   const modeLabel=(_mode:Mode)=>t.all;
 
@@ -123,12 +124,15 @@ export default function App(){
     setSession(s=>s&&s.state==='play'?{...s,state:'reveal',results:[...s.results,result]}:s);
     setFeedback('');
   };
-  const submit=async(event?:FormEvent,override?:string)=>{
-    const entry=override??answer;
+  const submittingRef=useRef(false);
+  const submit=async(event?:FormEvent)=>{
+    const entry=answer;
     event?.preventDefault();
     if(!session||session.state!=='play'||!activePrompt)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     if(!entry.trim()){setFeedback(t.empty);return;}
+    if(submittingRef.current)return;
+    submittingRef.current=true;
     // Never let the tiny bundled demo override the live film/anime/game catalog.
     const serverKind=true;
     if(serverKind){
@@ -148,7 +152,7 @@ export default function App(){
       }catch{
         setFeedback(lang==='ko'?'검증 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.':'Live answer verification is unavailable. Try again shortly.');
         return;
-      }
+      }finally{submittingRef.current=false;}
     }
     const found=lookupAnswer(entry,activePrompt.kind);
     if(found.status==='ambiguous'){const chosen=found.works.find(w=>activePrompt.match(w))||found.works[0];if(!activePrompt.match(chosen)){setFeedback(t.notEligible);return;}const pts=rarity(chosen,activePrompt);lock({promptId:activePrompt.id,workId:chosen.id,title:chosen.title,creator:chosen.creator,rawAnswer:entry.trim(),points:pts.points,tier:pts.tier});return;}
@@ -158,11 +162,12 @@ export default function App(){
     lock({promptId:activePrompt.id,workId:found.work.id,rawAnswer:entry.trim(),points:points.points,tier:points.tier});
   };
   const next=()=>{
+    submittingRef.current=false;
     if(!session||session.state!=='reveal')return;
     setAnswer('');setFeedback('');setTimeLeft(ROUND_SECONDS);
     setSession(s=>s?{...s,index:s.index+1>=ROUNDS?s.index:s.index+1,state:s.index+1>=ROUNDS?'finished':'play',roundStartedAt:Date.now()}:s);
   };
-  const home=()=>{setSession(null);setDuelOpen(false);setPublicMatch(null);setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);setAnswer('');setFeedback('');};
+  const home=()=>{submittingRef.current=false;setSession(null);setDuelOpen(false);setPublicMatch(null);setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);setAnswer('');setFeedback('');};
   const share=async()=>{
     if(!session||session.state!=='finished')return;
     const code=encodeShare(session);
