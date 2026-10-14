@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Disc3, Film, BookOpen, Gamepad2, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
 import { catalog } from './data/catalog';
+import { staticCatalogExact } from './lib/static-catalog';
 import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
@@ -113,6 +114,17 @@ export default function App(){
           if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
         }
       }catch{/* Static-only mode has no live catalog API. */}
+      // GitHub Pages has no Node API. Validate exact entries from the published static catalog.
+      const records=await staticCatalogExact(answer,activePrompt.kind);
+      if(records.length>1){setFeedback(t.ambiguous);return;}
+      if(records.length===1){
+        const work=records[0];
+        if(!activePrompt.match(work)){setFeedback(t.notEligible);return;}
+        if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
+        // This is *neutral provisional credit*: metadata presence never proves rarity.
+        lock({promptId:activePrompt.id,workId:work.id,title:work.title,titleKo:work.titleKo,
+          creator:work.creator,year:work.year,country:work.country,rawAnswer:answer.trim(),points:44,tier:5});return;
+      }
       setFeedback(t.invalid);return;
     }
     if(found.status==='ambiguous'){setFeedback(t.ambiguous);return;}
