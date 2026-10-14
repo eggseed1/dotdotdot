@@ -171,6 +171,17 @@ const server=http.createServer((req,res)=>{
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
       const chosen=[...valid].sort((a,b)=>Number(Boolean(b.ratingCount||b.popularity))-Number(Boolean(a.ratingCount||a.popularity)))[0];
+      // Keep proven live matches in the persistent SQLite catalog, so repeated
+      // searches do not rely solely on an upstream provider staying available.
+      const sourceNames={'tmdb-live':'tmdb','wikidata-live':'wikidata','wikidata-games':'wikidata','vndb-live':'vndb','anilist-live':'anilist','tvmaze-live':'tvmaze'};
+      for(const w of valid){
+        const storedSource=sourceNames[w.source];
+        const sourceId=String(w.id||'').split(':').slice(1).join(':');
+        if(!storedSource||!sourceId||!w.verified||!w.title)continue;
+        try{sourceCatalog.put({kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country,
+          genres:w.genres,aliases:w.aliases,source:storedSource,sourceId,ratingCount:w.ratingCount,
+          sourceUrl:w.sourceUrl,verified:true});}catch{/* Read-only data volume: live verification still works. */}
+      }
       const response=metadataMissing?{status:'unverified',reason:'provider-metadata-unavailable'}:!found.length?{status:'missing',reason:'no-exact-match-in-available-sources'}:!valid.length?
         {status:found.some(w=>w.metadataUnavailable||!w.genres?.length||!w.year)?'unverified':'notEligible',reason:'no-candidate-matched-all-conditions',candidates:found.slice(0,3).map(w=>({title:w.title,year:w.year,country:w.country,genres:w.genres,format:w.format,source:w.source}))}:
         !chosen.verified?{status:'unverified',reason:'source-not-verified'}:(()=>{
