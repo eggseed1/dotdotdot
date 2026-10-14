@@ -324,3 +324,36 @@ from the official Open Library bulk-export endpoint.
 Do **not** launch all huge imports simultaneously on a small web service.
 Prefer a separate import worker or scheduled job with enough disk and CPU;
 keep real-time multiplayer running on its own instance for a production launch.
+
+
+## Zero-cost GitHub Pages catalog shards (work in progress)
+
+GitHub Pages cannot host a many-GB SQLite database, and GitHub repositories
+have per-file and site bandwidth/size limits. The frontend now knows how to
+fetch **only the needed title-prefix JSON shards** and accepts exact
+matches from them, including bilingual aliases. Missing audience counts
+earn a neutral provisional score, not artificial maximum obscurity points.
+
+Once the source datasets have been downloaded and imported to SQLite **on a
+sufficiently provisioned machine**, export prefix shards:
+
+```sh
+node scripts/build-static-catalog.mjs --db data/catalog.sqlite --out public/catalog-shards --shard-size 1200
+```
+
+Generated `manifest.json` describes every prefix, record count and file.
+That command does **not** download Discogs/MusicBrainz, and it doesn't
+automatically push multi-GB files to GitHub. The current game remains on the
+limited sample catalog unless published shards are present. A complete
+Discogs export may exceed GitHub Pages' 1 GB published site limit and
+the ability of free hosted runners to build it. For larger catalogs,
+separate public shard hosting, copyright/attribution review, and a
+verified publishing workflow will be required.
+
+The shards are indexed by the first two normalized title characters; they
+include creator/title aliases from the database. Users typing `러브리스`
+can also search aliases when present; transliteration suggestions are not
+accepted as exact answers without verification.
+
+Do not distribute proprietary RYM, Spotify or Bandcamp content or
+noncommercial MusicBrainz supplementary tags/ratings without suitable rights.
