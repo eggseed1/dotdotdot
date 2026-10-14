@@ -9,7 +9,7 @@ import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutoco
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt, hellBackdrop } from './data/art';
 import { Swords } from 'lucide-react';
-import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, tierLabels, todayKey, totalScore } from './lib/engine';
+import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
 
