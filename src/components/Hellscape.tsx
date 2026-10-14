@@ -24,6 +24,10 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
      <div className="infernal-moon"/>
      {skyStars.map((v,i)=><i key={i} className="infernal-star" style={{left:`${v.x}%`,top:`${v.y}%`}}/>)}
      <div className="infernal-mountains far"/><div className="infernal-mountains near"/>
+     <div className="infernal-ash-haze"/>
+     <div className="infernal-bone-arch"><i/><i/><i/><i/><i/><i/><i/></div>
+     <div className="infernal-gallows gallows-left"><i/><i/><i/></div>
+     <div className="infernal-gallows gallows-right"><i/><i/><i/></div>
      <div className="infernal-citadel"><div className="citadel-tower tower-left"><i/><i/><i/></div><div className="citadel-tower tower-main"><i/><i/><i/></div><div className="citadel-tower tower-right"><i/><i/><i/></div><div className="citadel-gate"/><div className="citadel-bridge"/></div>
      <div className="infernal-lava-river"><i/><i/><i/><i/><i/><i/><i/><i/></div>
      <div className="infernal-lava-falls left"><i/><i/><i/></div><div className="infernal-lava-falls right"><i/><i/><i/></div>
@@ -39,6 +43,8 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
    <div className="infernal-depth-wash" style={{opacity:Math.min(.75,travel/8500)}} aria-hidden="true"/>
    <div className="infernal-sparks" aria-hidden="true">{sparks.map((p,i)=><i key={i} style={{left:`${p.x}%`,top:`${p.y}%`,animationDelay:`${p.d}s`}}/>)}</div>
    <div className="infernal-cliff left"/><div className="infernal-cliff right"/>
+   <div className="infernal-black-spires left"><i/><i/><i/><i/></div>
+   <div className="infernal-black-spires right"><i/><i/><i/><i/></div>
    <div className="infernal-devil" aria-hidden="true"><div className="infernal-devil-glow"/><img src={devilArt} alt=""/><span className="infernal-devil-trail"/></div>
    <div className="infernal-depth-meter"><small>{lang==='ko'?'현재 심도':'DEPTH'}</small><strong>{depth.toLocaleString()}m</strong><span>{zone[lang]} · {rank[lang]}</span></div>
    {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
