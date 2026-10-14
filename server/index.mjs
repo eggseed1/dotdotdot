@@ -10,6 +10,7 @@ import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
 import {searchAniList,exactAniList,aniListScore} from './anilist-live.mjs';
 import {searchWikidataGames,exactGameMatches,enrichWikidataGame} from './wikidata-games.mjs';
+import {searchVNDB,exactVNDB,vnRarity} from './vndb-live.mjs';
 import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
 import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
@@ -120,12 +121,12 @@ const server=http.createServer((req,res)=>{
   if(pathname==='/api/suggest' && req.method==='GET'){
     const kind=parsedUrl.searchParams.get('kind'),q=(parsedUrl.searchParams.get('q')||'').slice(0,100);
     const allowed=new Set(['music','film','literature','anime','games']);
-    const local=allowed.has(kind)&&q.trim().length>=2?sourceCatalog.suggest(kind,q,7):[];
+    const local=allowed.has(kind)&&q.trim().length>=2&&kind==='literature'?sourceCatalog.suggest(kind,q,7):[];
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
     if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
     else if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
     else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
-    else if(kind==='games'&&q.trim().length>=2){searchWikidataGames(q).then(respond).catch(()=>respond());}
+    else if(kind==='games'&&q.trim().length>=2){Promise.allSettled([searchVNDB(q),searchWikidataGames(q)]).then(results=>respond(results.flatMap(r=>r.status==='fulfilled'?r.value:[]))).catch(()=>respond());}
     else respond();
     return;
   }
@@ -141,7 +142,11 @@ const server=http.createServer((req,res)=>{
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
       if(!found.length&&prompt.kind==='games'){
-        try{found=exactGameMatches(raw,await searchWikidataGames(raw,{limit:25}));}catch{}
+        const q=raw.split(/\s+[—–]\s+/u)[0];
+        const responses=await Promise.allSettled([searchVNDB(q,{limit:30}),searchWikidataGames(q,{limit:25})]);
+        const vns=responses[0].status==='fulfilled'?exactVNDB(raw,responses[0].value):[];
+        const games=responses[1].status==='fulfilled'?exactGameMatches(raw,responses[1].value):[];
+        found=[...vns,...games];
       }
       if(prompt.kind==='games'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-games')return w;try{return await enrichWikidataGame(w);}catch{return {...w,metadataUnavailable:true};}}));}
       if(!found.length&&prompt.kind==='anime'){
@@ -159,10 +164,10 @@ const server=http.createServer((req,res)=>{
         !valid[0].verified?{status:'unverified'}:(()=>{
         const w=valid[0];
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
-        const score=w.source==='anilist-live'?aniListScore(w.popularity):w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
         // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
-          points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='anilist-live'?'anilist-popularity-provisional':w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
+          points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='vndb-live'?'vndb-votes-provisional':w.source==='anilist-live'?'anilist-popularity-provisional':w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
     });return;
