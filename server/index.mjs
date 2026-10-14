@@ -257,7 +257,7 @@ const server=http.createServer((req,res)=>{
         :[];
       const examples=[...curated,...discovered].filter((w,i,a)=>a.findIndex(x=>normEditorial(x.title)===normEditorial(w.title))===i).slice(0,200);
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-      res.end(JSON.stringify({examples,complete:true}));return;
+      res.end(JSON.stringify({examples,complete:false,curation:'ongoing'}));return;
     }
     const prepared=sourceCatalog.promptExamples(promptId,80);
     const imported=prepared.length?prepared:sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w));
