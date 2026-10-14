@@ -49,7 +49,7 @@ export function Hellscape({ score = 0, opponentScore, lang, compact = false, opp
       <div className="hell-route-label"><span>0m</span><span>7000m</span></div>
     </div>
     {opponentScore !== undefined && <div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName || 'RIVAL'} · {opposingDepth}m</span></div>}
-    {children&&<div className="hell-integrated-answer">{children}</div>}
+    {children}
     <div className="hell-bottom-copy">{lang === 'ko' ? '희귀할수록 더 깊이 내려갑니다' : 'THE RARER YOUR ANSWER, THE DEEPER YOU FALL'}</div>
   </div>;
 }
