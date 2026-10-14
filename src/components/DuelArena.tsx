@@ -39,7 +39,7 @@ export function DuelArena({lang,onBack}:{lang:Lang;onBack:()=>void}){
   const [ladder,setLadder]=useState<Array<{name:string;rating:number;played:number;wins:number}>>([]);
   const [player,setPlayer]=useState<Rival|null>(null);
   const [name,setName]=useState(()=>{try{return localStorage.getItem('deepcut:duel:name') || 'GUEST';}catch{return 'GUEST';}});
-  const [mode,setMode]=useState<Mode>('music');
+  const [mode,setMode]=useState<Mode>('all');
   const [waiting,setWaiting]=useState<'ranked'|'friend'|null>(null);
   const [invite,setInvite]=useState('');
   const [joinCode,setJoinCode]=useState('');
@@ -92,7 +92,7 @@ export function DuelArena({lang,onBack}:{lang:Lang;onBack:()=>void}){
           {!connected?<><p className="duel-help">{t.serverHint}</p><button className="action-button" onClick={connect}>{t.reconnect}<ArrowRight size={15}/></button></>:
           waiting?<div className="duel-wait"><Flame size={38}/><h2>{waiting==='ranked'?t.matchmaking:t.waiting}</h2>{invite&&<><small>{t.code}</small><strong className="duel-invite-code">{invite}</strong><button onClick={()=>{navigator.clipboard?.writeText(invite).then(()=>setCopied(true));}} className="duel-copy"><Copy size={15}/>{copied?t.copied:t.copy}</button></>}<div className="duel-waiting-animation">● ● ●</div><button className="secondary-button" onClick={cancel}>{t.cancel}<X size={15}/></button></div>:
           <><div className="duel-avatar-chip"><img src="/favicon.svg" alt=""/><div><small>{t.nickname} · ELO {player?.rating ?? 1000}</small><div className="duel-profile-name"><input value={name} onChange={e=>setName(e.target.value)} maxLength={18}/><button onClick={updateName}>{t.saveName}</button></div></div></div>
-            <p className="duel-control-label">{t.mode}</p><div className="duel-mode-tabs"><button className={mode==='music'?'selected':''} onClick={()=>setMode('music')}>{t.music}</button><button className={mode==='all'?'selected':''} onClick={()=>setMode('all')}>{t.all}</button></div>
+            <p className="duel-control-label">{t.mode}</p><div className="duel-mode-tabs"><button className={mode==='all'?'selected':''} onClick={()=>setMode('all')}>{t.all}</button></div>
             <button className="duel-action ranked-action" onClick={()=>begin(true)}><span><Swords size={23}/><strong>{t.ranked}</strong><small>{t.rankedSub}</small></span><ArrowRight/></button>
             <button className="duel-action friend-action" onClick={()=>begin(false)}><span><LockKeyhole size={23}/><strong>{t.friend}</strong><small>{t.friendSub}</small></span><ArrowRight/></button>
             <div className="duel-join-box"><label htmlFor="join-code">{t.join}</label><div><input id="join-code" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} maxLength={6} placeholder={t.enterCode}/><button onClick={()=>send({type:'join',code:joinCode})}>{t.joinNow}</button></div></div>
