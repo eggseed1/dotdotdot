@@ -5,6 +5,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 const groups=[
+ {id:'a-ova-90s',start:1990,end:1999,format:'OVA'},
+ {id:'a-movie-2000s-fantasy',start:2000,end:2009,format:'MOVIE',genre:'Fantasy'},
  {id:'a-scifi-tv-1995-1999',start:1995,end:1999,format:'TV',genre:'Sci-Fi'},
  {id:'a-fantasy-movie-2000-2006',start:2000,end:2006,format:'MOVIE',genre:'Fantasy'},
  {id:'a-90s-sci-fi-tv',start:1990,end:1999,format:'TV',genre:'Sci-Fi'},
