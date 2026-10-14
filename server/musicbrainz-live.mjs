@@ -17,19 +17,45 @@ export async function searchMusicBrainz(input,{limit=12}={}){
  const key=canonical(q);
  const hit=cache.get(key);if(hit&&hit.expires>Date.now())return hit.items;
  if(cache.size>MAX)cache.delete(cache.keys().next().value);
- const items=await enqueue(async()=>{
+ const fetchPage=async(lucene)=>enqueue(async()=>{
   const url=new URL('https://musicbrainz.org/ws/2/release-group/');
-  const term=q.replace(/["\\\\]/g,' ').replace(/[^\\p{L}\\p{N} -]/gu,' ').trim();
-  const lucene=term.includes(' ')?`releasegroup:"${term}"`:`releasegroup:${term}*`;
   url.searchParams.set('query',lucene);
-  url.searchParams.set('fmt','json');url.searchParams.set('limit',String(Math.min(50,Math.max(15,limit))));
-  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),9000);
+  url.searchParams.set('fmt','json');
+  url.searchParams.set('limit',String(Math.min(50,Math.max(20,limit))));
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
   try{
-   const response=await fetch(url,{signal:controller.signal,headers:{'User-Agent':`larper101/0.3 (contact: ${process.env.CATALOG_CONTACT_EMAIL||'https://github.com/eggseed1/dotdotdot'})`,'Accept':'application/json'}});
-   if(!response.ok)throw Error('MusicBrainz unavailable: '+response.status);
-   const data=await response.json();return (data['release-groups']||[]).map(normalizeMB).filter(Boolean);
+   const response=await fetch(url,{signal:controller.signal,headers:{
+    'User-Agent':`larper101/0.4 (contact: ${process.env.CATALOG_CONTACT_EMAIL||'https://github.com/eggseed1/dotdotdot'})`,
+    'Accept':'application/json'
+   }});
+   if(!response.ok)throw Error('MusicBrainz HTTP '+response.status);
+   const data=await response.json();
+   return (data['release-groups']||[]).map(normalizeMB).filter(Boolean);
   }finally{clearTimeout(timeout);}
  });
+ const phrase=q.replace(/["\\\\]/g,' ').replace(/[^\\p{L}\\p{N} '-]/gu,' ').trim();
+ if(!phrase)return [];
+ const terms=phrase.split(/\\s+/).filter(Boolean);
+ const primary=terms.length>1?
+   'releasegroup:('+terms.map((t,i)=>i===terms.length-1?`${t}*`:t).join(' AND ')+')':
+   'releasegroup:'+terms[0]+'*';
+ let items=await fetchPage(primary);
+ if(items.length<3&&terms.length>1){
+   const more=await fetchPage('releasegroup:"'+phrase+'"');
+   const seen=new Set(items.map(x=>x.id));
+   for(const item of more)if(!seen.has(item.id)){items.push(item);seen.add(item.id);}
+ }
+ // Exact and prefix title matches first, with stable results across query types.
+ const norm=canonical(phrase);
+ const rank=w=>{
+  const title=canonical(w.title);
+  if(title===norm)return 0;
+  if(title.startsWith(norm))return 1;
+  if(title.includes(norm))return 2;
+  return 3;
+ };
+ items.sort((a,b)=>rank(a)-rank(b)||a.title.localeCompare(b.title));
+
  cache.set(key,{expires:Date.now()+TTL,items});return items;
 }
 async function mbGet(route){return enqueue(async()=>{
