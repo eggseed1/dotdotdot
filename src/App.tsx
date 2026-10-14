@@ -14,7 +14,7 @@ import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Kind, Lang, Mode, RoundResult } from './lib/types';
 
 type IconType = typeof Disc3;
-const mediaIcons: Record<Exclude<Kind, 'any'>, IconType> = { music:Disc3,film:Film,literature:BookOpen,anime:Star,games:Gamepad2 };
+const mediaIcons: Record<Exclude<Kind, 'any'>, IconType> = { music:Disc3,film:Film,literature:BookOpen,anime:Star,games:Gamepad2,tv:Film };
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
   'xvvxvvvvvvvvxvvx','xvvxvvvggvvvxvvx','xxvvxvggggvxvvxx','.xvvxxvggvxxvvx.','.xxvvxxxxxxvvxx.','..xxvvxxxxvvxx..',
