@@ -1,0 +1,124 @@
+name: Build music catalog in the cloud
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sample = quick smoke test; dump = official MusicBrainz bulk snapshot (high disk use)"
+        type: choice
+        options: [sample, dump]
+        default: sample
+      limit:
+        description: "Maximum albums to export (0 = all in dump mode)"
+        type: number
+        default: 500
+      include_community_tags:
+        description: "I confirm noncommercial CC BY-NC-SA 3.0 obligations; fetch derived tags and rating counts"
+        type: boolean
+        default: false
+      publish_release:
+        description: "Publish resulting small catalog as GitHub Release assets (no site deployment)"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: music-catalog
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Show available disk
+        run: df -h . && free -h
+      - name: Import sample (not comprehensive)
+        if: ${{ inputs.mode == 'sample' }}
+        env:
+          CATALOG_CONTACT_EMAIL: ${{ secrets.CATALOG_CONTACT_EMAIL }}
+        run: |
+          if [ -z "$CATALOG_CONTACT_EMAIL" ]; then
+            echo "Set Actions secret CATALOG_CONTACT_EMAIL to a real contact email, required for MusicBrainz API etiquette."
+            exit 1
+          fi
+          node scripts/fetch-musicbrainz.mjs --limit 500 --out /tmp/music-sample.jsonl
+          node scripts/import-catalog.mjs --source musicbrainz --file /tmp/music-sample.jsonl --db data/catalog.sqlite
+      - name: Fetch official MusicBrainz core and optional supplementary archive
+        if: ${{ inputs.mode == 'dump' }}
+        env:
+          COMMUNITY: ${{ inputs.include_community_tags }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mbdata/mbdump
+          echo "GitHub-hosted runners have limited ephemeral disk; full archive processing may exhaust capacity."
+          SNAPSHOT="$(curl -fsSL --retry 3 https://ftp.musicbrainz.org/pub/musicbrainz/data/fullexport/LATEST | tr -d '\r\n')"
+          case "$SNAPSHOT" in *[!0-9-]*|'') echo "Unexpected snapshot ID"; exit 1;; esac
+          BASE="https://ftp.musicbrainz.org/pub/musicbrainz/data/fullexport/$SNAPSHOT"
+          curl -fL --retry 3 "$BASE/mbdump.tar.bz2" -o /tmp/mbdata/core.tar.bz2
+          # Extract only tables required by the importer, not the entire archive.
+          tar -xjf /tmp/mbdata/core.tar.bz2 -C /tmp/mbdata \
+            mbdump/artist mbdump/artist_credit mbdump/artist_credit_name \
+            mbdump/area mbdump/iso_3166_1 mbdump/release_group \
+            mbdump/release_group_primary_type mbdump/release mbdump/release_country \
+            mbdump/release_unknown_country mbdump/genre \
+            mbdump/release_group_alias mbdump/artist_alias
+          rm /tmp/mbdata/core.tar.bz2
+          if [ "$COMMUNITY" = true ]; then
+            echo "Derived metadata licensed CC BY-NC-SA 3.0: attribution and share-alike required."
+            curl -fL --retry 3 "$BASE/mbdump-derived.tar.bz2" -o /tmp/mbdata/derived.tar.bz2
+            mkdir -p /tmp/mbdata/derived
+            tar -xjf /tmp/mbdata/derived.tar.bz2 -C /tmp/mbdata/derived \
+              mbdump/tag mbdump/release_group_tag mbdump/release_group_meta
+            mv /tmp/mbdata/derived/mbdump/* /tmp/mbdata/derived/
+            rm /tmp/mbdata/derived.tar.bz2
+          fi
+          df -h .
+      - name: Import official bulk dataset
+        if: ${{ inputs.mode == 'dump' }}
+        env:
+          COMMUNITY: ${{ inputs.include_community_tags }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          set -euo pipefail
+          OPTS=()
+          if [ "$COMMUNITY" = true ]; then
+            OPTS+=(--derived-dir /tmp/mbdata/derived --allow-noncommercial)
+          fi
+          if [ "$LIMIT" != 0 ]; then
+            OPTS+=(--limit "$LIMIT")
+          fi
+          node scripts/import-musicbrainz-core.mjs --dump-dir /tmp/mbdata/mbdump --db data/catalog.sqlite "${OPTS[@]}"
+      - name: Export searchable static JSON shards
+        run: |
+          node scripts/build-static-catalog.mjs --db data/catalog.sqlite --out public/catalog-shards
+          du -sh data/catalog.sqlite public/catalog-shards
+          cat public/catalog-shards/manifest.json | head -c 500
+      - name: Check catalog files can build on Pages
+        run: npm run build
+      - name: Create downloadable catalog tarball
+        run: |
+          mkdir -p out
+          tar -czf out/larper101-catalog-shards.tar.gz -C public catalog-shards
+          du -h out/*
+      - name: Upload catalog build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-shards-${{ github.run_number }}
+          path: out/larper101-catalog-shards.tar.gz
+          retention-days: 7
+      - name: Publish optional immutable GitHub Release asset
+        if: ${{ inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="catalog-${GITHUB_RUN_ID}"
+          gh release create "$TAG" out/larper101-catalog-shards.tar.gz \
+            --title "Catalog batch $GITHUB_RUN_ID" \
+            --notes "Unverified completeness. Official MusicBrainz metadata. Community-derived tags only if enabled and subject to CC BY-NC-SA 3.0." \
+            --latest=false
