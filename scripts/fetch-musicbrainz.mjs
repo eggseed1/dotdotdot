@@ -7,7 +7,7 @@ import fs from 'node:fs';
 const argv=process.argv.slice(2),arg=k=>argv.includes(k)?argv[argv.indexOf(k)+1]:undefined;
 const contact=process.env.CATALOG_CONTACT_EMAIL;
 if(!contact){console.error('Set CATALOG_CONTACT_EMAIL so MusicBrainz can identify the application.');process.exit(1);}
-const count=Math.min(Math.max(Number(arg('--limit')||100),1),500),query=arg('--query')||'primarytype:album';
+const count=Math.min(Math.max(Number(arg('--limit')||100),1),5000),query=arg('--query')||'primarytype:album';
 const out=arg('--out')||'musicbrainz-sample.jsonl',pause=ms=>new Promise(r=>setTimeout(r,ms));
 let written=0;const output=fs.createWriteStream(out,{flags:'w'});
 try{
