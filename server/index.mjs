@@ -269,17 +269,17 @@ const server=http.createServer((req,res)=>{
     if(editorialAnswers[promptId]){
       const curated=editorialAnswers[promptId].answers.map(title=>({title,...localizedAnswer(promptId,title),source:'editorial-candidate',...editorialScore(promptId,title)}));
       const discovered=promptId==='f-title-number'
-        ?sourceCatalog.db.prepare("SELECT title FROM works WHERE kind='film' AND verified=1 ORDER BY title LIMIT 100000").all()
+        ?sourceCatalog.db.prepare("SELECT title FROM works WHERE kind='film' AND verified=1 ORDER BY title").all()
           .filter(w=>/[0-9０-９]/u.test(w.title)).map(w=>({title:w.title,source:'catalog-metadata',...editorialScore(promptId,w.title)}))
         :[];
-      const examples=[...curated,...discovered].filter((w,i,a)=>a.findIndex(x=>normEditorial(x.title)===normEditorial(w.title))===i).slice(0,200);
+      const examples=[...curated,...discovered].filter((w,i,a)=>a.findIndex(x=>normEditorial(x.title)===normEditorial(w.title))===i);
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
       res.end(JSON.stringify({examples,complete:false,curation:'ongoing'}));return;
     }
-    const prepared=sourceCatalog.promptExamples(promptId,100);
-    const imported=prepared.length?prepared:sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w));
-    const curated=eligible(prompt).slice(0,24);
-    const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i).slice(0,80);
+    const prepared=sourceCatalog.promptExamples(promptId,10000);
+    const imported=prepared.length?prepared:sourceCatalog.possible(promptId,10000).filter(w=>w.kind===prompt.kind&&prompt.match(w));
+    const curated=eligible(prompt);
+    const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i);
     const examples=combined.map(w=>({title:w.title,titleKo:w.titleKo||'',creator:w.creator||'',year:w.year||0,
       source:w.source||'curated-demo',points:w.points??null,ratingCount:w.ratingCount??null}));
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({examples,complete:false}));
