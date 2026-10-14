@@ -13,3 +13,16 @@ test('AniList importer paginates and stops on last page',async()=>{
  assert.equal(result.imported,2);assert.equal(calls,2);assert.equal(fs.readFileSync(out,'utf8').trim().split('\n').length,2);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('AniList resumes from requested page without fetching old pages',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'larper-anilist-resume-'));
+ try{
+  const out=path.join(dir,'resume.jsonl'),seen=[];
+  const request=async (_url,opts)=>{
+   const page=JSON.parse(opts.body).variables.page;seen.push(page);
+   return {ok:true,json:async()=>({data:{Page:{media:[{id:page,title:{english:'Entry '+page}}],pageInfo:{hasNextPage:true}}}})};
+  };
+  const result=await fetchAniList({out,pages:3,startPage:36,request,wait:async()=>{},progress:()=>{}});
+  assert.deepEqual(seen,[36,37,38]);assert.equal(result.imported,3);assert.equal(result.pages,38);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
