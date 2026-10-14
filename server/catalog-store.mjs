@@ -69,6 +69,24 @@ export function createCatalogStore(dbPath){
       if(seen.has(identity))return false;seen.add(identity);return true;
     });
   }
+  function promptLookup(promptId,kind,title){
+    const key=canonical(String(title||'').slice(0,200));
+    if(!key||!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='prompt_answers'").get())return [];
+    return db.prepare(`SELECT w.*,pa.points,pa.tier FROM prompt_answers pa
+      JOIN works w ON w.id=pa.work_id JOIN work_aliases a ON a.work_id=w.id
+      WHERE pa.prompt_id=? AND w.kind=? AND a.alias_norm=? LIMIT 30`).all(promptId,kind,key)
+      .map(row=>({...hydrate(row),points:row.points,tier:row.tier}));
+  }
+  function promptExamples(promptId,limit=24){
+    if(!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='prompt_answers'").get())return [];
+    return db.prepare(`SELECT w.*,pa.points,pa.tier FROM prompt_answers pa JOIN works w ON w.id=pa.work_id
+      WHERE pa.prompt_id=? ORDER BY pa.points DESC,w.title ASC LIMIT ?`).all(promptId,Math.min(100,Math.max(1,limit)))
+      .map(row=>({...hydrate(row),points:row.points,tier:row.tier}));
+  }
+  function promptCoverage(){
+    if(!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='prompt_coverage'").get())return [];
+    return db.prepare('SELECT prompt_id AS promptId,answer_count AS answers FROM prompt_coverage ORDER BY prompt_id').all();
+  }
   function suggest(kind,query,limit=7){
     if(!KINDS.has(kind)||typeof query!=='string'||query.trim().length<2)return [];
     const keys=phoneticKeys(query.slice(0,100)).map(k=>k.replace(/[\\%_]/g,'')).filter(Boolean);
@@ -125,6 +143,6 @@ export function createCatalogStore(dbPath){
     db.exec('BEGIN TRANSACTION');try{for(const row of rows)indexAliases(row.id,hydrate(row));db.exec('COMMIT');}
     catch(e){db.exec('ROLLBACK');throw e;}
   }
-  return {db,put,begin,commit,rollback,stats,lookup,suggest,eligible,score,possible,close:()=>db.close()};
+  return {db,put,begin,commit,rollback,stats,lookup,promptLookup,promptExamples,promptCoverage,suggest,eligible,score,possible,close:()=>db.close()};
 }
 function hydrate(row){return {id:row.id,kind:row.kind,title:row.title,titleKo:row.title_ko,creator:row.creator,year:row.year,country:row.country,genres:JSON.parse(row.genres||'[]'),aliases:JSON.parse(row.aliases||'[]'),source:row.source,sourceId:row.source_id,ratingCount:row.rating_count,format:row.format||'',verified:Boolean(row.verified),sourceUrl:row.source_url};}
