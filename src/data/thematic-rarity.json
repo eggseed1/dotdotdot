@@ -1,59 +1,47 @@
 {
-  "version": 1,
-  "method": "editorial-estimate-v1",
-  "disclaimer": "Editorial visibility estimates, NOT measured audience frequency. Unreviewed titles receive default tier until individual review.",
+  "version": 2,
+  "method": "krillion-inspired-six-tier-editorial-estimate-v2",
+  "disclaimer": "Krillion published fixed points 10/15/30/60/85/100, but its private prompt-specific familiarity thresholds are not public. These are our editorial estimates, not official Krillion scores.",
   "tiers": [
     {
-      "key": "iconic",
-      "labelKo": "국민급",
-      "labelEn": "ICONIC",
+      "key": "plankton",
+      "labelKo": "플랑크톤",
+      "labelEn": "PLANKTON",
       "points": 10
     },
     {
-      "key": "familiar",
-      "labelKo": "유명작",
-      "labelEn": "FAMILIAR",
-      "points": 27
+      "key": "too-clever",
+      "labelKo": "뻔한 딥컷",
+      "labelEn": "TOO CLEVER",
+      "points": 15
     },
     {
-      "key": "cult",
-      "labelKo": "컬트",
-      "labelEn": "CULT",
-      "points": 44
+      "key": "schooler",
+      "labelKo": "좀 아는 사람",
+      "labelEn": "SCHOOLER",
+      "points": 30
     },
     {
-      "key": "underground",
-      "labelKo": "언더그라운드",
-      "labelEn": "UNDERGROUND",
+      "key": "rare",
+      "labelKo": "레어",
+      "labelEn": "RARE",
       "points": 60
     },
     {
       "key": "deep-cut",
       "labelKo": "딥컷",
       "labelEn": "DEEP CUT",
-      "points": 75
+      "points": 85
     },
     {
-      "key": "obscure",
-      "labelKo": "희귀작",
-      "labelEn": "OBSCURE",
-      "points": 88
-    },
-    {
-      "key": "rare",
-      "labelKo": "극희귀",
-      "labelEn": "EXTREMELY RARE",
-      "points": 96
-    },
-    {
-      "key": "abyssal",
-      "labelKo": "심연",
-      "labelEn": "ABYSSAL",
+      "key": "one-in-a-krillion",
+      "labelKo": "심연의 한 방",
+      "labelEn": "ONE IN A KRILLION",
       "points": 100
     }
   ],
   "defaults": {
-    "tier": "cult",
+    "tier": "schooler",
     "reviewed": false
   },
   "overrides": {
@@ -151,5 +139,15 @@
       "Hedwig and the Angry Inch": "cult",
       "Velvet Goldmine": "cult"
     }
+  },
+  "aliases": {
+    "iconic": "plankton",
+    "familiar": "too-clever",
+    "cult": "schooler",
+    "underground": "rare",
+    "deep-cut": "deep-cut",
+    "obscure": "deep-cut",
+    "rare": "one-in-a-krillion",
+    "abyssal": "one-in-a-krillion"
   }
 }
