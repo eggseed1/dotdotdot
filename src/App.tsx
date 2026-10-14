@@ -9,7 +9,6 @@ import thematicAliases from './data/thematic-aliases-ko.json';
 import thematicAnswers from './data/thematic-answers.json';
 import thematicRarity from './data/thematic-rarity.json';
 import { DuelArena } from './components/DuelArena';
-import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
@@ -115,7 +114,6 @@ export default function App(){
   const t=strings[lang];
   const date=todayKey();
   const activePrompt=useMemo(()=>session?promptById.get(session.prompts[session.index]):undefined,[session]);
-  const autocomplete=useTitleAutocomplete(answer,activePrompt?.kind||'any',lang,session?.state==='play');
   const activeResult=session?.state==='reveal'?session.results[session.index]:undefined;
   // Live validation titles take precedence: bundled demo IDs must NEVER override a user's answer.
   const activeWork=activeResult?.title ? {
@@ -182,66 +180,37 @@ export default function App(){
     setFeedback('');
   };
   const submittingRef=useRef(false);
-  const submit=async(event?:FormEvent)=>{
+  // Daily games use a SINGLE authoritative local answer list. No live fuzzy search,
+  // no server-side first-result substitution, no autocomplete selection on Enter.
+  const submit=(event?:FormEvent)=>{
     event?.preventDefault();
-    const pending=typoSuggestion&&typoSuggestion.typed===answer.trim()?typoSuggestion:null;
-    const entry=pending?pending.title:answer;
-    if(pending){setAnswer(pending.display);setTypoSuggestion(null);}
-    if(!session||session.state!=='play'||!activePrompt)return;
+    if(!session||session.state!=='play'||!activePrompt||submittingRef.current)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-    if(!entry.trim()){setFeedback(t.empty);return;}
-    if(submittingRef.current)return;
-    submittingRef.current=true;
-    // Curated daily answers are matched LOCALLY first. Stale Render responses may never
-    // swap a submitted title for the first unrelated server/catalog record.
-    const exact=exactCuratedAnswer(activePrompt.id,entry.trim());
+    const typed=answer.trim();
+    if(!typed){setFeedback(t.empty);return;}
+    const acceptedTypo=typoSuggestion?.typed===typed?typoSuggestion:null;
+    const submitted=acceptedTypo?acceptedTypo.title:typed;
+    const exact=exactCuratedAnswer(activePrompt.id,submitted);
     if(exact){
-      lock({promptId:activePrompt.id,workId:'editorial:'+activePrompt.id+':'+normalizeAnswer(exact.title),title:exact.title,titleKo:exact.titleKo,rawAnswer:answer.trim(),points:exact.points,tier:exact.tier});
-      submittingRef.current=false;
+      submittingRef.current=true;
+      setTypoSuggestion(null);
+      lock({promptId:activePrompt.id,workId:'editorial:'+activePrompt.id+':'+normalizeAnswer(exact.title),title:exact.title,titleKo:exact.titleKo,rawAnswer:typed,points:exact.points,tier:exact.tier});
       return;
     }
-    // Never let the tiny bundled demo override the live film/anime/game catalog.
-    const serverKind=true;
-    if(serverKind){
-      try{
-        const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
-        const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:entry.trim()})});
-        if(!response.ok)throw Error('Live validation unavailable');
-        const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number;candidates?:Array<{title:string;year?:number;country?:string;genres?:string[];format?:string;source?:string;points?:number;rarityCategory?:string;rarityLabelKo?:string;rarityLabelEn?:string;rarityReviewed?:boolean}>;reason?:string};
-        if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
-          if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-          if(!isMatchingReturnedAnswer(activePrompt.id,entry.trim(),data.work)){
-            const suggestion=suggestSmallTypo(activePrompt.id,entry);
-            if(suggestion&&!pending){setTypoSuggestion(suggestion);setFeedback('');return;}
-            setFeedback(lang==='ko'?'서버가 입력한 작품과 다른 답을 반환했어. 잘못된 자동 정답은 적용하지 않았어.':'The server returned a different title. The incorrect match was rejected.');
-            return;
-          }
-          lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
-        }
-        if(data.status==='ambiguous'){setFeedback(lang==='ko'?'동명의 작품이 여러 개야. 연도나 제작자를 붙여서 입력해 줘.':'Several titles match. Add a year or creator.');return;}
-        if(data.status==='notEligible'){setFeedback(lang==='ko'?`“${entry.trim()}”은 정답이 아닙니다.`:`“${entry.trim()}” is not a correct answer.`);return;}
-        if(data.status==='unverified'){setFeedback(lang==='ko'?'작품은 발견됐지만 장르·국가 등 검증 데이터가 부족해. 정답이 아닐 수도 있고 DB 문제일 수도 있어.':'Title found, but source metadata is incomplete; eligibility cannot be confirmed.');return;}
-        if(!pending){const suggestion=suggestSmallTypo(activePrompt.id,entry);if(suggestion){setTypoSuggestion(suggestion);setFeedback('');return;}}
-        setFeedback(lang==='ko'?`“${entry.trim()}”은 정답이 아닙니다.`:`“${entry.trim()}” is not a correct answer.`);return;
-      }catch{
-        setFeedback(lang==='ko'?'검증 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.':'Live answer verification is unavailable. Try again shortly.');
-        return;
-      }finally{submittingRef.current=false;}
+    if(!acceptedTypo){
+      const suggestion=suggestSmallTypo(activePrompt.id,typed);
+      if(suggestion){setTypoSuggestion(suggestion);setFeedback('');return;}
     }
-    const found=lookupAnswer(entry,activePrompt.kind);
-    if(found.status==='ambiguous'){const chosen=found.works.find(w=>activePrompt.match(w))||found.works[0];if(!activePrompt.match(chosen)){setFeedback(t.notEligible);return;}const pts=rarity(chosen,activePrompt);lock({promptId:activePrompt.id,workId:chosen.id,title:chosen.title,creator:chosen.creator,rawAnswer:entry.trim(),points:pts.points,tier:pts.tier});return;}
-    if(found.status==='missing'){setFeedback(t.invalid);return;}
-    if(!activePrompt.match(found.work)){setFeedback(t.notEligible);return;}
-    const points=rarity(found.work,activePrompt);
-    lock({promptId:activePrompt.id,workId:found.work.id,rawAnswer:entry.trim(),points:points.points,tier:points.tier});
+    setTypoSuggestion(null);
+    setFeedback(lang==='ko'?`“${typed}”은 정답이 아닙니다.`:`“${typed}” is not a correct answer.`);
   };
   const next=()=>{
     submittingRef.current=false;
     if(!session||session.state!=='reveal')return;
-    setAnswer('');setFeedback('');setTimeLeft(ROUND_SECONDS);
+    setAnswer('');setTypoSuggestion(null);setFeedback('');setTimeLeft(ROUND_SECONDS);
     setSession(s=>s?{...s,index:s.index+1>=ROUNDS?s.index:s.index+1,state:s.index+1>=ROUNDS?'finished':'play',roundStartedAt:Date.now()}:s);
   };
-  const home=()=>{submittingRef.current=false;setSession(null);setDuelOpen(false);setPublicMatch(null);setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);setAnswer('');setFeedback('');};
+  const home=()=>{submittingRef.current=false;setTypoSuggestion(null);setSession(null);setDuelOpen(false);setPublicMatch(null);setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);setAnswer('');setFeedback('');};
   const share=async()=>{
     if(!session||session.state!=='finished')return;
     const code=encodeShare(session);
@@ -309,7 +278,7 @@ export default function App(){
           <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><h1>{activePrompt?.label[lang]}</h1></div>
           {session.state==='play'&&<div className="hell-answer-ui cinematic-answer-ui"><div className="answer-card">
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
-            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);setTypoSuggestion(null);if(feedback)setFeedback('');}} onKeyDown={e=>{autocomplete.onKeyDown(e);if(e.key==='Enter'&&(e.nativeEvent.isComposing||e.repeat)){e.preventDefault();}}}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>{setTypoSuggestion(null);autocomplete.select(item,setAnswer);}}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck={false} autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);setTypoSuggestion(null);setFeedback('');}} onKeyDown={e=>{if(e.key==='Enter'&&(e.nativeEvent.isComposing||e.repeat))e.preventDefault();}}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
             {typoSuggestion&&<div className="typo-confirm" role="status"><span>{lang==='ko'?'혹시 이걸 말씀하셨나요?':'DID YOU MEAN THIS?'}</span><strong>{typoSuggestion.display}</strong><small>{typoSuggestion.title!==typoSuggestion.display?typoSuggestion.title:''}</small><button type="button" onClick={()=>{void submit();}}>{lang==='ko'?'Enter 한 번 더 · 이 답으로 제출':'PRESS ENTER AGAIN TO CONFIRM'} ↵</button></div>}
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
