@@ -35,7 +35,7 @@ const suggestSmallTypo=(promptId:string,raw:string):TypoSuggestion|null=>{
  if(Array.from(typed).length<5)return null;
  const list=(thematicAnswers as Record<string,{answers?:string[]}>)[promptId]?.answers||[];
  const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
- let best:{title:string;display:string;distance:number}|null=null,ambiguous=false;
+ let best:{title:string;display:string;distance:number}|null=null;
  for(const title of list){
   const forms=[title,...(aliases?.[title]||[])];
   for(const form of forms){
@@ -43,11 +43,10 @@ const suggestSmallTypo=(promptId:string,raw:string):TypoSuggestion|null=>{
    if(!normalized||Math.abs(Array.from(normalized).length-Array.from(typed).length)>2)continue;
    const distance=editDistanceWithinTwo(typed,normalized);
    if(distance<1||distance>2)continue;
-   if(!best||distance<best.distance){best={title,display:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||title,distance};ambiguous=false;}
-   else if(distance===best.distance&&best.title!==title)ambiguous=true;
+   if(!best||distance<best.distance){best={title,display:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||title,distance};}
   }
  }
- return best&&!ambiguous?{typed:raw.trim(),title:best.title,display:best.display}:null;
+ return best?{typed:raw.trim(),title:best.title,display:best.display}:null;
 };
 const exactCuratedAnswer=(promptId:string,input:string)=>{
  const list=(thematicAnswers as Record<string,{answers?:string[]}>)[promptId]?.answers||[];
@@ -184,10 +183,12 @@ export default function App(){
     const typed=answer.trim();
     if(!typed){setFeedback(t.empty);return;}
     const exact=exactCuratedAnswer(activePrompt.id,typed);
-    // A unique 1-2 character typo is accepted immediately. Never pick the first
-    // suggestion when several works tie: ambiguous titles stay unsubmitted.
-    const correction=exact?null:suggestSmallTypo(activePrompt.id,typed);
-    const resolved=exact||(correction?exactCuratedAnswer(activePrompt.id,correction.title):null);
+    const pending=typoSuggestion?.typed===typed?typoSuggestion:null;
+    if(!exact&&!pending){
+      const correction=suggestSmallTypo(activePrompt.id,typed);
+      if(correction){setTypoSuggestion(correction);setFeedback('');return;}
+    }
+    const resolved=exact||(pending?exactCuratedAnswer(activePrompt.id,pending.title):null);
     if(resolved){
       submittingRef.current=true;
       setTypoSuggestion(null);
