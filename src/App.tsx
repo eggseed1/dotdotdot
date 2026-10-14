@@ -141,7 +141,7 @@ export default function App(){
   };
   const switchLang=(newLang:Lang)=>{setLang(newLang);setFeedback('');setCopied(false);};
 
-  return <div className={`app-shell ${!session&&!publicMatch&&!duelOpen?'is-integrated-home':''}`}>
+  return <div lang={lang} className={`app-shell ${!session&&!publicMatch&&!duelOpen?'is-integrated-home':''}`}>
     <div className="scanline" aria-hidden="true"/>
     <header className="site-header">
       <button className="brand-lockup" onClick={home} title={lang==='ko'?'처음으로':'Home'}>
