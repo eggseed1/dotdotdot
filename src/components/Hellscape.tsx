@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import { devilArt, hellBackdrop } from '../data/art';
 import type { Lang } from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
@@ -10,17 +11,18 @@ const layers = [
   { at: 5000, en: 'THE ABYSS', ko: '심연' },
   { at: 6500, en: 'INFERNAL THRONE', ko: '마왕의 왕좌' },
 ];
-export function Hellscape({ score = 0, opponentScore, lang, compact = false, opponentName }: { score?: number; opponentScore?: number; lang: Lang; compact?: boolean; opponentName?: string }) {
+export function Hellscape({ score = 0, opponentScore, lang, compact = false, opponentName,previewDepth=0,children }: { score?: number; opponentScore?: number; lang: Lang; compact?: boolean; opponentName?: string; previewDepth?:number; children?:ReactNode }) {
   const depth = Math.max(0, Math.min(7000, score * 10));
+  const visualDepth=Math.max(0,Math.min(7000,depth+previewDepth));
   const rank=rarityRank(score>0?score/7:10);
   const opposingDepth = Math.max(0, Math.min(7000, (opponentScore ?? 0) * 10));
-  const phase = Math.min(5, layers.filter(l => depth >= l.at).length - 1);
+  const phase = Math.min(5, layers.filter(l => visualDepth >= l.at).length - 1);
   const current = layers[phase];
   // Camera follows the devil as layers scroll past; CSS interpolates depth changes.
-  const cameraY = 115 - depth * 0.18;
-  const sceneProgress=depth/7000;
+  const cameraY = 115 - visualDepth * 0.18;
+  const sceneProgress=visualDepth/7000;
   const landmarks = layers.map((layer,i)=>({ ...layer, color:['#a75a43','#bd6b43','#775469','#7b454b','#49315c','#d08b49'][i] }));
-  return <div className={`hellscape ${compact ? 'hellscape--compact' : ''} infernal-phase-${phase}`} role="img" aria-label={lang === 'ko' ? `악마가 지옥 ${depth}미터까지 내려왔습니다` : `Devil has descended ${depth} meters into hell`}>
+  return <div className={`hellscape ${compact ? 'hellscape--compact' : ''} infernal-phase-${phase}`} role={children?'group':'img'} aria-label={lang === 'ko' ? `악마가 지옥 ${depth}미터까지 내려왔습니다` : `Devil has descended ${depth} meters into hell`}>
     <div className="hell-backdrop" style={{ backgroundImage: `url(${hellBackdrop})`, transform: `translate3d(0,${Math.min(0, -depth / 95)}px,0) scale(1.22)` }} />
     <div className="hell-pixel-sky" />
     <div className="hell-scene-overlay" style={{opacity:Math.min(.72,sceneProgress*.68)}} />
@@ -47,6 +49,7 @@ export function Hellscape({ score = 0, opponentScore, lang, compact = false, opp
       <div className="hell-route-label"><span>0m</span><span>7000m</span></div>
     </div>
     {opponentScore !== undefined && <div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName || 'RIVAL'} · {opposingDepth}m</span></div>}
+    {children&&<div className="hell-integrated-answer">{children}</div>}
     <div className="hell-bottom-copy">{lang === 'ko' ? '희귀할수록 더 깊이 내려갑니다' : 'THE RARER YOUR ANSWER, THE DEEPER YOU FALL'}</div>
   </div>;
 }
