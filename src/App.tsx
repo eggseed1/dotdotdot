@@ -123,13 +123,13 @@ export default function App(){
         const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
         const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:entry.trim()})});
         if(!response.ok)throw Error('Live validation unavailable');
-        const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
+        const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number;candidates?:Array<{title:string;year?:number;country?:string;genres?:string[];format?:string;source?:string}>;reason?:string};
         if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
           if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
           lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
         }
         if(data.status==='ambiguous'){setFeedback(lang==='ko'?'동명의 작품이 여러 개야. 연도나 제작자를 붙여서 입력해 줘.':'Several titles match. Add a year or creator.');return;}
-        if(data.status==='notEligible'){setFeedback(lang==='ko'?'작품은 찾았지만 출시 연도·국가·장르·형식 중 문제 조건과 일치하지 않아. 메타데이터가 잘못됐을 가능성도 있어.':'Title found, but year, country, genre or format differs from the prompt.');return;}
+        if(data.status==='notEligible'){const found=data.candidates?.[0];const details=found?`${found.title} (${found.year||'연도 미상'}) · ${found.country||'국가 미상'} · ${found.genres?.slice(0,4).join(', ')||'장르 미상'}${found.format?' · '+found.format:''}`:'';setFeedback(lang==='ko'?`작품은 찾았지만 문제의 조건과 달라. ${details}`:`Title found but does not match the prompt. ${details}`);return;}
         if(data.status==='unverified'){setFeedback(lang==='ko'?'작품은 발견됐지만 장르·국가 등 검증 데이터가 부족해. 정답이 아닐 수도 있고 DB 문제일 수도 있어.':'Title found, but source metadata is incomplete; eligibility cannot be confirmed.');return;}
         setFeedback(lang==='ko'?'검색 데이터에서 정확히 일치하는 작품을 찾지 못했어. 정답이 틀렸다는 뜻은 아니야. 원제·영문 제목이나 다른 표기를 시도해 봐.':'No exact title match in the available sources. This does not prove the answer is wrong.');return;
       }catch{
