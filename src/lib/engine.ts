@@ -14,6 +14,14 @@ export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
 };
 
 export const promptPool: Prompt[] = [
+  {id:'f-lynch-directed',kind:'film',badge:{en:'FILM · DIRECTOR',ko:'영화 · 감독'},label:{en:'Name a feature film directed by David Lynch.',ko:'데이비드 린치가 감독한 장편영화를 대보세요.'},match:()=>false},
+  {id:'f-park-directed',kind:'film',badge:{en:'FILM · DIRECTOR',ko:'영화 · 감독'},label:{en:'Name a feature film directed by Park Chan-wook.',ko:'박찬욱이 감독한 장편영화를 대보세요.'},match:()=>false},
+  {id:'a-evangelion-character',kind:'anime',badge:{en:'ANIME · CHARACTERS',ko:'애니 · 등장인물'},label:{en:'Name a character from Neon Genesis Evangelion.',ko:'《신세기 에반게리온》 등장인물 한 명을 대보세요.'},match:()=>false},
+  {id:'a-ghibli-movie',kind:'anime',badge:{en:'ANIME · STUDIO',ko:'애니 · 스튜디오'},label:{en:'Name a Studio Ghibli feature film.',ko:'스튜디오 지브리에서 제작한 장편영화를 대보세요.'},match:()=>false},
+  {id:'g-fromsoftware-game',kind:'games',badge:{en:'GAMES · STUDIO',ko:'게임 · 개발사'},label:{en:'Name a game developed by FromSoftware.',ko:'프롬소프트웨어가 개발한 게임을 대보세요.'},match:()=>false},
+  {id:'l-murakami-novel',kind:'literature',badge:{en:'BOOKS · AUTHOR',ko:'문학 · 작가'},label:{en:'Name a novel by Haruki Murakami.',ko:'무라카미 하루키가 쓴 장편소설을 대보세요.'},match:()=>false},
+  {id:'tv-twinpeaks-character',kind:'tv',badge:{en:'TV · CHARACTERS',ko:'TV · 등장인물'},label:{en:'Name a character from Twin Peaks.',ko:'《트윈 픽스》 등장인물 한 명을 대보세요.'},match:()=>false},
+
   {id:'f-90s-one-word',kind:'film',badge:{en:'FILM · TITLE TRICK',ko:'영화 · 제목 놀이'},label:{en:'Name a film released in the 1990s with a one-word English title.',ko:'1990년대 영화 중 영어 제목이 딱 한 단어인 작품을 대보세요.'},match:w=>w.year>=1990&&w.year<=1999&&w.title.trim().split(/\\s+/u).length===1},
   {id:'a-ova-90s',kind:'anime',badge:{en:'ANIME · VIDEO ERA',ko:'애니 · 비디오 시대'},label:{en:'Name an anime OVA first released in the 1990s. TV series and theatrical films do not count.',ko:'1990년대에 처음 출시된 OVA 애니메이션을 대보세요. TV판·극장판은 제외.'},match:w=>w.year>=1990&&w.year<=1999&&w.format==='OVA'},
   {id:'g-rpg-2000s-japan',kind:'games',badge:{en:'GAMES · JRPG SHELF',ko:'게임 · JRPG 덕후'},label:{en:'Name a role-playing video game developed in Japan and first released in the 2000s.',ko:'2000년대에 처음 나온 일본 개발 RPG 게임을 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&w.country==='Japan'&&w.genres.includes('rpg')},
