@@ -1,3 +1,4 @@
+import dailyEditorial from '../data/daily-editorial.json';
 import { byId, catalog } from '../data/catalog';
 import { rarityFromRank, RARITY_TAGS, SCORE_TIERS } from './rarity-model.mjs';
 import type { GameSession, Kind, Mode, Prompt, RoundResult, Work } from './types';
@@ -53,35 +54,14 @@ export const promptPool: Prompt[] = [
 
 export const promptById = new Map(promptPool.map(p=>[p.id,p]));
 
-function hash(input:string): number {
-  let h=2166136261;
-  for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,16777619);}
-  return h>>>0;
-}
-function shuffle<T>(array:T[], seed:string):T[] {
-  const sorted=[...array];let n=hash(seed)||1;
-  for(let i=sorted.length-1;i>0;i--){n^=n<<13;n^=n>>>17;n^=n<<5;const j=(n>>>0)%(i+1);[sorted[i],sorted[j]]=[sorted[j],sorted[i]];}
-  return sorted;
-}
-
 export function eligible(prompt:Prompt):Work[] {
   return catalog.filter(w=>(prompt.kind==='any'||w.kind===prompt.kind)&&prompt.match(w));
 }
 export function selectPrompts(_mode:Mode,date:string):Prompt[] {
-  // Server-backed genres, country and format replace the tiny demo's eligibility gate.
-  const groups: Array<[Kind,number,string[]]>=[
-    ['film',2,['f-korean-2000s-drama','f-japan-90s-horror','f-70s-sci-fi']],
-    ['anime',2,['a-90s-sci-fi-tv','a-2000s-movie-fantasy','a-2010s-mystery-tv','a-2000s-psych-tv']],
-    ['games',1,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-psych']],
-    ['tv',1,['tv-90s-drama','tv-2000s-scifi','tv-2010s-crime']],
-    ['literature',1,['l-experimental','l-japanese','l-asia','l-1900s']]
-  ];
-  const chosen=groups.flatMap(([kind,count,ids])=>{
-    const valid=ids.map(id=>promptById.get(id)!).filter(Boolean)
-      .filter(p=>kind!=='literature'||eligible(p).length>=2);
-    return shuffle(valid,date+kind).slice(0,count);
-  });
-  return shuffle(chosen,date+'all');
+  const schedule=dailyEditorial as Record<string,unknown>;
+  const ids=schedule[date];
+  if(!Array.isArray(ids)||ids.length!==7||new Set(ids).size!==7||!ids.every(id=>typeof id==='string'&&promptById.has(id)))return [];
+  return ids.map(id=>promptById.get(id as string)!);
 }
 
 /** Unicode-aware canonicalization; Hangul is preserved. */
