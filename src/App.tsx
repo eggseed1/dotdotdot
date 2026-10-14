@@ -119,7 +119,7 @@ export default function App(){
   const modeLabel=(_mode:Mode)=>t.all;
 
   useEffect(()=>setSaved('deepcut:lang:ko-default-v2',lang),[lang]);
-  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:exact-answer-v4',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
+  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:exact-answer-v5',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
   useEffect(()=>{if(!session||session.state!=='play')return;
     const tick=()=>{
       const remaining=Math.max(0,ROUND_SECONDS-(Date.now()-session.roundStartedAt)/1000);
@@ -150,7 +150,7 @@ export default function App(){
     mode='all';
     setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);
     const finished=getSaved<{score:number}>(gameKey(mode,date));
-    const existing=getSaved<GameSession>('deepcut:session:cinematic-v3');
+    const existing=getSaved<GameSession>('deepcut:session:exact-answer-v5');
     if(!practice&&!finished&&existing?.date===date&&existing?.mode===mode&&existing.state!=='finished'&&existing.prompts.every(id=>!id.startsWith('m-'))){
       setSession(existing);setAnswer('');setFeedback('');setCopied(false);return;
     }
@@ -279,7 +279,7 @@ export default function App(){
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
           </div></div>}
         {session.state==='play'?<></>:<div className="reveal-panel reveal-panel--inside-hell">
-          {activeWork?<><div className="reveal-status good"><Check size={16}/>{t.accepted}</div><p className="reveal-work-label">{t.yourPick}</p><h2>{lang==='ko'&&activeWork.titleKo?activeWork.titleKo:activeWork.title}</h2><p className="reveal-creator">{activeWork.creator} <span>·</span> {activeWork.year} <span>·</span> {activeWork.country}</p><p className="genre-line">{activeWork.genres.slice(0,3).join(' · ')}</p><div className={`points-won points-won--tier-${activeResult?.points||0}`}><span className="rarity-label">{activeResult?`${activeResult.points>=100?(lang==="ko"?"이걸 안다고?":"WHAT EVEN"):activeResult.points>=85?(lang==="ko"?"진짜 마이너":"DEEP CUT"):activeResult.points>=60?(lang==="ko"?"꽤 마이너":"OBSCURE"):activeResult.points>=30?(lang==="ko"?"좀 아는 편":"NICHE"):activeResult.points>=15?(lang==="ko"?"흔한 답":"COMMON"):(lang==="ko"?"너무 쉬움":"OBVIOUS")} · ${rarityRank(activeResult.points)[lang]}`:''}</span><strong>+{activeResult?.points}</strong><span>{t.points}</span></div></>:<><div className="reveal-status missing"><X size={16}/>{activeResult?.timedOut?t.noMore:t.skipped}</div><h2 className="miss-title">{t.noAnswer}</h2><div className="points-won empty-points"><strong>+0</strong><span>{t.points}</span></div></>}
+          {activeWork?<><div className="reveal-status good"><Check size={16}/>{t.accepted}</div><p className="reveal-work-label">{lang==='ko'?`내가 입력한 답: ${activeResult?.rawAnswer||''}`:`YOU TYPED: ${activeResult?.rawAnswer||''}`}</p><h2>{lang==='ko'&&activeWork.titleKo?activeWork.titleKo:activeWork.title}</h2><p className="reveal-creator">{activeWork.creator} <span>·</span> {activeWork.year} <span>·</span> {activeWork.country}</p><p className="genre-line">{activeWork.genres.slice(0,3).join(' · ')}</p><div className={`points-won points-won--tier-${activeResult?.points||0}`}><span className="rarity-label">{activeResult?`${activeResult.points>=100?(lang==="ko"?"이걸 안다고?":"WHAT EVEN"):activeResult.points>=85?(lang==="ko"?"진짜 마이너":"DEEP CUT"):activeResult.points>=60?(lang==="ko"?"꽤 마이너":"OBSCURE"):activeResult.points>=30?(lang==="ko"?"좀 아는 편":"NICHE"):activeResult.points>=15?(lang==="ko"?"흔한 답":"COMMON"):(lang==="ko"?"너무 쉬움":"OBVIOUS")} · ${rarityRank(activeResult.points)[lang]}`:''}</span><strong>+{activeResult?.points}</strong><span>{t.points}</span></div></>:<><div className="reveal-status missing"><X size={16}/>{activeResult?.timedOut?t.noMore:t.skipped}</div><h2 className="miss-title">{t.noAnswer}</h2><div className="points-won empty-points"><strong>+0</strong><span>{t.points}</span></div></>}
           <button className="action-button next-button" onClick={next}>{session.index===ROUNDS-1?t.seeResults:t.next}<ArrowRight size={17}/></button>
           
         </div>}
