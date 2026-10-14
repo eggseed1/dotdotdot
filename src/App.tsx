@@ -44,7 +44,7 @@ export default function App(){
     const param=new URLSearchParams(window.location.search).get('r');
     if(param){const shared=decodeShare(param);if(shared)return shared.session;}
     const saved=getSaved<GameSession>('deepcut:session');
-    return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'?saved:null;
+    return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'&&saved.prompts.every(id=>!id.startsWith('m-'))?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
   const [landingMode,setLandingMode]=useState<Mode>('all');
@@ -86,7 +86,7 @@ export default function App(){
     setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);
     const finished=getSaved<{score:number}>(gameKey(mode,date));
     const existing=getSaved<GameSession>('deepcut:session');
-    if(!practice&&!finished&&existing?.date===date&&existing?.mode===mode&&existing.state!=='finished'){
+    if(!practice&&!finished&&existing?.date===date&&existing?.mode===mode&&existing.state!=='finished'&&existing.prompts.every(id=>!id.startsWith('m-'))){
       setSession(existing);setAnswer('');setFeedback('');setCopied(false);return;
     }
     const game=newGame(mode,date,practice||Boolean(finished)?false:true);
