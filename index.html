@@ -37,14 +37,14 @@ html,body{margin:0;min-height:100%;background:#190408;color:#fff0dc;font-family:
 </head><body><div id="root"><main id="fallback-home"><div class="lang"><button id="fb-en">EN</button><button id="fb-ko">한국어</button></div><div class="wrap" id="fb-wrap">
 <p class="eyebrow" id="fb-eyebrow">THE OBSCURITY GAME</p><h1 id="fb-title">larper101</h1>
 <img class="sprite" src="./public/devil.png" alt="Red pixel devil" />
-<p class="caption" id="fb-tagline">THE RARER YOU KNOW, THE DEEPER YOU GO.</p>
+
 <div class="modes"><button id="fb-music" class="active">MUSIC</button><button id="fb-all">ALL MEDIA</button></div>
 <button id="fb-start" class="start">START →</button>
 <p class="fine" id="fb-fine">7 ROUNDS · 25 SECONDS · LIMITED OFFLINE CATALOG</p></div></main></div><script type="module" src="/src/main.tsx"></script>
 <script>
 (function(){
 var root=document.getElementById('root'),mode='music',lang='en',items=[],questions=[],results=[],round=0,seconds=25,timer=null,chosen='';
-var labels={en:{title:'larper101',eyebrow:'THE OBSCURITY GAME',tag:'THE RARER YOU KNOW, THE DEEPER YOU GO.',music:'MUSIC',all:'ALL MEDIA',start:'START →',fine:'7 ROUNDS · 25 SECONDS · LIMITED OFFLINE CATALOG',submit:'LOCK IN →',next:'NEXT →',skip:'SKIP →',again:'PLAY AGAIN',missing:'Not found in the offline demo catalog.',incorrect:'That title does not match this prompt.',complete:'YOU DESCENDED',archive:'POSSIBLE ANSWERS',copy:'COPY RESULTS'},ko:{title:'꺼드럭대마왕',eyebrow:'지옥의 꺼드럭 퀴즈',tag:'마이너할수록 더 깊이 내려간다.',music:'음악',all:'전체 미디어',start:'시작하기 →',fine:'7문제 · 문제당 25초 · 제한된 체험판 데이터',submit:'제출 →',next:'다음 →',skip:'넘기기 →',again:'다시 하기',missing:'체험판 데이터에 없는 작품입니다.',incorrect:'이 문제의 조건과 맞지 않습니다.',complete:'지옥 하강 완료',archive:'가능한 정답',copy:'결과 복사'}};
+var labels={en:{title:'larper101',eyebrow:'THE OBSCURITY GAME',tag:'',music:'MUSIC',all:'ALL MEDIA',start:'START →',fine:'7 ROUNDS · 25 SECONDS · LIMITED OFFLINE CATALOG',submit:'LOCK IN →',next:'NEXT →',skip:'SKIP →',again:'PLAY AGAIN',missing:'Not found in the offline demo catalog.',incorrect:'That title does not match this prompt.',complete:'YOU DESCENDED',archive:'POSSIBLE ANSWERS',copy:'COPY RESULTS'},ko:{title:'꺼드럭대마왕',eyebrow:'지옥의 꺼드럭 퀴즈',tag:'',music:'음악',all:'전체 미디어',start:'시작하기 →',fine:'7문제 · 문제당 25초 · 제한된 체험판 데이터',submit:'제출 →',next:'다음 →',skip:'넘기기 →',again:'다시 하기',missing:'체험판 데이터에 없는 작품입니다.',incorrect:'이 문제의 조건과 맞지 않습니다.',complete:'지옥 하강 완료',archive:'가능한 정답',copy:'결과 복사'}};
 function txt(){return labels[lang]}
 function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function setLanguage(next){lang=next;var e=document.getElementById('fb-title');if(!e)return;['title','eyebrow','tagline','fine'].forEach(function(k){var el=document.getElementById('fb-'+k);if(el)el.textContent=txt()[k==='tagline'?'tag':k]});document.getElementById('fb-music').textContent=txt().music;document.getElementById('fb-all').textContent=txt().all;document.getElementById('fb-start').textContent=txt().start}
