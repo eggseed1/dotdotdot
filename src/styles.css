@@ -931,3 +931,13 @@ button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixe
 
 /* Preserve fixed camera framing throughout the descent: no zoom or scaling. */
 .krillion-game-screen .hellscape:has(.reveal-panel--inside-hell) .infernal-sky{transform-origin:center center}
+
+
+/* Explicit typo confirmation: never silently replace user input. */
+.typo-confirm{position:relative;z-index:120;display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;background:#20102bf5;border:3px solid #e9ae79;box-shadow:5px 5px #0e0717;color:#ffe1b7;padding:10px 12px;margin:10px auto 0;width:min(100%,490px);box-sizing:border-box}
+.typo-confirm span{font:700 clamp(11px,1.6vw,14px) 'Galmuri11','Noto Sans KR',sans-serif}
+.typo-confirm strong{font:900 clamp(15px,3vw,24px)/1.35 'Galmuri11','Noto Sans KR',sans-serif;color:#fff3d6;overflow-wrap:anywhere}
+.typo-confirm small{font-size:10px;color:#d3a8b1}
+.typo-confirm button{background:#f2bf88;border:2px solid #592f3f;color:#261121;font:700 11px 'Galmuri11','Noto Sans KR',sans-serif;cursor:pointer;padding:9px 12px}
+.typo-confirm button:focus-visible{outline:3px solid white;outline-offset:2px}
+@media(max-width:600px){.typo-confirm{padding:8px;gap:4px;margin-top:6px}.typo-confirm button{font-size:10px;padding:7px}}
