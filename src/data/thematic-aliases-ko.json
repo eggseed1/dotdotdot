@@ -1,5 +1,5 @@
 {
-  "_schema": "Title-to-alias mapping keyed by prompt ID. Korean forms include editorial approximations and should not be represented as all official release titles.",
+  "_schema": "Prompt-level aliases (Korean common/distribution titles, Japanese originals, international variants). When no formal Korean release title is known, Korean transliteration is editorial, not an official title.",
   "_sources": {
     "f-title-number": {
       "964 Pinocchio": "https://www.yes24.com/product/goods/144994525",
@@ -347,6 +347,271 @@
     ],
     "Carnival Phantasm": [
       "카니발 판타즘"
+    ],
+    "Seitokai no Ichizon": [
+      "학생회의 일존",
+      "生徒会の一存"
+    ],
+    "Student Council's Discretion": [
+      "학생회의 일존",
+      "生徒会の一存"
+    ],
+    "Nyaruko: Crawling with Love!": [
+      "기어와라! 냐루코 양",
+      "這いよれ! ニャル子さん"
+    ],
+    "Haiyore! Nyaruko-san": [
+      "기어와라! 냐루코 양",
+      "這いよれ! ニャル子さん"
+    ],
+    "Miami Guns": [
+      "마이애미 건즈",
+      "マイアミ☆ガンズ"
+    ],
+    "Kanokon": [
+      "카노콘",
+      "かのこん"
+    ],
+    "Zoku Sayonara Zetsubou-Sensei": [
+      "속 안녕 절망선생",
+      "【俗・】さよなら絶望先生"
+    ],
+    "Pani Poni Dash!": [
+      "파니포니 대쉬!",
+      "ぱにぽにだっしゅ!"
+    ],
+    "Zan Sayonara Zetsubou-Sensei": [
+      "참 안녕 절망선생",
+      "【懺・】さよなら絶望先生"
+    ],
+    "Maria Holic": [
+      "마리아 홀릭",
+      "まりあ†ほりっく"
+    ],
+    "Maria Holic Alive": [
+      "마리아 홀릭 얼라이브",
+      "まりあ†ほりっく あらいぶ"
+    ],
+    "Seitokai no Ichizon Lv.2": [
+      "학생회의 일존 Lv.2",
+      "生徒会の一存 Lv.2"
+    ],
+    "Osomatsu-kun": [
+      "오소마츠 군",
+      "おそ松くん"
+    ],
+    "Sgt. Frog": [
+      "개구리 중사 케로로",
+      "ケロロ軍曹"
+    ],
+    "Anime Tenchou": [
+      "애니메 점장",
+      "アニメ店長"
+    ],
+    "Anime-Gataris": [
+      "애니메가타리즈",
+      "アニメガタリズ"
+    ],
+    "Akiba's Trip: The Animation": [
+      "아키바즈 트립 더 애니메이션",
+      "AKIBA'S TRIP -THE ANIMATION-"
+    ],
+    "Akiba Maid War": [
+      "아키바 메이드 전쟁",
+      "アキバ冥途戦争"
+    ],
+    "Binbougami ga!": [
+      "가난뱅이 신이!",
+      "貧乏神が!"
+    ],
+    "Good Luck Girl!": [
+      "가난뱅이 신이!",
+      "貧乏神が!"
+    ],
+    "Fate/Grand Carnival": [
+      "페이트 그랜드 카니발",
+      "Fate/Grand Carnival"
+    ],
+    "Gugure! Kokkuri-san": [
+      "구구레! 코쿠리 씨",
+      "繰繰れ! コックリさん"
+    ],
+    "Arakawa Under the Bridge": [
+      "아라카와 언더 더 브리지",
+      "荒川アンダー ザ ブリッジ"
+    ],
+    "Joshiraku": [
+      "죠시라쿠",
+      "じょしらく"
+    ],
+    "Is This a Zombie?": [
+      "이것은 좀비입니까?",
+      "これはゾンビですか?"
+    ],
+    "School Rumble": [
+      "스쿨럼블",
+      "スクールランブル"
+    ],
+    "Nerima Daikon Brothers": [
+      "네리마 다이콘 브라더스",
+      "練馬大根ブラザーズ"
+    ],
+    "Dokidoki Densetsu Mahoujin Guru Guru": [
+      "두근두근 전설 마법진 구루구루",
+      "ドキドキ♡伝説 魔法陣グルグル"
+    ],
+    "Magical Circle Guru-Guru": [
+      "마법진 구루구루",
+      "魔法陣グルグル"
+    ],
+    "Dai Mahou Touge": [
+      "대마법고개",
+      "大魔法峠"
+    ],
+    "Nurse Witch Komugi": [
+      "너스위치 코무기짱 R",
+      "ナースウィッチ小麦ちゃんR"
+    ],
+    "Bokusatsu Tenshi Dokuro-chan": [
+      "박살천사 도쿠로짱",
+      "撲殺天使ドクロちゃん"
+    ],
+    "Bludgeoning Angel Dokuro-chan": [
+      "박살천사 도쿠로짱",
+      "撲殺天使ドクロちゃん"
+    ],
+    "Mitsudomoe": [
+      "쓰리몬",
+      "みつどもえ"
+    ],
+    "Ebichu Minds the House": [
+      "오루치우반 에비츄",
+      "おるちゅばんエビちゅ"
+    ],
+    "Super Milk Chan": [
+      "슈퍼 밀크짱",
+      "OH!スーパーミルクチャン"
+    ],
+    "Senyuu.": [
+      "전용.",
+      "戦勇。"
+    ],
+    "SKET Dance": [
+      "스켓 댄스",
+      "SKET DANCE"
+    ],
+    "Plastic Nee-san": [
+      "플라스틱 언니",
+      "+チック姉さん"
+    ],
+    "Azumanga Daioh": [
+      "아즈망가 대왕",
+      "あずまんが大王"
+    ],
+    "Galaxy Angel": [
+      "갤럭시 엔젤",
+      "ギャラクシーエンジェル"
+    ],
+    "Jungle wa Itsumo Hare nochi Guu": [
+      "정글은 언제나 맑음 뒤 흐림",
+      "ジャングルはいつもハレのちグゥ"
+    ],
+    "SoreMachi": [
+      "그래도 마을은 돌아간다",
+      "それでも町は廻っている"
+    ],
+    "Aho Girl": [
+      "바보걸",
+      "アホガール"
+    ],
+    "D-Frag!": [
+      "디-프래그!",
+      "ディーふらぐ!"
+    ],
+    "To Be Hero": [
+      "투 비 히어로",
+      "TO BE HERO"
+    ],
+    "To Be Heroine": [
+      "투 비 히로인",
+      "TO BE HEROINE"
+    ],
+    "Robot Girls Z": [
+      "로봇 걸즈 Z",
+      "ロボットガールズZ"
+    ],
+    "Mahou Shoujo Ore": [
+      "마법소녀 나",
+      "魔法少女 俺"
+    ],
+    "Cute High Earth Defense Club LOVE!": [
+      "미남고교 지구방위부 LOVE!",
+      "美男高校地球防衛部LOVE!"
+    ],
+    "Space Patrol Luluco": [
+      "우주 패트롤 루루코",
+      "宇宙パトロールルル子"
+    ],
+    "Inferno Cop": [
+      "인페르노 캅",
+      "インフェルノコップ"
+    ],
+    "Puni Puni Poemy": [
+      "푸니푸니 포에미",
+      "ぷにぷに☆ぽえみぃ"
+    ],
+    "Cream Lemon": [
+      "크림 레몬",
+      "くりいむレモン"
+    ],
+    "Great Teacher Onizuka": [
+      "GTO",
+      "그레이트 티처 오니즈카",
+      "グレート・ティーチャー・オニヅカ"
+    ],
+    "Gintama°": [
+      "은혼°",
+      "銀魂°"
+    ],
+    "Gintama': Enchousen": [
+      "은혼 연장전",
+      "銀魂' 延長戦"
+    ],
+    "Gintama'": [
+      "은혼'",
+      "銀魂'"
+    ],
+    "Kaguya-sama: Love Is War - Ultra Romantic": [
+      "카구야 님은 고백받고 싶어 -울트라 로맨틱-",
+      "かぐや様は告らせたい-ウルトラロマンティック-"
+    ],
+    "No Game No Life": [
+      "노 게임 노 라이프",
+      "ノーゲーム・ノーライフ"
+    ],
+    "Comic Party": [
+      "코믹 파티",
+      "こみっくパーティー"
+    ],
+    "Kyoufu no Kyo-chan": [
+      "공포의 쿄짱",
+      "恐怖のキョーちゃん"
+    ],
+    "Ayu Mayu Theater": [
+      "아유마유 극장",
+      "あゆまゆ劇場"
+    ],
+    "My Teen Romantic Comedy SNAFU": [
+      "역시 내 청춘 러브코메디는 잘못됐다.",
+      "やはり俺の青春ラブコメはまちがっている。"
+    ],
+    "The Disastrous Life of Saiki K.": [
+      "사이키 쿠스오의 재난",
+      "斉木楠雄のΨ難"
+    ],
+    "Watamote: No Matter How I Look at It, It's You Guys' Fault I'm Not Popular!": [
+      "내가 인기 없는 건 아무리 생각해도 너희들 탓이야!",
+      "私がモテないのはどう考えてもお前らが悪い!"
     ]
   },
   "l-fictional-book": {
