@@ -1,6 +1,6 @@
 import {canonical} from '../src/lib/title-match.mjs';
 // Rate-limited upstream MusicBrainz search. No site scraping, no mass harvesting.
-const cache=new Map(),MAX=900,TTL=1000*60*60*8;
+const cache=new Map(),detailsCache=new Map(),MAX=900,TTL=1000*60*60*8;
 let pending=Promise.resolve(),last=0;
 function enqueue(job){const run=pending.then(async()=>{const wait=Math.max(0,1150-(Date.now()-last));if(wait)await new Promise(r=>setTimeout(r,wait));last=Date.now();return job();});pending=run.catch(()=>{});return run;}
 export function normalizeMB(item){
@@ -29,6 +29,29 @@ export async function searchMusicBrainz(input,{limit=12}={}){
   }finally{clearTimeout(timeout);}
  });
  cache.set(key,{expires:Date.now()+TTL,items});return items;
+}
+async function mbGet(route){return enqueue(async()=>{
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
+ try{const res=await fetch('https://musicbrainz.org/ws/2/'+route,{signal:controller.signal,headers:{'User-Agent':`larper101/0.3 (contact: ${process.env.CATALOG_CONTACT_EMAIL||'https://github.com/eggseed1/dotdotdot'})`,'Accept':'application/json'}});
+ if(!res.ok)throw Error('MusicBrainz details unavailable: '+res.status);
+ return res.json();
+ }finally{clearTimeout(timer);}
+});}
+const countryNames={'JP':'Japan','BR':'Brazil','GB':'United Kingdom','US':'United States','KR':'South Korea'};
+export async function enrichMusicBrainz(work){
+ if(!work?.id?.startsWith('musicbrainz:'))return work;
+ const id=work.id.slice('musicbrainz:'.length),existing=detailsCache.get(id);
+ if(existing&&existing.expires>Date.now())return {...work,...existing.fields};
+ const result=await mbGet('release-group/'+encodeURIComponent(id)+'?inc=genres+artist-credits&fmt=json');
+ const genres=(result.genres||[]).filter(g=>g.count>0).map(g=>g.name.toLowerCase());
+ const artistId=result['artist-credit']?.find(a=>a.artist)?.artist?.id;
+ let country='';
+ if(artistId){try{const artist=await mbGet('artist/'+encodeURIComponent(artistId)+'?fmt=json');
+ country=countryNames[artist.country]||artist.area?.name||'';}catch{}}
+ const fields={genres,country};
+ detailsCache.set(id,{fields,expires:Date.now()+TTL});
+ if(detailsCache.size>MAX)detailsCache.delete(detailsCache.keys().next().value);
+ return {...work,...fields};
 }
 export function exactLiveMatches(raw,items){
  const key=canonical(raw);
