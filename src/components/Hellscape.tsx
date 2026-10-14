@@ -1,55 +1,22 @@
 import type {ReactNode} from 'react';
-import { devilArt, hellBackdrop } from '../data/art';
-import type { Lang } from '../lib/types';
+import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
 
-const layers = [
-  { at: 0, en: 'THE GATES', ko: '지옥문' },
-  { at: 700, en: 'EMBER FALLS', ko: '잿불 폭포' },
-  { at: 1700, en: 'THE CRYPTS', ko: '납골당' },
-  { at: 3200, en: 'BONE WASTES', ko: '뼈의 황무지' },
-  { at: 5000, en: 'THE ABYSS', ko: '심연' },
-  { at: 6500, en: 'INFERNAL THRONE', ko: '마왕의 왕좌' },
-];
-export function Hellscape({ score = 0, opponentScore, lang, compact = false, opponentName,previewDepth=0,children }: { score?: number; opponentScore?: number; lang: Lang; compact?: boolean; opponentName?: string; previewDepth?:number; children?:ReactNode }) {
-  const depth = Math.max(0, Math.min(7000, score * 10));
-  const visualDepth=Math.max(0,Math.min(7000,depth+previewDepth));
-  const rank=rarityRank(score>0?score/7:10);
-  const opposingDepth = Math.max(0, Math.min(7000, (opponentScore ?? 0) * 10));
-  const phase = Math.min(5, layers.filter(l => visualDepth >= l.at).length - 1);
-  const current = layers[phase];
-  // Camera follows the devil as layers scroll past; CSS interpolates depth changes.
-  const cameraY = 115 - visualDepth * 0.18;
-  const sceneProgress=visualDepth/7000;
-  const landmarks = layers.map((layer,i)=>({ ...layer, color:['#a75a43','#bd6b43','#775469','#7b454b','#49315c','#d08b49'][i] }));
-  return <div className={`hellscape ${compact ? 'hellscape--compact' : ''} infernal-phase-${phase}`} role={children?'group':'img'} aria-label={lang === 'ko' ? `악마가 지옥 ${depth}미터까지 내려왔습니다` : `Devil has descended ${depth} meters into hell`}>
-    <div className="hell-backdrop" style={{ backgroundImage: `url(${hellBackdrop})`, transform: `translate3d(0,${Math.min(0, -depth / 95)}px,0) scale(1.22)` }} />
-    <div className="hell-pixel-sky" />
-    <div className="hell-scene-overlay" style={{opacity:Math.min(.72,sceneProgress*.68)}} />
-    <div className="hell-speedlines" aria-hidden="true">{Array.from({length:12},(_,i)=><i key={i} style={{left:`${7+(i*17)%86}%`,animationDelay:`-${i*.17}s`,height:`${15+(i%4)*17}px`}} />)}</div>
-    <div className="hell-world" style={{transform:`translate3d(0,${cameraY}px,0)`}}>
-      {landmarks.map((layer,i)=><div className="hell-world-layer" key={layer.at} style={{top:`${layer.at*.18}px`,borderColor:layer.color}}><span className="hell-world-depth">▼ {layer.at.toLocaleString()}m</span><strong>{layer[lang]}</strong><div className={`hell-world-feature feature-${i}`}><i/><i/><i/><i/><i/></div><div className={`hell-biome hell-biome-${i}`}><span/><span/><span/><span/><span/><span/></div></div>)}
-      {Array.from({length:26},(_,i)=><div className="hell-world-ember" key={i} style={{top:`${80+i*49}px`,left:`${6+(i*37)%85}%`,animationDelay:`-${(i%7)*.41}s`}}/>)}
-    </div>
-    <div className="hell-particle hell-particle-a">✦</div><div className="hell-particle hell-particle-b">✧</div><div className="hell-particle hell-particle-c">+</div>
-    <div className="hell-headline"><span>▼ {lang === 'ko' ? '지옥 탐험 중' : 'DESCENDING INTO HELL'}</span><strong>{current[lang]}</strong><small className="hell-rank-label">{rank.symbol} {rank[lang]} · {rank.division}</small></div>
-    <div className="hell-foreground-ridge ridge-left" />
-    <div className="hell-foreground-ridge ridge-right" />
-    <div className="hell-character-zone">
-      <div className="hell-character-halo" />
-      <img className="hell-character" src={devilArt} draggable="false" alt={lang === 'ko' ? '빨간 픽셀 악마' : 'Red pixel devil adventurer'} />
-      <div className="hell-character-shadow" />
-    </div>
-    <div className="hell-depth"><small>{lang === 'ko' ? '현재 심도' : 'CURRENT DEPTH'}</small><b>{depth.toLocaleString()}<em>m</em></b></div>
-    <div className="hell-route">
-      <div className="hell-route-track"><div className="hell-route-fill" style={{ height: `${depth / 7000 * 100}%` }} />
-        <div className="hell-route-marker" style={{ top: `${Math.max(1, Math.min(96, depth / 7000 * 100))}%` }}>▼</div>
-        {opponentScore !== undefined && <div className="hell-route-marker hell-route-rival" style={{ top: `${Math.max(1, Math.min(96, opposingDepth / 7000 * 100))}%` }}>◆</div>}
-      </div>
-      <div className="hell-route-label"><span>0m</span><span>7000m</span></div>
-    </div>
-    {opponentScore !== undefined && <div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName || 'RIVAL'} · {opposingDepth}m</span></div>}
-    {children}
-    <div className="hell-bottom-copy">{lang === 'ko' ? '희귀할수록 더 깊이 내려갑니다' : 'THE RARER YOUR ANSWER, THE DEEPER YOU FALL'}</div>
-  </div>;
+/** Original neon-city journey: a camera-follow road scene, no fantasy/hell elements. */
+export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName,previewDepth=0,children}:{score?:number;opponentScore?:number;lang:Lang;compact?:boolean;opponentName?:string;previewDepth?:number;children?:ReactNode}){
+ const distance=Math.max(0,Math.min(7000,score*10));
+ const moving=Math.max(0,Math.min(7000,distance+previewDepth));
+ const rank=rarityRank(score>0?score/7:10);
+ const lights=Array.from({length:40},(_,i)=>({x:(i*73+17)%100,y:(i*47+13)%42,size:i%4===0?3:1}));
+ return <div className={`hellscape cityscape-scene ${compact?'hellscape--compact':''}`} role={children?'group':'img'} aria-label={lang==='ko'?`도시를 ${distance}미터 이동했습니다`:`Travelled ${distance} meters through the city`}>
+  <div className="neon-sky" aria-hidden="true"><div className="neon-moon"/>{lights.map((l,i)=><i className="neon-star" key={i} style={{left:`${l.x}%`,top:`${l.y}%`,width:l.size,height:l.size}}/>)}</div>
+  <div className="neon-hills" aria-hidden="true"/>
+  <div className="neon-skyline skyline-back" aria-hidden="true" style={{transform:`translateX(-${moving*.016%80}px)`}}>{Array.from({length:19},(_,i)=><i key={i} style={{height:`${28+(i*47)%51}%`}}/>)}</div>
+  <div className="neon-skyline skyline-front" aria-hidden="true" style={{transform:`translateX(-${moving*.039%130}px)`}}>{Array.from({length:17},(_,i)=><i key={i} style={{height:`${38+(i*29)%53}%`}}/>)}</div>
+  <div className="neon-sidewalk" aria-hidden="true"/><div className="neon-road" aria-hidden="true"><div className="neon-road-stripes" style={{backgroundPositionX:`-${moving*.35}px`}}/></div>
+  <div className="neon-player" aria-hidden="true"><div className="neon-travel-car"><span className="car-roof"/><span className="car-window"/><span className="car-driver"/><span className="car-body"/><span className="car-light"/><span className="car-wheel wheel-left"/><span className="car-wheel wheel-right"/></div></div>
+  <div className="city-distance-readout"><small>{lang==='ko'?'이동 거리':'DISTANCE'}</small><b>{distance.toLocaleString()}m</b><span>{rank[lang]} · {rank.division}</span></div>
+  {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {distance}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
+  {children}
+ </div>;
 }
