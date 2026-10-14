@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
-import {canonical,phoneticKeys} from '../src/lib/title-match.mjs';
+import {canonical} from '../src/lib/title-match.mjs';
 
 const argv=process.argv.slice(2);
 const arg=(name,otherwise)=>{const i=argv.indexOf(name);return i<0?otherwise:argv[i+1];};
