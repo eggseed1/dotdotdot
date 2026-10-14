@@ -8,7 +8,7 @@ describe('daily engine',()=>{
       expect(a).toHaveLength(7);
       expect(a.map(p=>p.id)).toEqual(selectPrompts(mode,'2026-10-13').map(p=>p.id));
       expect(new Set(a.map(p=>p.id)).size).toBe(7);
-      expect(a.every(p=>eligible(p).length>=2)).toBe(true);
+      expect(a.every(p=>p.kind!=='music')).toBe(true);
     }
   });
   it('all media features film anime games and books without music',()=>{
