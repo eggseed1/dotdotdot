@@ -196,10 +196,10 @@ export default function App(){
           lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
         }
         if(data.status==='ambiguous'){setFeedback(lang==='ko'?'동명의 작품이 여러 개야. 연도나 제작자를 붙여서 입력해 줘.':'Several titles match. Add a year or creator.');return;}
-        if(data.status==='notEligible'){const found=data.candidates?.[0];const details=found?`${found.title} (${found.year||'연도 미상'}) · ${found.country||'국가 미상'} · ${found.genres?.slice(0,4).join(', ')||'장르 미상'}${found.format?' · '+found.format:''}`:'';setFeedback(lang==='ko'?`작품은 찾았지만 문제의 조건과 달라. ${details}`:`Title found but does not match the prompt. ${details}`);return;}
+        if(data.status==='notEligible'){setFeedback(lang==='ko'?`“${entry.trim()}”은 정답이 아닙니다.`:`“${entry.trim()}” is not a correct answer.`);return;}
         if(data.status==='unverified'){setFeedback(lang==='ko'?'작품은 발견됐지만 장르·국가 등 검증 데이터가 부족해. 정답이 아닐 수도 있고 DB 문제일 수도 있어.':'Title found, but source metadata is incomplete; eligibility cannot be confirmed.');return;}
         if(!pending){const suggestion=suggestSmallTypo(activePrompt.id,entry);if(suggestion){setTypoSuggestion(suggestion);setFeedback('');return;}}
-        setFeedback(lang==='ko'?'검색 데이터에서 정확히 일치하는 작품을 찾지 못했어. 정답이 틀렸다는 뜻은 아니야. 원제·영문 제목이나 다른 표기를 시도해 봐.':'No exact title match in the available sources. This does not prove the answer is wrong.');return;
+        setFeedback(lang==='ko'?`“${entry.trim()}”은 정답이 아닙니다.`:`“${entry.trim()}” is not a correct answer.`);return;
       }catch{
         setFeedback(lang==='ko'?'검증 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.':'Live answer verification is unavailable. Try again shortly.');
         return;
