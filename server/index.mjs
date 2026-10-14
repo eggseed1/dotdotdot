@@ -168,6 +168,17 @@ const server=http.createServer((req,res)=>{
         }catch{return {...w,metadataUnavailable:true};}
       }));
       found=[...new Map(found.map(w=>[w.id,w])).values()];
+      found=found.map(w=>{
+        const genres=new Set((w.genres||[]).map(x=>String(x).toLowerCase().trim()));
+        const has=(...names)=>names.some(x=>genres.has(x));
+        if(has('sci-fi','science-fiction','science fiction','sf'))genres.add('science fiction');
+        if(has('role-playing','role playing','role-playing game','role playing game','jrpg','action rpg'))genres.add('rpg');
+        if(has('psychological horror','psychological thriller'))genres.add('psychological');
+        if(has('independent','indie game','independent game'))genres.add('indie');
+        if(has('experimental film','experimental fiction'))genres.add('experimental');
+        if(has('surreal','surrealist'))genres.add('surrealism');
+        return {...w,genres:[...genres]};
+      });
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
       const chosen=[...valid].sort((a,b)=>Number(Boolean(b.ratingCount||b.popularity))-Number(Boolean(a.ratingCount||a.popularity)))[0];
