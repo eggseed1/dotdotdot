@@ -728,3 +728,50 @@ body:has(.krillion-game-screen) .game-main,body:has(.krillion-game-screen) .ques
 .krillion-game-screen .cinematic-answer-ui .submit-button{min-width:73px!important;padding:5px 7px!important}
 }
 @media(max-height:600px){.krillion-game-screen .cinematic-stage-top{top:34px!important;max-height:29dvh!important}.krillion-game-screen .infernal-devil{top:59%!important;width:70px!important;height:70px!important}}
+
+
+/* Polished underworld: restrained stage, one continuous illustrated backdrop. */
+.krillion-game-screen .infernal-game-scene{border:0!important;border-radius:0!important;background:#100915!important}
+.krillion-game-screen .infernal-game-scene .infernal-sky{background-size:cover!important;background-position:center 53%!important;filter:saturate(.93) contrast(1.12)!important}
+.krillion-game-screen .infernal-game-scene:before{background:linear-gradient(180deg,rgba(12,4,19,.35) 0%,rgba(12,4,19,.04) 35%,rgba(12,4,19,.03) 65%,rgba(11,5,15,.76) 100%)!important}
+.krillion-game-screen .infernal-game-scene:after{height:23%!important;background:linear-gradient(180deg,transparent,#130a19 41%,#130a19 100%)!important;border:0!important;box-shadow:none!important;pointer-events:none!important}
+.krillion-game-screen .infernal-game-scene .infernal-sky:after{display:none!important}
+.krillion-game-screen .infernal-sparks{opacity:.32!important}
+.krillion-game-screen .infernal-devil{top:69%!important;width:clamp(75px,9.5vw,118px)!important;height:clamp(75px,9.5vw,118px)!important;z-index:12!important}
+.krillion-game-screen .infernal-devil:before{display:none!important}
+.krillion-game-screen .infernal-devil-glow{display:none!important}
+.krillion-game-screen .infernal-devil img{filter:drop-shadow(0 7px 0 #110815)!important}
+.krillion-game-screen .krillion-hud{width:min(960px,calc(100% - 48px))!important;top:10px!important}
+.krillion-game-screen .krillion-hud-block,.krillion-game-screen .krillion-hud-score{background:rgba(18,8,22,.88)!important;clip-path:none!important;min-width:100px!important;padding:10px 16px!important;border:1px solid #633145!important}
+.krillion-game-screen .krillion-hud small{font-size:9px!important;letter-spacing:.12em!important;color:#e1aa97!important}
+.krillion-game-screen .krillion-hud strong{color:#ffd7a2!important}
+.krillion-game-screen .krillion-round-pips span{background:#2a1228!important;border-color:#6c3545!important}
+.krillion-game-screen .krillion-round-pips span.active{background:#d65e40!important;border-color:#f0a766!important}
+.krillion-game-screen .cinematic-stage-top{top:clamp(85px,13vh,126px)!important;width:min(660px,calc(100% - 40px))!important;max-height:30dvh!important;text-align:center!important;background:#160b1deF!important;border:1px solid #704355!important;border-bottom:3px solid #a25c4b!important;box-shadow:0 8px 0 #1209179e!important;padding:clamp(18px,2.1vh,26px) clamp(16px,3vw,36px)!important}
+.krillion-game-screen .cinematic-stage-top h1{font-size:clamp(19px,2.3vw,31px)!important;color:#fff1d8!important;text-shadow:2px 2px #4b273d!important;text-align:center!important;line-height:1.5!important}
+.krillion-game-screen .cinematic-stage-kind{font-size:11px!important;color:#d6a69c!important}
+.krillion-game-screen .cinematic-stage-count{font-size:10px!important;color:#efac83!important}
+.krillion-game-screen .hell-answer-ui.cinematic-answer-ui{width:min(860px,calc(100% - 24px))!important;bottom:16px!important;padding:0!important}
+.krillion-game-screen .cinematic-answer-ui .answer-card{max-width:860px!important}
+.krillion-game-screen .cinematic-answer-ui #answer{background:#1a0c1df8!important;border:2px solid #875068!important;color:#fff2e3!important;box-shadow:none!important;font-family:'Galmuri11',monospace!important}
+.krillion-game-screen .cinematic-answer-ui .submit-button{background:#ebad77!important;border:2px solid #5d3141!important;color:#28101e!important;box-shadow:none!important}
+.krillion-game-screen .cinematic-answer-ui .timer{background:#211125ed!important;border-color:#714053!important}
+.krillion-game-screen .cinematic-answer-ui .timer-rail{background:#321b30!important}
+.krillion-game-screen .cinematic-answer-ui .timer-rail>div{background:#ee9a71!important}
+.krillion-game-screen .skip-button{color:#bd92a2!important}
+.integrated-home .home-stage-title h1{font-size:clamp(26px,3.8vw,52px)!important}
+.integrated-home .home-stage-title{top:clamp(110px,19vh,190px)!important}
+.integrated-home .home-start-dock{bottom:clamp(28px,7vh,70px)!important}
+.integrated-home .home-start-actions{justify-content:center!important}
+.integrated-home .pixel-landing-start{background:#e3a06d!important;color:#2e1221!important;border-color:#754454!important}
+@media(max-width:700px){
+.krillion-game-screen .krillion-hud{width:calc(100% - 18px)!important;top:6px!important}
+.krillion-game-screen .krillion-hud-block,.krillion-game-screen .krillion-hud-score{min-width:62px!important;padding:6px!important}
+.krillion-game-screen .cinematic-stage-top{top:clamp(69px,11dvh,97px)!important;width:calc(100% - 24px)!important;max-height:30dvh!important;padding:11px 13px!important}
+.krillion-game-screen .cinematic-stage-top h1{font-size:clamp(14px,4vw,20px)!important}
+.krillion-game-screen .infernal-devil{top:60%!important;width:clamp(65px,22vw,95px)!important;height:clamp(65px,22vw,95px)!important}
+.krillion-game-screen .infernal-game-scene:after{height:24%!important}
+.krillion-game-screen .hell-answer-ui.cinematic-answer-ui{width:calc(100% - 12px)!important;bottom:max(8px,env(safe-area-inset-bottom))!important}
+.integrated-home .home-stage-title{top:21dvh!important}
+.integrated-home .home-stage-title h1{font-size:clamp(24px,7vw,38px)!important}
+}
