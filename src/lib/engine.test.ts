@@ -28,8 +28,9 @@ describe('daily engine',()=>{
   });
   it('award greater rarity to less popular eligible works',()=>{
     const p=promptById.get('f-korean')!;
-    const common=eligible(p)[0]!;
-    const obscure=eligible(p).find(w=>w.popularity<common.popularity)!;
+    const works=[...eligible(p)].sort((a,b)=>b.popularity-a.popularity);
+    const common=works[0]!;
+    const obscure=works[works.length-1]!;
     expect(rarity(obscure,p).points).toBeGreaterThan(rarity(common,p).points);
   });
 });
