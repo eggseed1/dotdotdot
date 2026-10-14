@@ -20,7 +20,7 @@ export function useTitleAutocomplete(value:string,kind:Kind,lang:Lang,enabled=tr
   setRemote([]);setOpen(true);
   const controller=new AbortController();
   const timer=window.setTimeout(()=>{
-   staticCatalogMatches(value,kind,7).then(items=>{if(!controller.signal.aborted&&items.length)setRemote(items);}).catch(()=>{});
+   staticCatalogMatches(value,kind,7).then(items=>{if(!controller.signal.aborted&&items.length)setRemote(current=>{const merged=[...current,...items];return merged.filter((w,i)=>merged.findIndex(x=>x.id===w.id)===i);});}).catch(()=>{});
    fetch(`${apiOrigin()}/api/suggest?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(value.slice(0,90))}`,{signal:controller.signal})
     .then(res=>res.ok?res.json():null).then(data=>{if(data?.suggestions)setRemote(current=>{const merged=[...current,...data.suggestions];return merged.filter((w,i)=>merged.findIndex(x=>x.id===w.id)===i);});}).catch(()=>{});
   },180);
@@ -28,7 +28,7 @@ export function useTitleAutocomplete(value:string,kind:Kind,lang:Lang,enabled=tr
  },[enabled,value,kind]);
  const items=useMemo(()=>{
   const out:Item[]=[],seen=new Set<string>();
-  for(const w of [...local,...remote]){
+  for(const w of [...remote,...local]){
    const key=`${w.kind}:${w.title.toLocaleLowerCase()}:${(w.creator||'').toLocaleLowerCase()}`;
    if(!seen.has(key)){out.push(w);seen.add(key);}
   }
