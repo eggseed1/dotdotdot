@@ -1,5 +1,6 @@
 import { devilArt, hellBackdrop } from '../data/art';
 import type { Lang } from '../lib/types';
+import {rarityRank} from '../lib/rarity-ranks.mjs';
 
 const layers = [
   { at: 0, en: 'THE GATES', ko: '지옥문' },
@@ -11,6 +12,7 @@ const layers = [
 ];
 export function Hellscape({ score = 0, opponentScore, lang, compact = false, opponentName }: { score?: number; opponentScore?: number; lang: Lang; compact?: boolean; opponentName?: string }) {
   const depth = Math.max(0, Math.min(7000, score * 10));
+  const rank=rarityRank(score>0?score/7:10);
   const opposingDepth = Math.max(0, Math.min(7000, (opponentScore ?? 0) * 10));
   const phase = Math.min(5, layers.filter(l => depth >= l.at).length - 1);
   const current = layers[phase];
@@ -24,7 +26,7 @@ export function Hellscape({ score = 0, opponentScore, lang, compact = false, opp
       {Array.from({length:26},(_,i)=><div className="hell-world-ember" key={i} style={{top:`${80+i*49}px`,left:`${6+(i*37)%85}%`,animationDelay:`-${(i%7)*.41}s`}}/>)}
     </div>
     <div className="hell-particle hell-particle-a">✦</div><div className="hell-particle hell-particle-b">✧</div><div className="hell-particle hell-particle-c">+</div>
-    <div className="hell-headline"><span>▼ {lang === 'ko' ? '지옥 탐험 중' : 'DESCENDING INTO HELL'}</span><strong>{current[lang]}</strong></div>
+    <div className="hell-headline"><span>▼ {lang === 'ko' ? '지옥 탐험 중' : 'DESCENDING INTO HELL'}</span><strong>{current[lang]}</strong><small className="hell-rank-label">{rank.symbol} {rank[lang]} · {rank.division}</small></div>
     <div className="hell-character-zone">
       <div className="hell-character-halo" />
       <img className="hell-character" src={devilArt} draggable="false" alt={lang === 'ko' ? '빨간 픽셀 악마' : 'Red pixel devil adventurer'} />
