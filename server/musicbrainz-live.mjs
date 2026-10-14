@@ -12,7 +12,7 @@ export function normalizeMB(item){
   country:'',genres:[],aliases:[],verified:true,ratingCount:null,sourceUrl:'https://musicbrainz.org/release-group/'+id};
 }
 export async function searchMusicBrainz(input,{limit=12}={}){
- const q=String(input||'').trim().slice(0,100);
+ const q=String(input||'').split(/\\s+[—–]\\s+/u)[0].trim().slice(0,100);
  if(q.length<2||q.length>100)return [];
  const key=canonical(q);
  const hit=cache.get(key);if(hit&&hit.expires>Date.now())return hit.items;
@@ -32,5 +32,5 @@ export async function searchMusicBrainz(input,{limit=12}={}){
 }
 export function exactLiveMatches(raw,items){
  const key=canonical(raw);
- return items.filter(w=>canonical(w.title)===key||canonical(w.title+' '+w.creator)===key||canonical(w.creator+' '+w.title)===key);
+ return items.filter(w=>canonical(w.title)===key||canonical(w.title+' '+w.creator)===key||canonical(w.title+' — '+w.creator)===key||canonical(w.creator+' '+w.title)===key);
 }
