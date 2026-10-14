@@ -169,6 +169,7 @@ export default function App(){
         <img className="pixel-landing-devil" src={devilArt} alt={lang==='ko'?'픽셀 악마':'Little pixel devil'} draggable="false"/>
         
         <div className="pixel-landing-choices" role="group" aria-label={lang==='ko'?'카테고리 선택':'Choose category'}>
+          <button type="button" disabled aria-disabled="true" title={lang==='ko'?'음악 모드는 현재 이용할 수 없습니다':'Music mode is temporarily unavailable'} style={{opacity:0.3,cursor:'not-allowed',pointerEvents:'none'}}>{lang==='ko'?'음악':'MUSIC'}</button>
           
           <button type="button" className={landingMode==='all'?'selected':''} aria-pressed={landingMode==='all'} onClick={()=>setLandingMode('all')}>{lang==='ko'?'전체 미디어':'ALL MEDIA'}</button>
         </div>
