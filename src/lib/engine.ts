@@ -13,17 +13,6 @@ export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
 };
 
 export const promptPool: Prompt[] = [
-  {id:'m-shoegaze',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a shoegaze album.',ko:'슈게이즈 앨범을 하나 대보세요.'},match:w=>w.genres.includes('shoegaze')},
-  {id:'m-90s',kind:'music',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an album released in the 1990s.',ko:'1990년대에 발매된 앨범을 하나 대보세요.'},match:w=>w.year>=1990&&w.year<=1999},
-  {id:'m-japan',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a Japanese artist.',ko:'일본 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='Japan'},
-  {id:'m-postrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a post-rock album.',ko:'포스트 록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('post-rock')},
-  {id:'m-brazil',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name a Brazilian album.',ko:'브라질 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='Brazil'},
-  {id:'m-70s',kind:'music',badge:{en:'DECADE',ko:'시대'},label:{en:'Name an album released in the 1970s.',ko:'1970년대에 발매된 앨범을 하나 대보세요.'},match:w=>w.year>=1970&&w.year<=1979},
-  {id:'m-jazz',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a jazz album released before 1970.',ko:'1970년 이전에 발매된 재즈 앨범을 하나 대보세요.'},match:w=>w.genres.includes('jazz')&&w.year<1970},
-  {id:'m-electronic',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an electronic album released in the 1990s.',ko:'90년대에 발매된 전자음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('electronic')&&w.year>=1990&&w.year<2000},
-  {id:'m-uk',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a British artist.',ko:'영국 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='United Kingdom'},
-  {id:'m-krautrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a krautrock album.',ko:'크라우트록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('krautrock')},
-  {id:'m-experimental',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an experimental music album.',ko:'실험음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('experimental')},
   {id:'f-korean-2000s-drama',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a South Korean drama film released between 2000 and 2009.',ko:'2000년부터 2009년 사이 개봉한 한국 드라마 영화를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009&&w.genres.includes('drama')},
   {id:'f-japan-90s-horror',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a Japanese horror film released in the 1990s.',ko:'1990년대 개봉한 일본 공포 영화를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=1990&&w.year<=1999&&w.genres.includes('horror')},
   {id:'f-70s-sci-fi',kind:'film',badge:{en:'DECADE · GENRE',ko:'시대 · 장르'},label:{en:'Name a science-fiction film released in the 1970s.',ko:'1970년대 개봉한 SF 영화를 대보세요.'},match:w=>w.year>=1970&&w.year<=1979&&w.genres.includes('science fiction')},
