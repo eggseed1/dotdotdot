@@ -39,6 +39,15 @@ jobs:
           PAGE=$(( 10#$(date -u +%V) * 5 ))
           node scripts/fetch-openlibrary-search.mjs --pages 5 --start-page "$PAGE" --out data/books.jsonl
           node scripts/import-catalog.mjs --file data/books.jsonl --source openlibrary --db "$CATALOG_DB"
+      - name: Discover additional independent films and video games
+        continue-on-error: true
+        run: |
+          WEEK=$(date -u +%V)
+          OFFSET=$((10#$WEEK))
+          node scripts/fetch-wikidata-discovery.mjs --kind film --offset "$OFFSET" --out data/films-wikidata.jsonl
+          node scripts/import-catalog.mjs --file data/films-wikidata.jsonl --source wikidata --db "$CATALOG_DB"
+          node scripts/fetch-wikidata-discovery.mjs --kind games --offset "$OFFSET" --out data/games-wikidata.jsonl
+          node scripts/import-catalog.mjs --file data/games-wikidata.jsonl --source wikidata --db "$CATALOG_DB"
       - name: Optional TMDB catalog sync
         if: env.TMDB_READ_TOKEN != ''
         run: |
