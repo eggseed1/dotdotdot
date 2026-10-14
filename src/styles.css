@@ -336,3 +336,40 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
  .krillion-game-screen .hell-answer-ui.cinematic-answer-ui{padding-top:6px}
  .krillion-game-screen .answer-label,.krillion-game-screen .skip-button{display:none}
 }
+
+
+/* 2026-10-14 arcade visibility + depth art pass: scene overlays are direct
+   descendants of .hellscape, never inside the bottom-anchored answer dock. */
+.krillion-game-screen .hellscape{isolation:isolate;background:#070e28}
+.krillion-game-screen .hellscape .krillion-scene-decor{z-index:2;opacity:1;filter:saturate(1.28) contrast(1.12)}
+.krillion-game-screen .hellscape .cinematic-stage-top{position:absolute!important;inset:auto!important;top:clamp(76px,11.5dvh,120px)!important;left:50%!important;right:auto!important;bottom:auto!important;transform:translateX(-50%)!important;z-index:45!important;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;width:min(750px,calc(100% - 130px))!important;max-height:min(32dvh,260px)!important;min-height:125px;padding:clamp(14px,2.2dvh,27px) clamp(16px,2.6vw,33px)!important;overflow:visible!important;background:#140e26f5!important;border:3px solid #45315a!important;border-bottom:6px solid #865075!important;box-shadow:0 0 0 3px #090a1c,8px 10px 0 #06091b!important;text-align:left!important;pointer-events:none;color:#ffe4cb}
+.krillion-game-screen .cinematic-stage-top h1{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;font:900 clamp(18px,2.25vw,32px)/1.4 'DM Sans','Noto Sans KR',sans-serif!important;letter-spacing:-.025em!important;color:#fff3e6!important;text-shadow:2px 2px 0 #5c3763!important;white-space:normal!important;word-break:keep-all;overflow-wrap:anywhere;max-width:100%;margin:8px 0!important}
+.krillion-game-screen .cinematic-stage-kind{color:#f8b789;font:700 10px/1.5 var(--mono)!important;letter-spacing:.1em}
+.krillion-game-screen .cinematic-stage-count{color:#f6c279;font:8px/1.5 var(--pixel)}
+.krillion-game-screen .cinematic-stage-top p{font:8px/1.5 var(--mono)!important;color:#cfbdd2!important;letter-spacing:.04em}
+.krillion-game-screen .hellscape .krillion-hud{z-index:49}
+.krillion-game-screen .hellscape .hell-character-zone{z-index:9;top:62%;transform:translate(-50%,-15%);filter:drop-shadow(0 9px 0 #080c28) drop-shadow(0 0 14px #e55e96)}
+.krillion-game-screen .hellscape .hell-world{z-index:3}
+.krillion-game-screen .hellscape .hell-speedlines{z-index:4;opacity:.24}
+.krillion-game-screen .hellscape .hell-foreground-ridge{z-index:5;opacity:.38}
+.krillion-game-screen .hellscape .cinematic-answer-ui{z-index:51!important;background:linear-gradient(180deg,#090d24ef,#080b1b 38%,#080b1b)!important;border-top:4px solid #4a426f!important;box-shadow:0 -12px 24px #07091c88}
+.krillion-game-screen .hellscape #answer{background:#180f29!important;color:#fff4df!important;border:3px solid #705282!important;box-shadow:inset 3px 3px #0a071b!important}
+.krillion-game-screen .hellscape #answer::placeholder{color:#aea0c3}
+.krillion-game-screen .hellscape .submit-button{background:#e4bf79!important;color:#1a1332!important;border:3px solid #533b4a!important;box-shadow:4px 4px #07081e;font-weight:900}
+.krillion-game-screen .hellscape .title-suggestions{z-index:60;bottom:calc(100% + 5px)}
+@media(max-width:700px){
+ .krillion-game-screen .hellscape .cinematic-stage-top{top:clamp(60px,12dvh,98px)!important;width:calc(100% - 28px)!important;min-height:112px;max-height:min(31dvh,210px)!important;padding:11px 13px!important;border-width:2px!important;border-bottom-width:5px!important;box-shadow:4px 5px #080a1e!important}
+ .krillion-game-screen .cinematic-stage-top h1{font-size:clamp(15px,4.35vw,23px)!important;line-height:1.4!important;letter-spacing:-.02em!important}
+ .krillion-game-screen .cinematic-stage-top p{font-size:8px!important}
+ .krillion-game-screen .cinematic-stage-kind{font-size:8px!important}
+ .krillion-game-screen .cinematic-stage-count{font-size:7px!important}
+ .krillion-game-screen .hellscape .hell-character-zone{top:61%!important;max-height:13dvh!important;max-width:13dvh!important}
+ .krillion-game-screen .hellscape .cinematic-answer-ui{padding:9px 10px max(10px,env(safe-area-inset-bottom))!important}
+ .krillion-game-screen .hellscape .cinematic-answer-ui #answer{font-size:12px!important}
+}
+@media(max-height:650px){
+ .krillion-game-screen .hellscape .cinematic-stage-top{top:11dvh!important;min-height:0;max-height:30dvh!important;padding:8px 12px!important}
+ .krillion-game-screen .cinematic-stage-top h1{font-size:clamp(13px,3.6vw,21px)!important;margin:4px 0!important;line-height:1.28!important}
+ .krillion-game-screen .cinematic-stage-top p{display:none}
+ .krillion-game-screen .hellscape .hell-character-zone{top:59%!important;max-height:12dvh!important}
+}
