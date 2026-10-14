@@ -244,3 +244,71 @@ and import the datasets there. GitHub Pages only serves a small static demo;
 it cannot hold the full catalog, run indexed SQL queries, or host live Elo.
 Discogs artist and label XML dumps also exist; those should be indexed into
 separate artist/label tables before offering artist/label-specific prompts.
+
+## Loading full public Discogs snapshots on Render
+
+**Current state:** The repo contains the import software, but deploying the web
+service does not itself import the catalog. To populate the user's live database,
+run the importer **inside Render's service Shell**, or from a Render job sharing
+the same persistent disk. A GitHub Pages build cannot write to the Render disk.
+The game should not claim comprehensive coverage until the status endpoint
+reports the actual imported counts.
+
+1. In Render > larper101 Web Service > Disks, confirm an actual **persistent disk**
+   mounted at `/data`. A Docker `VOLUME` declaration alone is NOT a Render disk.
+   Multiple millions of searchable records and their trigram indexes may need
+   **tens of gigabytes or more**; 10 GB may not be enough. Back up the database.
+2. In Render > Shell, confirm `node --version` is 22.13 or newer and
+   `python3 --version` works.
+3. Run this **once** to stream the official CC0 Discogs artists, masters and
+   label data. No API key or temporary 11 GB compressed download is needed:
+
+   ```sh
+   python3 scripts/import-discogs-online.py --month 202610 --db /data/catalog.sqlite --kinds artists masters labels
+   ```
+
+4. With larger disk capacity, run the comprehensive individual-release import,
+   including non-mastered obscure releases:
+
+   ```sh
+   python3 scripts/import-discogs-online.py --month 202610 --db /data/catalog.sqlite --kinds releases
+   ```
+
+   These are **large, long-running operations**; network or shell timeouts can
+   interrupt them. They are idempotent but, when restarted, must still re-read
+   the selected dump. Use the complete published month listed at
+   https://data.discogs.com/ ; if the current month returns 404, use the last
+   available month. The release dump can require many hours.
+
+5. Check live counts:
+
+   ```sh
+   node -e "fetch('http://localhost:8787/api/catalog/status').then(r=>r.json()).then(console.log)"
+   ```
+
+   Or open `https://dotdotdot-7yot.onrender.com/api/catalog/status`.
+
+A verified Discogs title *without* audience vote counts becomes a valid answer
+with **neutral provisional credit**, not a fictitious 100-point rarity reward.
+Discogs styles provide genre clues and release dates; the *release country* is
+not necessarily the artist's country and is intentionally excluded. Full
+cross-source merging, reliable audience popularity, artist origin enrichment
+and stable ranked rarity still require separate pipelines and licensing.
+
+**Other full catalogs:**
+- MusicBrainz core (official CC0 dump, not optional noncommercial derived data):
+  download/extract `mbdump.tar.bz2` from
+  https://ftp.musicbrainz.org/pub/musicbrainz/data/fullexport/ ;
+  run `node scripts/import-musicbrainz-core.mjs --dump-dir /data/mbdump --db /data/catalog.sqlite`.
+  Ensure space for both raw data and the staging database.
+- Open Library full books: download the official *works* dump from
+  https://openlibrary.org/developers/dumps and use
+  `node scripts/import-openlibrary-dump.mjs --file /data/ol_dump_works_YYYY-MM-DD.txt.gz --db /data/catalog.sqlite`.
+- IMDb, TMDB, AniList, IGDB, RYM, Spotify, Last.fm, Backloggd,
+  Letterboxd and MyAnimeList have distinct API/dataset rights, some requiring
+  keys or approved access. The repo's existing import scripts are **not**
+  evidence that complete catalogs from those services have been imported.
+
+Do **not** launch all huge imports simultaneously on a small web service.
+Prefer a separate import worker or scheduled job with enough disk and CPU;
+keep real-time multiplayer running on its own instance for a production launch.
