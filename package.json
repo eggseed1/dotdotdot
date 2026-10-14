@@ -29,7 +29,8 @@
     "catalog:bootstrap": "node scripts/catalog-bootstrap.mjs",
     "catalog:audit": "node scripts/catalog-audit.mjs",
     "catalog:restore": "node scripts/restore-catalog.mjs",
-    "catalog:snapshot": "node scripts/catalog-snapshot.mjs"
+    "catalog:snapshot": "node scripts/catalog-snapshot.mjs",
+    "catalog:questions": "node scripts/build-prompt-answers.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
