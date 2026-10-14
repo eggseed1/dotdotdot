@@ -12,7 +12,6 @@ import {searchAniList,exactAniList,aniListScore} from './anilist-live.mjs';
 import {searchWikidataGames,exactGameMatches,enrichWikidataGame} from './wikidata-games.mjs';
 import {searchVNDB,exactVNDB,vnRarity} from './vndb-live.mjs';
 import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
-import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
@@ -25,7 +24,7 @@ const port = Number(process.env.PORT || 8787);
 const vite = await createViteServer({ root, server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' });
 const { lookupAnswer, promptById, rarity, selectPrompts, eligible, todayKey } = await vite.ssrLoadModule('/src/lib/engine.ts');
 const clients = new Map();
-const queues = new Map([['music', []], ['all', []]]);
+const queues = new Map([['all', []]]);
 const invitations = new Map();
 const matches = new Map();
 let ratings = {};
@@ -120,11 +119,10 @@ const server=http.createServer((req,res)=>{
   const pathname=parsedUrl.pathname;
   if(pathname==='/api/suggest' && req.method==='GET'){
     const kind=parsedUrl.searchParams.get('kind'),q=(parsedUrl.searchParams.get('q')||'').slice(0,100);
-    const allowed=new Set(['music','film','literature','anime','games']);
+    const allowed=new Set(['film','literature','anime','games']);
     const local=allowed.has(kind)&&q.trim().length>=2&&kind==='literature'?sourceCatalog.suggest(kind,q,7):[];
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
-    if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
-    else if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
+    if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
     else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
     else if(kind==='games'&&q.trim().length>=2){Promise.allSettled([searchVNDB(q),searchWikidataGames(q)]).then(results=>respond(results.flatMap(r=>r.status==='fulfilled'?r.value:[]))).catch(()=>respond());}
     else respond();
@@ -136,11 +134,8 @@ const server=http.createServer((req,res)=>{
     req.on('end',async()=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
-      if(!prompt||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
+      if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
       let found=['film','anime','games'].includes(prompt.kind)?[]:sourceCatalog.lookup(prompt.kind,raw);
-      if(!found.length&&prompt.kind==='music'){
-        try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
-      }
       if(!found.length&&prompt.kind==='games'){
         const q=raw.split(/\s+[—–]\s+/u)[0];
         const responses=await Promise.allSettled([searchVNDB(q,{limit:30}),searchWikidataGames(q,{limit:25})]);
@@ -157,7 +152,6 @@ const server=http.createServer((req,res)=>{
         try{found=exactFilmMatches(raw,await searchWikidataFilms(searchTitle,{limit:18}));}catch{}
       }
       if(prompt.kind==='film'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-live')return w;try{return await enrichWikidataFilm(w);}catch{return {...w,metadataUnavailable:true};}}));}
-      if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return {...w,metadataUnavailable:true};}}));}
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
       const chosen=valid.length?valid[0]:found[0];
@@ -165,10 +159,10 @@ const server=http.createServer((req,res)=>{
         !chosen.verified?{status:'unverified'}:(()=>{
         const w=chosen;
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
-        const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        const score=w.source==='vndb-live'?vnRarity(w.ratingCount):w.source==='anilist-live'?aniListScore(w.popularity):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
         // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
-          points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='vndb-live'?'vndb-votes-provisional':w.source==='anilist-live'?'anilist-popularity-provisional':w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
+          points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='vndb-live'?'vndb-votes-provisional':w.source==='anilist-live'?'anilist-popularity-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
     });return;
