@@ -15,7 +15,7 @@ const getFile=(filename:string)=>{if(!/^[a-z0-9-]+\.json$/i.test(filename))retur
 export async function staticCatalogMatches(query:string,kind:Kind,limit=7):Promise<Work[]>{
  if(canonical(query).length<2)return [];
  const manifest=await getManifest();if(!manifest?.prefixes)return [];
- const keys=[...new Set(phoneticKeys(query).map(keyFor))].filter(k=>Array.from(k).length>=2);
+ const keys=[...new Set((phoneticKeys(query) as string[]).map(keyFor))].filter(k=>Array.from(k).length>=2);
  const filenames=[...new Set(keys.flatMap(k=>manifest.prefixes[k]?.files||[]))];
  if(!filenames.length)return [];
  const arrays=await Promise.all(filenames.map(getFile));
@@ -26,7 +26,7 @@ export async function staticCatalogMatches(query:string,kind:Kind,limit=7):Promi
 export async function staticCatalogExact(query:string,kind:Kind):Promise<Work[]>{
  if(canonical(query).length<2)return [];
  const manifest=await getManifest();if(!manifest?.prefixes)return [];
- const keys=[...new Set(phoneticKeys(query).map(keyFor))].filter(k=>Array.from(k).length>=2);
+ const keys=[...new Set((phoneticKeys(query) as string[]).map(keyFor))].filter(k=>Array.from(k).length>=2);
  const filenames=[...new Set(keys.flatMap(k=>manifest.prefixes[k]?.files||[]))];
  const arrays=await Promise.all(filenames.map(getFile));
  const seen=new Set<string>();
