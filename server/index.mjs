@@ -214,7 +214,7 @@ wss.on('connection',ws=>{
       sync(id);sendTo(m.players.find(p=>p!==id),{type:'rival_locked'});return;
     }
     if(msg.type==='invite'){
-      removeFromQueues(id);const mode=msg.mode==='all'?'all':'music';const inviteCode=code();
+      removeFromQueues(id);const mode='all';const inviteCode=code();
       invitations.set(inviteCode,{host:id,mode,created:Date.now()});send(ws,{type:'invited',code:inviteCode});return;
     }
     if(msg.type==='join'){
@@ -223,7 +223,7 @@ wss.on('connection',ws=>{
       invitations.delete(inviteCode);startMatch(inv.host,id,inv.mode,false);return;
     }
     if(msg.type==='queue'){
-      removeFromQueues(id);const mode=msg.mode==='all'?'all':'music';const queue=queues.get(mode);
+      removeFromQueues(id);const mode='all';const queue=queues.get(mode);
       const contender=queue.find(item=>item.id!==id&&clients.has(item.id));
       if(contender)startMatch(contender.id,id,mode,true);
       else{queue.push({id,since:Date.now()});send(ws,{type:'queued',mode});}return;
