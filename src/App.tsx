@@ -41,7 +41,7 @@ export default function App(){
   const [session,setSession]=useState<GameSession|null>(()=>{
     const param=new URLSearchParams(window.location.search).get('r');
     if(param){const shared=decodeShare(param);if(shared)return shared.session;}
-    const saved=getSaved<GameSession>('deepcut:session');
+    const saved=getSaved<GameSession>('deepcut:session:cinematic-v3');
     return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'&&saved.prompts.every(id=>!id.startsWith('m-'))?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
@@ -67,7 +67,7 @@ export default function App(){
   const modeLabel=(_mode:Mode)=>t.all;
 
   useEffect(()=>setSaved('deepcut:lang',lang),[lang]);
-  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
+  useEffect(()=>{if(session&&!publicShare){setSaved('deepcut:session:cinematic-v3',session);if(session.state==='finished'&&session.ranked)setSaved(gameKey(session.mode,session.date),{score:totalScore(session.results),results:session.results});}},[session,publicShare]);
   useEffect(()=>{if(!session||session.state!=='play')return;
     const tick=()=>{
       const remaining=Math.max(0,ROUND_SECONDS-(Date.now()-session.roundStartedAt)/1000);
@@ -82,7 +82,7 @@ export default function App(){
     mode='all';
     setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);
     const finished=getSaved<{score:number}>(gameKey(mode,date));
-    const existing=getSaved<GameSession>('deepcut:session');
+    const existing=getSaved<GameSession>('deepcut:session:cinematic-v3');
     if(!practice&&!finished&&existing?.date===date&&existing?.mode===mode&&existing.state!=='finished'&&existing.prompts.every(id=>!id.startsWith('m-'))){
       setSession(existing);setAnswer('');setFeedback('');setCopied(false);return;
     }
