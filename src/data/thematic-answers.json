@@ -213,7 +213,14 @@
       "55 Steps",
       "72 Tenants of Prosperity",
       "88 Minutes",
-      "90 Minutes"
+      "90 Minutes",
+      "5 Hour Circular X-ray Diffraction Film",
+      "16-18-4",
+      "Synchromy No. 2",
+      "1951 President Aderhold Inauguration",
+      "1958 Khrushchev",
+      "1964: Year of Change",
+      "16mm"
     ]
   },
   "f-nonhuman-romance": {
@@ -498,7 +505,23 @@
       "Axxon",
       "Globe Oil",
       "Terroil",
-      "Deludamol"
+      "Deludamol",
+      "7Days Market",
+      "3 Count Casino",
+      "30 frame",
+      "60 Diner",
+      "99.0 The Underground",
+      "105.0 The World",
+      "315 Production",
+      "346 Production",
+      "Bikini Bottom Motor Company",
+      "Fard",
+      "Frog",
+      "Phaedra",
+      "Kamikaze",
+      "Soyota",
+      "Toyata",
+      "Toyot"
     ],
     "source": "https://www.gamespot.com/articles/100-fictional-game-brands-and-logos/1100-6452901/"
   },
@@ -573,7 +596,14 @@
       "Puni Puni Poemy",
       "Food Wars! Shokugeki no Soma",
       "Watamote: No Matter How I Look at It, It's You Guys' Fault I'm Not Popular!",
-      "One Punch Man"
+      "One Punch Man",
+      "Project A-ko",
+      "Cream Lemon",
+      "Great Teacher Onizuka",
+      "Gintama°",
+      "Gintama': Enchousen",
+      "Gintama'",
+      "Kaguya-sama: Love Is War - Ultra Romantic"
     ],
     "source": "https://www.animenation.net/blog/ask-john-what-are-some-major-anime-parodies/"
   },
@@ -813,7 +843,12 @@
       "The Hollow Mountain",
       "Blood Ties",
       "Electric Orphans",
-      "The Ravishers of Pentagord"
+      "The Ravishers of Pentagord",
+      "Carnovsky",
+      "Harlequin Ballads",
+      "Night Rote",
+      "Lost Property",
+      "My Cue"
     ],
     "source": "https://en.wikipedia.org/wiki/Imaginary_book",
     "additionalSources": [
@@ -955,17 +990,25 @@
   "_notes": "Expanded broad candidate discovery, not exhaustive. Many semantic items are unverified leads and must be reviewed before use for ranked correct-answer judging.",
   "_searchExpansion": {
     "date": "2026-10-14",
-    "method": "direct topical internet research, not DB filtering",
+    "method": "direct web-source search and editorial candidate extraction",
     "sources": {
-      "l-fictional-book": [
-        "https://en.everybodywiki.com/List_of_fictional_books",
-        "https://imaginedlibrary.com/shelf/books-within-books/"
+      "f-title-number": [
+        "https://letterboxd.com/lightsweetcrude/list/earthly-delights-historic-psychedelia-animation/",
+        "https://16mmfilmography.org/database/"
       ],
       "a-anime-parodies-anime": [
-        "https://www.ranker.com/list/x-times-anime-hilariously-parodied-other-anime/anna-lindwasser",
-        "https://binbougamiga.fandom.com/wiki/List_of_Parodies"
+        "https://www.animenation.net/blog/ask-john-do-anime-sometimes-parody-each-other/",
+        "https://www.animenation.net/blog/ask-john-what-are-some-major-anime-parodies/",
+        "https://mitsutsubo.moe/tag/parody"
+      ],
+      "l-fictional-book": [
+        "https://www.theparisreview.org/blog/2016/03/24/the-borges-memorial-non-lending-library-of-imaginary-books/",
+        "https://imaginedlibrary.com/shelf/books-within-books/"
+      ],
+      "g-fictional-corporation": [
+        "https://fictionalcompanies.fandom.com/wiki/List_of_fictional_brands_in_video_games"
       ]
     },
-    "caveat": "Fictional book lists include in-universe plays, reference works and texts. Names are added as candidates; scope and exact title must be checked. Rarity remains editorial estimate."
+    "caveat": "Some entries are search candidates only, not confirmed under exact prompt definition; rarity points estimated."
   }
 }
