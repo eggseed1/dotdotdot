@@ -12,17 +12,12 @@ import { DuelArena } from './components/DuelArena';
 import { PublicMatchPage } from './components/PublicMatchPage';
 import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
-import { lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, todayKey, totalScore } from './lib/engine';
+import { newGame, promptById, ROUND_SECONDS, ROUNDS, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
 import type { GameSession, Lang, Mode, RoundResult } from './lib/types';
 
 // Defend against stale servers returning the first catalog item instead of the submitted title.
 const normalizeAnswer=(s:string)=>s.normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
-const isMatchingReturnedAnswer=(promptId:string,submitted:string,work:{title:string;titleKo?:string})=>{
- const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
- const names=[work.title,work.titleKo,...(aliases?.[work.title]||[])];
- return names.some(name=>typeof name==='string'&&normalizeAnswer(name)===normalizeAnswer(submitted));
-};
 type TypoSuggestion={typed:string;title:string;display:string};
 const editDistanceWithinTwo=(a:string,b:string)=>{
  const x=Array.from(a),y=Array.from(b);
