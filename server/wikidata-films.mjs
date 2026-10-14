@@ -14,13 +14,13 @@ async function wikidata(params){
 }
 const claims=(entity,key)=>(entity.claims?.[key]||[]).map(c=>c.mainsnak?.datavalue?.value).filter(Boolean);
 const ids=(entity,key)=>claims(entity,key).map(c=>c.id).filter(Boolean);
-const yearFrom=entity=>{const dates=[...claims(entity,'P577'),...claims(entity,'P571')];for(const d of dates){const y=Number(/^[+-]?(\\d{4})/.exec(d.time||'')?.[1]);if(y>=1880&&y<=2100)return y;}return undefined;};
+const yearFrom=entity=>{const dates=[...claims(entity,'P577'),...claims(entity,'P571')];for(const d of dates){const y=Number(/^[+-]?(\d{4})/.exec(d.time||'')?.[1]);if(y>=1880&&y<=2100)return y;}return undefined;};
 const label=(entities,id)=>entities[id]?.labels?.en?.value||entities[id]?.labels?.ko?.value||'';
 export async function searchWikidataFilms(query,{limit=9}={}){
  const raw=String(query||'').trim().slice(0,95);if(raw.length<2)return [];
  const key='film:'+canonical(raw),cached=cache.get(key);if(cached?.until>Date.now())return cached.value;
  const results=await wikidata({action:'wbsearchentities',search:raw,language:/[가-힣]/u.test(raw)?'ko':'en',uselang:'en',limit:Math.min(18,Math.max(limit,10))});
- const hits=(results.search||[]).filter(x=>/^Q\\d+$/.test(x.id));
+ const hits=(results.search||[]).filter(x=>/^Q\d+$/.test(x.id));
  if(!hits.length)return remember(key,[]);
  const payload=await wikidata({action:'wbgetentities',ids:hits.map(x=>x.id).join('|'),props:'claims|labels',languages:'en|ko'});
  const entries=payload.entities||{};
