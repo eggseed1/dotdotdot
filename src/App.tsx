@@ -113,7 +113,7 @@ export default function App(){
           if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
           lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
         }
-        if(data.status==='ambiguous'){setFeedback(t.ambiguous);return;}
+        if(data.status==='ambiguous'){setFeedback(t.invalid);return;}
         if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
         if(data.status==='unverified'){setFeedback(lang==='ko'?'데이터가 부족해 조건을 확인할 수 없습니다.':'Source metadata is incomplete. This answer cannot be verified.');return;}
         setFeedback(t.invalid);return;
@@ -123,7 +123,7 @@ export default function App(){
       }
     }
     const found=lookupAnswer(entry,activePrompt.kind);
-    if(found.status==='ambiguous'){setFeedback(t.ambiguous);return;}
+    if(found.status==='ambiguous'){const chosen=found.works.find(w=>activePrompt.match(w))||found.works[0];if(!activePrompt.match(chosen)){setFeedback(t.notEligible);return;}const pts=rarity(chosen,activePrompt);lock({promptId:activePrompt.id,workId:chosen.id,title:chosen.title,creator:chosen.creator,rawAnswer:entry.trim(),points:pts.points,tier:pts.tier});return;}
     if(found.status==='missing'){setFeedback(t.invalid);return;}
     if(!activePrompt.match(found.work)){setFeedback(t.notEligible);return;}
     const points=rarity(found.work,activePrompt);
