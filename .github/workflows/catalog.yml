@@ -29,7 +29,7 @@ jobs:
           mkdir -p data
           gh release download catalog-latest --pattern catalog.sqlite --dir data --clobber || echo "No previous catalog release yet."
       - name: Install build dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Test importer pagination
         run: node --test scripts/fetch-anilist.test.mjs
       - name: Incrementally ingest permitted AniList metadata
