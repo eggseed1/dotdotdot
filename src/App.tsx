@@ -6,6 +6,7 @@ import { catalog } from './data/catalog';
 import { Hellscape } from './components/Hellscape';
 import { AnswerDirectory } from './components/AnswerDirectory';
 import thematicAliases from './data/thematic-aliases-ko.json';
+import thematicAnswers from './data/thematic-answers.json';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
@@ -21,6 +22,37 @@ const isMatchingReturnedAnswer=(promptId:string,submitted:string,work:{title:str
  const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
  const names=[work.title,work.titleKo,...(aliases?.[work.title]||[])];
  return names.some(name=>typeof name==='string'&&normalizeAnswer(name)===normalizeAnswer(submitted));
+};
+type TypoSuggestion={typed:string;title:string;display:string};
+const editDistanceWithinTwo=(a:string,b:string)=>{
+ const x=Array.from(a),y=Array.from(b);
+ if(Math.abs(x.length-y.length)>2)return 3;
+ let prev=Array.from({length:y.length+1},(_,j)=>j);
+ for(let i=1;i<=x.length;i++){
+  const row=[i];
+  for(let j=1;j<=y.length;j++)row[j]=Math.min(row[j-1]+1,prev[j]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));
+  prev=row;
+ }
+ return prev[y.length];
+};
+const suggestSmallTypo=(promptId:string,raw:string):TypoSuggestion|null=>{
+ const typed=normalizeAnswer(raw);
+ if(Array.from(typed).length<5)return null;
+ const list=(thematicAnswers as Record<string,{answers?:string[]}>)[promptId]?.answers||[];
+ const aliases=(thematicAliases as Record<string,unknown>)[promptId] as Record<string,string[]>|undefined;
+ let best:{title:string;display:string;distance:number}|null=null,ambiguous=false;
+ for(const title of list){
+  const forms=[title,...(aliases?.[title]||[])];
+  for(const form of forms){
+   const normalized=normalizeAnswer(form);
+   if(!normalized||Math.abs(Array.from(normalized).length-Array.from(typed).length)>2)continue;
+   const distance=editDistanceWithinTwo(typed,normalized);
+   if(distance<1||distance>2)continue;
+   if(!best||distance<best.distance){best={title,display:aliases?.[title]?.find(a=>/[가-힣]/.test(a))||title,distance};ambiguous=false;}
+   else if(distance===best.distance&&best.title!==title)ambiguous=true;
+  }
+ }
+ return best&&!ambiguous?{typed:raw.trim(),title:best.title,display:best.display}:null;
 };
 const pixelRecord = [
   '......xxxx......','....xxxxxxxx....','...xxvvvvvvxx...','..xxvvxxxxvvxx..','.xxvvxxxxxxvvxx.','.xvvxxvvvvxxvvx.','xxvvxvvvvvvxvvxx',
@@ -59,6 +91,7 @@ export default function App(){
   const publicResults=publicShare?decodeShare(publicShare):null;
   const [answer,setAnswer]=useState('');
   const [feedback,setFeedback]=useState('');
+  const [typoSuggestion,setTypoSuggestion]=useState<TypoSuggestion|null>(null);
   const [timeLeft,setTimeLeft]=useState(ROUND_SECONDS);
   const [infoOpen,setInfoOpen]=useState(false);
   const [copied,setCopied]=useState(false);
@@ -135,8 +168,10 @@ export default function App(){
   };
   const submittingRef=useRef(false);
   const submit=async(event?:FormEvent)=>{
-    const entry=answer;
     event?.preventDefault();
+    const pending=typoSuggestion&&typoSuggestion.typed===answer.trim()?typoSuggestion:null;
+    const entry=pending?pending.title:answer;
+    if(pending){setAnswer(pending.display);setTypoSuggestion(null);}
     if(!session||session.state!=='play'||!activePrompt)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
     if(!entry.trim()){setFeedback(t.empty);return;}
@@ -153,6 +188,8 @@ export default function App(){
         if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
           if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
           if(!isMatchingReturnedAnswer(activePrompt.id,entry.trim(),data.work)){
+            const suggestion=suggestSmallTypo(activePrompt.id,entry);
+            if(suggestion&&!pending){setTypoSuggestion(suggestion);setFeedback('');return;}
             setFeedback(lang==='ko'?'서버가 입력한 작품과 다른 답을 반환했어. 잘못된 자동 정답은 적용하지 않았어.':'The server returned a different title. The incorrect match was rejected.');
             return;
           }
@@ -161,6 +198,7 @@ export default function App(){
         if(data.status==='ambiguous'){setFeedback(lang==='ko'?'동명의 작품이 여러 개야. 연도나 제작자를 붙여서 입력해 줘.':'Several titles match. Add a year or creator.');return;}
         if(data.status==='notEligible'){const found=data.candidates?.[0];const details=found?`${found.title} (${found.year||'연도 미상'}) · ${found.country||'국가 미상'} · ${found.genres?.slice(0,4).join(', ')||'장르 미상'}${found.format?' · '+found.format:''}`:'';setFeedback(lang==='ko'?`작품은 찾았지만 문제의 조건과 달라. ${details}`:`Title found but does not match the prompt. ${details}`);return;}
         if(data.status==='unverified'){setFeedback(lang==='ko'?'작품은 발견됐지만 장르·국가 등 검증 데이터가 부족해. 정답이 아닐 수도 있고 DB 문제일 수도 있어.':'Title found, but source metadata is incomplete; eligibility cannot be confirmed.');return;}
+        if(!pending){const suggestion=suggestSmallTypo(activePrompt.id,entry);if(suggestion){setTypoSuggestion(suggestion);setFeedback('');return;}}
         setFeedback(lang==='ko'?'검색 데이터에서 정확히 일치하는 작품을 찾지 못했어. 정답이 틀렸다는 뜻은 아니야. 원제·영문 제목이나 다른 표기를 시도해 봐.':'No exact title match in the available sources. This does not prove the answer is wrong.');return;
       }catch{
         setFeedback(lang==='ko'?'검증 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.':'Live answer verification is unavailable. Try again shortly.');
@@ -248,7 +286,8 @@ export default function App(){
           <div className="cinematic-stage-top"><div className="cinematic-stage-count">{lang==='ko'?`문제 ${session.index+1} / ${ROUNDS}`:`ROUND ${session.index+1} / ${ROUNDS}`}</div><h1>{activePrompt?.label[lang]}</h1></div>
           {session.state==='play'&&<div className="hell-answer-ui cinematic-answer-ui"><div className="answer-card">
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
-            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={autocomplete.onKeyDown}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            <form onSubmit={submit}><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span></div><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);setTypoSuggestion(null);if(feedback)setFeedback('');}} onKeyDown={autocomplete.onKeyDown}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>{setTypoSuggestion(null);autocomplete.select(item,setAnswer);}}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            {typoSuggestion&&<div className="typo-confirm" role="status"><span>{lang==='ko'?'혹시 이걸 말씀하셨나요?':'DID YOU MEAN THIS?'}</span><strong>{typoSuggestion.display}</strong><small>{typoSuggestion.title!==typoSuggestion.display?typoSuggestion.title:''}</small><button type="button" onClick={()=>{void submit();}}>{lang==='ko'?'Enter 한 번 더 · 이 답으로 제출':'PRESS ENTER AGAIN TO CONFIRM'} ↵</button></div>}
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
           </div></div>}
