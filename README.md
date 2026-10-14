@@ -412,3 +412,9 @@ TMDB_READ_TOKEN=YOUR_TOKEN npm run catalog:bootstrap -- --anime-pages 0 --movies
 ```
 
 The bootstrap script does not automatically run on deployment. Avoid heavy API imports at server startup. TMDB use requires appropriate API authorization and attribution; AniList use is subject to its API terms and rate limits. Movie country and anime format coverage remain source-dependent. `/api/catalog/status` exposes current import totals, and the postgame examples endpoint reads the same catalog. Live lookup may find titles even if the import count is zero, but it is not a complete database.
+
+## Hand-author exactly seven daily questions
+
+Edit `src/data/daily-editorial.json` to publish the seven ordered prompt IDs for each date (UTC-style `YYYY-MM-DD` date key, using the game's date convention). These are authored manually; there is **no daily automatic question selection**. Every published entry must contain exactly seven different IDs already declared in `src/lib/engine.ts`. A missing date means no daily game. The current October 14 entry is a sample editorial lineup, not a selection made by the user.
+
+To make a question substantially narrower, add an explicit `Prompt` to `promptPool` in `src/lib/engine.ts`, carefully specifying matching year, country, genres and format; then add its ID to that day's seven-question list. Run `npm run catalog:questions -- --db data/catalog.sqlite` to precompute its accepted answers. The backend reports answer coverage and prioritizes precomputed matches, retaining fallback verification for unlisted titles. Narrow questions need targeted candidate discovery and source review; never mark guessed matches as verified.
