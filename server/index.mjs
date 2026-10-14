@@ -19,7 +19,7 @@ const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
 const editorialAnswers={...JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8')),...JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-answers.json'),'utf8'))};
 const editorialRarity=JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-rarity.json'),'utf8'));
-const rarityTiers=new Map(editorialRarity.tiers.map((t,i)=>[t.key,{...t,tier:i}]));
+const rarityTiers=new Map(editorialRarity.tiers.map((t,i)=>[t.key,{...t,tier:7-i}]));
 const editorialScore=(id,title)=>{const key=editorialRarity.overrides[id]?.[title]||editorialRarity.defaults.tier;const t=rarityTiers.get(key)||rarityTiers.get('cult');return {points:t.points,tier:t.tier,rarityCategory:t.key,rarityLabelKo:t.labelKo,rarityLabelEn:t.labelEn,rarityMethod:editorialRarity.method,rarityReviewed:Boolean(editorialRarity.overrides[id]?.[title])};};
 const normEditorial=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
 const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],...editorialScore(id,list[i])};};
