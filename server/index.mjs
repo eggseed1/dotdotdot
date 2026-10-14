@@ -17,7 +17,7 @@ import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidat
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
-const editorialAnswers=JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8'));
+const editorialAnswers={...JSON.parse(fs.readFileSync(path.join(root,'src/data/editorial-answers.json'),'utf8')),...JSON.parse(fs.readFileSync(path.join(root,'src/data/thematic-answers.json'),'utf8'))};
 const normEditorial=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
 const editorialMatch=(id,raw)=>{const list=editorialAnswers[id]?.answers||[];const i=list.findIndex(title=>normEditorial(title)===normEditorial(raw));return i<0?null:{title:list[i],points:Math.min(100,10+5*i),tier:Math.min(7,Math.max(1,Math.ceil((10+5*i)/15)))};};
 const lineupFor=date=>{const ids=dailyEditorial[date];return Array.isArray(ids)&&ids.length===7&&new Set(ids).size===7&&ids.every(id=>promptById.has(id))?ids:null;};
