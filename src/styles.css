@@ -188,3 +188,35 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .question-shell .question-panel{min-height:0;padding:20px 24px 13px}
 .question-shell .question-text{margin:12px 0;min-height:0;font-size:clamp(22px,3vw,35px)}
 @media(max-width:720px){.quest-depth-visual--interactive .hellscape{min-height:450px}.hell-integrated-answer{left:8px;right:8px;bottom:10px}.hell-answer-ui .answer-card{padding:9px}.hell-answer-ui .answer-card form{gap:5px}.hell-answer-ui .submit-button{padding:9px 7px;font-size:7px}.hell-answer-ui .answer-card input{font-size:13px}.quest-depth-visual--interactive .hell-character-zone{top:27%}.question-shell .question-panel{padding:18px 13px}}
+
+
+/* Single integrated pixel-art scene: question and answer are inside the world. */
+.cinematic-play-stage{width:100%;margin:18px 0 30px}
+.cinematic-play-stage .hellscape{height:clamp(540px,72vh,790px);min-height:540px;border:4px solid #352143;border-radius:10px;box-shadow:0 0 0 2px #0b091e,0 16px 50px #0e041a}
+.cinematic-play-stage .hell-headline{display:none}
+.cinematic-play-stage .hell-depth{top:20px;bottom:auto;left:22px}
+.cinematic-play-stage .hell-depth small{font-size:8px;color:#ffcd85}
+.cinematic-play-stage .hell-depth b{font-size:22px}
+.cinematic-play-stage .hell-route{top:28px;bottom:130px}
+.cinematic-play-stage .hell-character-zone{top:45%;width:210px;height:220px;transform:translate(-50%,-20%);pointer-events:none}
+.cinematic-play-stage .hell-bottom-copy{display:none}
+.cinematic-stage-top{position:absolute;z-index:12;left:50%;top:22px;transform:translateX(-50%);width:min(640px,72%);padding:20px 24px 23px;border:3px solid #35243c;background:rgba(18,10,31,.93);box-shadow:8px 9px 0 #100719;text-align:center;color:#fce4c2;pointer-events:none}
+.cinematic-stage-count{font:9px var(--pixel);color:#f6ba75;letter-spacing:2px}
+.cinematic-stage-kind{margin:12px 0 8px;font:9px var(--mono);letter-spacing:1.7px;color:#bd9cb7}
+.cinematic-stage-top h1{font:clamp(15px,2.2vw,29px)/1.58 'DM Sans','Noto Sans KR',sans-serif;font-weight:900;margin:12px 0;color:#fff1d9;text-shadow:2px 3px #5d334e;overflow-wrap:anywhere}
+.cinematic-stage-top p{font:9px var(--mono);letter-spacing:.8px;color:#d5a7ba;margin:0}
+.cinematic-play-stage .hell-answer-ui.cinematic-answer-ui{position:absolute;z-index:15;bottom:0;left:0;right:0;width:100%;max-width:none;padding:17px max(20px,8%) 18px;background:linear-gradient(180deg,rgba(7,6,22,.9),#0d081e 72%);border-top:4px solid #5d3c55;pointer-events:auto;transform:none}
+.cinematic-play-stage .answer-card{background:transparent!important;border:0!important;box-shadow:none!important;margin:0 auto;max-width:860px;padding:0!important}
+.cinematic-play-stage .answer-label{color:#fbc389}
+.cinematic-play-stage .timer{color:#ffd395}
+.cinematic-play-stage .timer-rail{margin:8px 0 10px;background:#3d274b}
+.cinematic-play-stage .timer-rail>div{background:#efbd68}
+.cinematic-play-stage .answer-card form{display:flex;align-items:stretch;gap:11px}
+.cinematic-play-stage .title-suggest-wrap{flex:1;min-width:0;position:relative}
+.cinematic-play-stage #answer{width:100%;background:#1a1230;color:#f6e9d7;border:3px solid #694678;height:58px;font:16px 'DM Mono',monospace;box-shadow:inset 4px 4px 0 #100b1d}
+.cinematic-play-stage #answer::placeholder{color:#a494b0}
+.cinematic-play-stage .submit-button{background:#dbb66d;color:#23162a;border:3px solid #2b1b31;min-width:125px;font:10px var(--pixel);box-shadow:4px 4px #0b0617}
+.cinematic-play-stage .skip-button{position:absolute;right:20px;top:8px;color:#cbacc2}
+.cinematic-play-stage .answer-feedback{margin:9px 0 0;color:#ffb3a6;font-size:12px}
+.cinematic-play-stage .title-suggestions{bottom:calc(100% + 9px);top:auto;z-index:40;background:#1c1330;border:2px solid #9b6f9e;color:#fff2dc}
+@media(max-width:700px){.cinematic-play-stage .hellscape{height:clamp(560px,78dvh,720px)}.cinematic-stage-top{top:20px;width:calc(100% - 38px);padding:15px 13px}.cinematic-stage-top h1{font-size:clamp(17px,5vw,24px)}.cinematic-play-stage .hell-character-zone{top:49%;width:160px;height:170px}.cinematic-play-stage .hell-depth{top:175px;left:16px}.cinematic-play-stage .hell-route{right:12px;top:175px;bottom:180px}.cinematic-play-stage .hell-answer-ui.cinematic-answer-ui{padding:19px 12px 20px}.cinematic-play-stage #answer{height:52px;font-size:14px}.cinematic-play-stage .submit-button{min-width:85px;font-size:8px;padding:8px}.cinematic-play-stage .skip-button{top:0}.cinematic-stage-top p{font-size:8px}}
