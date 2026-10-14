@@ -26,10 +26,10 @@ describe('daily engine',()=>{
   it('does not accept a wrong-kind response',()=>{
     expect(lookupAnswer('Loveless','anime').status).toBe('missing');
   });
-  it('award greater rarity to less popular eligible albums',()=>{
-    const p=promptById.get('m-shoegaze')!;
-    const common=eligible(p).find(w=>w.id==='m01')!;
-    const obscure=eligible(p).find(w=>w.id==='m06')!;
+  it('award greater rarity to less popular eligible works',()=>{
+    const p=promptById.get('f-korean')!;
+    const common=eligible(p)[0]!;
+    const obscure=eligible(p).find(w=>w.popularity<common.popularity)!;
     expect(rarity(obscure,p).points).toBeGreaterThan(rarity(common,p).points);
   });
 });
