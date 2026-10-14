@@ -677,3 +677,14 @@ body:has(.krillion-game-screen) .game-main,body:has(.krillion-game-screen) .ques
 .krillion-game-screen .krillion-hud-block,.krillion-game-screen .krillion-hud-score{background:#240d1def!important}
 .pixel-landing-devil,.brand-mark img{image-rendering:pixelated!important;image-rendering:crisp-edges!important}
 @media(max-width:700px){.krillion-game-screen .cinematic-answer-ui{max-width:calc(100vw - 12px)!important}.krillion-game-screen .cinematic-answer-ui form{display:flex;min-width:0}.krillion-game-screen .cinematic-answer-ui .title-suggest-wrap{min-width:0;flex:1}}
+
+
+/* New hand-authored 320x180 hell world with sharply defined 32x32 devil sprite. */
+.infernal-game-scene .infernal-sky{background-image:var(--pixel-scene)!important;background-size:cover!important;background-position:center center!important;image-rendering:pixelated!important;image-rendering:crisp-edges!important}
+.infernal-game-scene .infernal-moon,.infernal-game-scene .infernal-mountains,.infernal-game-scene .infernal-ash-haze,.infernal-game-scene .infernal-bone-arch,.infernal-game-scene .infernal-gallows,.infernal-game-scene .infernal-citadel,.infernal-game-scene .infernal-lava-river,.infernal-game-scene .infernal-lava-falls,.infernal-game-scene .infernal-skeleton-tree,.infernal-game-scene .infernal-black-spires,.infernal-game-scene .infernal-world,.infernal-game-scene .infernal-depth-wash,.infernal-game-scene .infernal-cliff{display:none!important}
+.infernal-game-scene .infernal-devil{z-index:9!important}
+.infernal-game-scene .infernal-devil img{object-fit:contain!important;image-rendering:pixelated!important;image-rendering:crisp-edges!important;filter:drop-shadow(4px 6px #160812)!important}
+.infernal-game-scene .infernal-devil-glow{opacity:.2!important}
+.pixel-landing{background-size:cover!important;background-position:center center!important}
+.pixel-landing-devil{image-rendering:pixelated!important;image-rendering:crisp-edges!important;filter:drop-shadow(5px 8px #170914)!important}
+@media(max-width:700px){.pixel-landing{background-position:center!important}.infernal-game-scene .infernal-sky{background-position:center center!important}}
