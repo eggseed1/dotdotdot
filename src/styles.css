@@ -158,3 +158,33 @@ button:focus-visible,input:focus-visible{outline:3px solid #ffbc55;outline-offse
 .ridge-left{left:0}.ridge-right{right:0;transform:scaleX(-1)}
 .hellscape--compact .hell-foreground-ridge{height:54%;opacity:.55}
 @media(prefers-reduced-motion:reduce){.hell-speedlines i{animation:none;opacity:0}.hell-world{transition:none}}
+
+
+/* Krillion-inspired playable scene: input is part of the pixel world, not a separate card. */
+.quest-depth-visual--interactive{grid-template-columns:minmax(0,1fr);margin-bottom:15px}
+.quest-depth-visual--interactive .depth-souls{display:none}
+.quest-depth-visual--interactive .hellscape{min-height:485px;overflow:visible}
+.quest-depth-visual--interactive .hellscape .hell-world,
+.quest-depth-visual--interactive .hellscape .hell-backdrop{clip-path:inset(0 0 0 0)}
+.hell-integrated-answer{position:absolute;z-index:12;left:4%;right:4%;bottom:15px;pointer-events:auto}
+.hell-answer-ui .answer-card{border:2px solid #c67b50;background:rgba(30,8,22,.97);box-shadow:4px 4px 0 #080308;padding:12px 14px 14px;position:relative}
+.hell-answer-ui .answer-label{color:#ffd9a3;font:8px var(--pixel);letter-spacing:.25px}
+.hell-answer-ui .timer{color:#ffd88e;font:16px var(--mono)}
+.hell-answer-ui .timer small{color:#ffc28c}
+.hell-answer-ui .timer-rail{background:#4a2534;margin:9px 0 12px;height:5px}
+.hell-answer-ui .timer-rail div{background:#ffb870}
+.hell-answer-ui .answer-card form{display:flex;align-items:stretch;gap:7px}
+.hell-answer-ui .title-suggest-wrap{flex:1;min-width:0;position:relative}
+.hell-answer-ui .answer-card input{width:100%;height:49px;background:#150915;border:2px solid #a85645;color:#fff1d5;font:14px 'DM Sans','Noto Sans KR',sans-serif;padding:0 12px}
+.hell-answer-ui .answer-card input:focus{border-color:#ffd184;outline:1px solid #ffd184}
+.hell-answer-ui .answer-card input::placeholder{color:#ac8e89}
+.hell-answer-ui .submit-button{background:#af603f;color:#fff5d9;border:2px solid #e6a570;box-shadow:3px 3px #110407;padding:10px 11px;font:9px var(--pixel)}
+.hell-answer-ui .skip-button{color:#dcab92;margin:10px 0 0 auto;font:10px var(--mono)}
+.hell-answer-ui .answer-feedback{margin:7px 0;color:#ffb7a7;background:#2d111c;padding:7px}
+.hell-answer-ui .title-suggestions{position:absolute;z-index:100;bottom:calc(100% + 4px);top:auto;left:0;right:0;max-height:200px;overflow-y:auto;box-shadow:0 -5px 0 #10050e}
+.quest-depth-visual--interactive .hell-headline{max-width:65%}
+.quest-depth-visual--interactive .hell-character-zone{top:28%;height:150px;width:150px}
+.quest-depth-visual--interactive .hell-bottom-copy{display:none}
+.question-shell .question-panel{min-height:0;padding:20px 24px 13px}
+.question-shell .question-text{margin:12px 0;min-height:0;font-size:clamp(22px,3vw,35px)}
+@media(max-width:720px){.quest-depth-visual--interactive .hellscape{min-height:450px}.hell-integrated-answer{left:8px;right:8px;bottom:10px}.hell-answer-ui .answer-card{padding:9px}.hell-answer-ui .answer-card form{gap:5px}.hell-answer-ui .submit-button{padding:9px 7px;font-size:7px}.hell-answer-ui .answer-card input{font-size:13px}.quest-depth-visual--interactive .hell-character-zone{top:27%}.question-shell .question-panel{padding:18px 13px}}
