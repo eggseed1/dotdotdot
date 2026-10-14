@@ -33,7 +33,6 @@ for(const id of ids){
  const genreIds=claimIds(e,'P136'),genres=[];
  const known={'Q471839':'science fiction','Q200092':'horror','Q130232':'drama','Q157443':'romance','Q157394':'fantasy'};
  for(const g of genreIds)if(known[g])genres.push(known[g]);
- if(kind==='games'&&/role.playing/i.test(query))genres.push('rpg');
  const aliases=[...(e.aliases?.en||[]),...(e.aliases?.ko||[])].map(x=>x.value).slice(0,25);
  works.push({kind,sourceId:id,title,titleKo:e.labels?.ko?.value||'',creator:'',year:year(e),country,genres,aliases,ratingCount:null,verified:true,sourceUrl:'https://www.wikidata.org/wiki/'+id});
 }
