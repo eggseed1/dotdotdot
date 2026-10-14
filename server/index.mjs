@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
+import {searchAniList,exactAniList,aniListScore} from './anilist-live.mjs';
 import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
 import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
@@ -122,6 +123,7 @@ const server=http.createServer((req,res)=>{
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
     if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
     else if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
+    else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
     else respond();
     return;
   }
@@ -136,6 +138,9 @@ const server=http.createServer((req,res)=>{
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
+      if(!found.length&&prompt.kind==='anime'){
+        try{found=exactAniList(raw,await searchAniList(raw,{limit:25}));}catch{}
+      }
       if(!found.length&&prompt.kind==='film'){
         const searchTitle=raw.split(/\\s+[—–]\\s+/u)[0];
         try{found=exactFilmMatches(raw,await searchWikidataFilms(searchTitle,{limit:18}));}catch{}
@@ -148,10 +153,10 @@ const server=http.createServer((req,res)=>{
         !valid[0].verified?{status:'unverified'}:(()=>{
         const w=valid[0];
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
-        const score=w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        const score=w.source==='anilist-live'?aniListScore(w.popularity):w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
         // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
-          points:score.points,tier:score.tier,provisional:true,unrated:!hasVotes,rarityMethod:w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
+          points:score.points,tier:score.tier,provisional:true,unrated:w.source==='anilist-live'?!w.popularity:!hasVotes,rarityMethod:w.source==='anilist-live'?'anilist-popularity-provisional':w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
     });return;
