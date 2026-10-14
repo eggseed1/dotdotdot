@@ -1,6 +1,6 @@
 import {rarityRank} from './lib/rarity-ranks.mjs';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Film, Info, RotateCcw, SkipForward, Star, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Clipboard, Clock3, Info, RotateCcw, SkipForward, X } from 'lucide-react';
 import { catalog } from './data/catalog';
 
 import { Hellscape } from './components/Hellscape';
