@@ -3,7 +3,7 @@ const GQL=`query($search:String,$perPage:Int){Page(perPage:$perPage){media(searc
 function normalize(m){
  const genres=[...(m.genres||[]).map(x=>x.toLowerCase()==='sci-fi'?'science fiction':x.toLowerCase()),...(m.tags||[]).filter(x=>x.rank>=55).map(x=>x.name.toLowerCase())];
  return {id:'anilist:'+m.id,kind:'anime',title:m.title?.english||m.title?.romaji||m.title?.native,
-  titleKo:'',creator:'',year:m.startDate?.year||m.seasonYear||0,country:m.countryOfOrigin==='JP'?'Japan':m.countryOfOrigin==='KR'?'South Korea':'',
+  titleKo:'',creator:'',format:m.format||'',year:m.startDate?.year||m.seasonYear||0,country:m.countryOfOrigin==='JP'?'Japan':m.countryOfOrigin==='KR'?'South Korea':'',
   genres:[...new Set(genres)],aliases:[m.title?.romaji,m.title?.english,m.title?.native].filter(Boolean),
   source:'anilist-live',verified:true,ratingCount:null,popularity:Number(m.popularity)||null,
   favourites:Number(m.favourites)||null,sourceUrl:'https://anilist.co/anime/'+m.id};
