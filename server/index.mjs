@@ -8,7 +8,7 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
-import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz} from './musicbrainz-live.mjs';
+import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
@@ -134,16 +134,17 @@ const server=http.createServer((req,res)=>{
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
-      if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return w;}}));}
+      if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return {...w,metadataUnavailable:true};}}));}
       const valid=found.filter(w=>prompt.match(w));
-      const response=found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
+      const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
+      const response=metadataMissing?{status:'unverified',reason:'genre-or-country-metadata-unavailable'}:found.length>1?{status:'ambiguous'}:!found.length?{status:'missing'}:!valid.length?{status:'notEligible'}:
         !valid[0].verified?{status:'unverified'}:(()=>{
         const w=valid[0];
         const hasVotes=Number.isSafeInteger(w.ratingCount)&&w.ratingCount>=1;
-        const score=hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
+        const score=w.source==='musicbrainz-live'?provisionalRarity(w.ratingCount):hasVotes?sourceCatalog.score(prompt.id,w.ratingCount):{points:44,tier:5};
         // Metadata-only works are real answers, but this neutral SOLO score is not a verified rarity rating.
         return {status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,country:w.country},
-          points:score.points,tier:score.tier,provisional:true,unrated:!hasVotes};
+          points:score.points,tier:score.tier,provisional:true,unrated:!hasVotes,rarityMethod:w.source==='musicbrainz-live'?'musicbrainz-votes-provisional':hasVotes?'catalog-votes':'no-popularity-data',genreVotes:w.genreVotes||null};
       })();
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(response));
     });return;
