@@ -295,6 +295,18 @@ not necessarily the artist's country and is intentionally excluded. Full
 cross-source merging, reliable audience popularity, artist origin enrichment
 and stable ranked rarity still require separate pipelines and licensing.
 
+**Full Open Library in one command:** With additional disk space, stream the
+official latest WORKS dump directly into the same Render SQLite database
+without manually downloading the gzip archive:
+
+```sh
+python3 scripts/import-openlibrary-online.py --db /data/catalog.sqlite
+```
+
+Books without known author/origin/readership data remain searchable but only
+qualify for prompts whose factual conditions can be verified. All downloads are
+from the official Open Library bulk-export endpoint.
+
 **Other full catalogs:**
 - MusicBrainz core (official CC0 dump, not optional noncommercial derived data):
   download/extract `mbdump.tar.bz2` from
