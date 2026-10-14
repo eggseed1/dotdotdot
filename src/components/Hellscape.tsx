@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type {ReactNode,CSSProperties} from 'react';
 import {devilArt} from '../data/art';
 import type {Lang} from '../lib/types';
 import {rarityRank} from '../lib/rarity-ranks.mjs';
@@ -26,7 +26,7 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
      <div className="infernal-mountains far"/><div className="infernal-mountains near"/>
    </div>
    <div className="infernal-world" style={{transform:`translate3d(0,${100-travel*.135}px,0)`}} aria-hidden="true">
-     {zones.map((z,i)=><div key={z.at} className={`infernal-zone zone-${i}`} style={{top:`${z.at*.135}px`,'--zone-tone':z.tone} as React.CSSProperties}>
+     {zones.map((z,i)=><div key={z.at} className={`infernal-zone zone-${i}`} style={{top:`${z.at*.135}px`,'--zone-tone':z.tone} as CSSProperties}>
        <div className="infernal-zone-sign"><b>{z.at.toLocaleString()}m</b><span>{z[lang]}</span></div>
        <div className="infernal-ruins"><i/><i/><i/><i/><i/><i/><i/></div>
        <div className="infernal-stalactites"><i/><i/><i/><i/><i/></div>
