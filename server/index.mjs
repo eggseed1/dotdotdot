@@ -146,7 +146,7 @@ const server=http.createServer((req,res)=>{
         const responses=await Promise.allSettled([searchVNDB(q,{limit:30}),searchWikidataGames(q,{limit:25})]);
         const vns=responses[0].status==='fulfilled'?exactVNDB(raw,responses[0].value):[];
         const games=responses[1].status==='fulfilled'?exactGameMatches(raw,responses[1].value):[];
-        found=[...vns,...games];
+        found=vns.length?vns:games;
       }
       if(prompt.kind==='games'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-games')return w;try{return await enrichWikidataGame(w);}catch{return {...w,metadataUnavailable:true};}}));}
       if(!found.length&&prompt.kind==='anime'){
