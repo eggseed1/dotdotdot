@@ -111,8 +111,12 @@ export function createCatalogStore(dbPath){
       FROM works WHERE ${filter.sql} AND verified=1 AND rating_count>=1`).get(count,...filter.params);
     return rarityFromRank(count,Number(row.n),Number(row.greater||0));
   }
-  function possible(promptId,limit=12){const pool=eligible(promptId);if(!pool.length)return [];
-    return pool.sort((a,b)=>a.ratingCount-b.ratingCount).slice(0,limit);
+  function possible(promptId,limit=12){
+    const filter=wherePrompt(promptId);if(!filter)return [];
+    // Include valid metadata-only works: no audience votes does not mean nonexistent.
+    return db.prepare(`SELECT * FROM works WHERE ${filter.sql} AND verified=1
+      ORDER BY CASE WHEN rating_count IS NULL THEN 1 ELSE 0 END, rating_count ASC, title ASC LIMIT ?`)
+      .all(...filter.params,Math.min(Math.max(limit,1),100)).map(hydrate);
   }
   if((db.prepare('SELECT COUNT(*) n FROM work_aliases').get().n===0 || db.prepare('SELECT COUNT(*) n FROM work_grams').get().n===0)
       && db.prepare('SELECT COUNT(*) n FROM works').get().n>0){
