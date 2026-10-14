@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { scoreRound, eloDelta } from './duel-rules.mjs';
 import { createCatalogStore } from './catalog-store.mjs';
+import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
 import {searchMusicBrainz,exactLiveMatches,enrichMusicBrainz,provisionalRarity} from './musicbrainz-live.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
@@ -120,6 +121,7 @@ const server=http.createServer((req,res)=>{
     const local=allowed.has(kind)&&q.trim().length>=2?sourceCatalog.suggest(kind,q,7):[];
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
     if(kind==='music'&&q.trim().length>=2){searchMusicBrainz(q).then(respond).catch(()=>respond());}
+    else if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
     else respond();
     return;
   }
@@ -134,6 +136,11 @@ const server=http.createServer((req,res)=>{
       if(!found.length&&prompt.kind==='music'){
         try{found=exactLiveMatches(raw,await searchMusicBrainz(raw,{limit:25}));}catch{}
       }
+      if(!found.length&&prompt.kind==='film'){
+        const searchTitle=raw.split(/\\s+[—–]\\s+/u)[0];
+        try{found=exactFilmMatches(raw,await searchWikidataFilms(searchTitle,{limit:18}));}catch{}
+      }
+      if(prompt.kind==='film'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-live')return w;try{return await enrichWikidataFilm(w);}catch{return {...w,metadataUnavailable:true};}}));}
       if(prompt.kind==='music'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='musicbrainz-live')return w;try{return await enrichMusicBrainz(w);}catch{return {...w,metadataUnavailable:true};}}));}
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
