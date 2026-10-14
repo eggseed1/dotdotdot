@@ -4,15 +4,16 @@ import { eligible,lookupAnswer,normalize,promptById,rarity,selectPrompts } from 
 describe('daily engine',()=>{
   it('always returns seven stable prompts in each mode',()=>{
     for(const mode of ['music','all'] as const){
-      const a=selectPrompts(mode,'2026-10-13');
+      const a=selectPrompts(mode,'2026-10-14');
       expect(a).toHaveLength(7);
-      expect(a.map(p=>p.id)).toEqual(selectPrompts(mode,'2026-10-13').map(p=>p.id));
+      expect(a.map(p=>p.id)).toEqual(selectPrompts(mode,'2026-10-14').map(p=>p.id));
       expect(new Set(a.map(p=>p.id)).size).toBe(7);
       expect(a.every(p=>p.kind!=='music')).toBe(true);
     }
   });
+  it('unpublished dates have no automatically generated questions',()=>{expect(selectPrompts('all','2026-10-15')).toEqual([]);});
   it('all media features film anime games and books without music',()=>{
-    const kinds=selectPrompts('all','2026-10-13').map(p=>p.kind);
+    const kinds=selectPrompts('all','2026-10-14').map(p=>p.kind);
     expect(kinds.filter(x=>x==='music')).toHaveLength(0);
     expect(kinds.filter(x=>x==='film')).toHaveLength(2);
     expect(new Set(kinds).size).toBe(5);
