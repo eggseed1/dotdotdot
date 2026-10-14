@@ -7,7 +7,7 @@ import { Hellscape } from './components/Hellscape';
 import { DuelArena } from './components/DuelArena';
 import { useTitleAutocomplete, TitleSuggestions } from './components/TitleAutocomplete';
 import { PublicMatchPage } from './components/PublicMatchPage';
-import { devilArt, hellBackdrop } from './data/art';
+import { devilArt } from './data/art';
 import { Swords } from 'lucide-react';
 import { kindNames, lookupAnswer, newGame, promptById, rarity, ROUND_SECONDS, ROUNDS, selectedWork, todayKey, totalScore } from './lib/engine';
 import { encodeShare, decodeShare, sampleAnswers } from './lib/sharing';
@@ -45,7 +45,6 @@ export default function App(){
     return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'&&saved.prompts.every(id=>!id.startsWith('m-'))?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
-  const [landingMode,setLandingMode]=useState<Mode>('all');
   const [publicMatch,setPublicMatch]=useState(()=>new URLSearchParams(window.location.search).get('match'));
   const [publicShare,setPublicShare]=useState(()=>{try{return new URLSearchParams(window.location.search).get('r');}catch{return null;}});
   const publicResults=publicShare?decodeShare(publicShare):null;
