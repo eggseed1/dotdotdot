@@ -24,6 +24,15 @@ export const promptPool: Prompt[] = [
   {id:'m-uk',kind:'music',badge:{en:'COUNTRY',ko:'국가'},label:{en:'Name an album by a British artist.',ko:'영국 아티스트의 앨범을 하나 대보세요.'},match:w=>w.country==='United Kingdom'},
   {id:'m-krautrock',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name a krautrock album.',ko:'크라우트록 앨범을 하나 대보세요.'},match:w=>w.genres.includes('krautrock')},
   {id:'m-experimental',kind:'music',badge:{en:'GENRE',ko:'장르'},label:{en:'Name an experimental music album.',ko:'실험음악 앨범을 하나 대보세요.'},match:w=>w.genres.includes('experimental')},
+  {id:'f-korean-2000s-drama',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a South Korean drama film released between 2000 and 2009.',ko:'2000년부터 2009년 사이 개봉한 한국 드라마 영화를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009&&w.genres.includes('drama')},
+  {id:'f-japan-90s-horror',kind:'film',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a Japanese horror film released in the 1990s.',ko:'1990년대 개봉한 일본 공포 영화를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=1990&&w.year<=1999&&w.genres.includes('horror')},
+  {id:'f-70s-sci-fi',kind:'film',badge:{en:'DECADE · GENRE',ko:'시대 · 장르'},label:{en:'Name a science-fiction film released in the 1970s.',ko:'1970년대 개봉한 SF 영화를 대보세요.'},match:w=>w.year>=1970&&w.year<=1979&&w.genres.includes('science fiction')},
+  {id:'a-90s-sci-fi-tv',kind:'anime',badge:{en:'DECADE · GENRE · FORMAT',ko:'시대 · 장르 · 형식'},label:{en:'Name a 1990s TV anime tagged as science fiction.',ko:'1990년대 방영한 SF 장르 TV 애니메이션을 대보세요.'},match:w=>w.year>=1990&&w.year<=1999&&w.genres.includes('science fiction')&&w.format==='TV'},
+  {id:'a-2000s-movie-fantasy',kind:'anime',badge:{en:'DECADE · GENRE · FORMAT',ko:'시대 · 장르 · 형식'},label:{en:'Name a fantasy anime film released from 2000 to 2009.',ko:'2000년대 개봉한 판타지 애니메이션 영화를 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&w.genres.includes('fantasy')&&w.format==='MOVIE'},
+  {id:'a-2010s-mystery-tv',kind:'anime',badge:{en:'DECADE · GENRE · FORMAT',ko:'시대 · 장르 · 형식'},label:{en:'Name a mystery TV anime that began airing in the 2010s.',ko:'2010년대 방영을 시작한 미스터리 TV 애니메이션을 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('mystery')&&w.format==='TV'},
+  {id:'a-2000s-psych-tv',kind:'anime',badge:{en:'DECADE · TAG · FORMAT',ko:'시대 · 태그 · 형식'},label:{en:'Name a 2000s TV anime with a strong psychological tag.',ko:'2000년대 방영한 심리물 태그의 TV 애니메이션을 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&w.genres.includes('psychological')&&w.format==='TV'},
+  {id:'g-2010s-indie-rpg',kind:'games',badge:{en:'DECADE · GENRE · STYLE',ko:'시대 · 장르 · 성격'},label:{en:'Name an indie RPG released between 2010 and 2019.',ko:'2010년부터 2019년 사이 나온 인디 RPG 게임을 대보세요.'},match:w=>w.year>=2010&&w.year<=2019&&w.genres.includes('rpg')&&w.genres.includes('indie')},
+  {id:'g-2000s-japan-rpg',kind:'games',badge:{en:'COUNTRY · DECADE · GENRE',ko:'국가 · 시대 · 장르'},label:{en:'Name a Japanese-developed RPG released in the 2000s.',ko:'2000년대에 출시된 일본 개발 RPG를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=2000&&w.year<=2009&&w.genres.includes('rpg')},
   {id:'f-korean-2000s',kind:'film',badge:{en:'COUNTRY + DECADE',ko:'국가 + 시대'},label:{en:'Name a South Korean film from the 2000s.',ko:'2000년대 한국 영화 하나를 대보세요.'},match:w=>w.country==='South Korea'&&w.year>=2000&&w.year<=2009},
   {id:'f-japan-90s',kind:'film',badge:{en:'COUNTRY + DECADE',ko:'국가 + 시대'},label:{en:'Name a Japanese film released during the 1990s.',ko:'1990년대 일본 영화 하나를 대보세요.'},match:w=>w.country==='Japan'&&w.year>=1990&&w.year<=1999},
   {id:'a-2000s-sci-fi',kind:'anime',badge:{en:'GENRE + DECADE',ko:'장르 + 시대'},label:{en:'Name a science-fiction anime from the 2000s.',ko:'2000년대 SF 애니메이션 하나를 대보세요.'},match:w=>w.year>=2000&&w.year<=2009&&(w.genres.includes('sci-fi')||w.genres.includes('science fiction'))},
@@ -64,10 +73,20 @@ function shuffle<T>(array:T[], seed:string):T[] {
 export function eligible(prompt:Prompt):Work[] {
   return catalog.filter(w=>(prompt.kind==='any'||w.kind===prompt.kind)&&prompt.match(w));
 }
-export function selectPrompts(mode:Mode,date:string):Prompt[] {
-  if(mode==='music')return shuffle(promptPool.filter(p=>p.kind!=='music'&&eligible(p).length>=2),date+mode).slice(0,ROUNDS);
-  const counts: Array<[Kind,number]>=[['film',2],['literature',1],['anime',2],['games',2]];
-  return shuffle(counts.flatMap(([kind,amount])=>shuffle(promptPool.filter(p=>p.kind===kind&&eligible(p).length>=2),date+kind).slice(0,amount)),date+mode);
+export function selectPrompts(_mode:Mode,date:string):Prompt[] {
+  // Server-backed genres, country and format replace the tiny demo's eligibility gate.
+  const groups: Array<[Kind,number,string[]]>=[
+    ['film',2,['f-korean-2000s-drama','f-japan-90s-horror','f-70s-sci-fi','f-korean-2000s','f-japan-90s']],
+    ['anime',2,['a-90s-sci-fi-tv','a-2000s-movie-fantasy','a-2010s-mystery-tv','a-2000s-psych-tv','a-2000s-sci-fi','a-90s-drama']],
+    ['games',2,['g-2000s-japan-rpg','g-2010s-rpg','g-2010s-indie-rpg','g-japan']],
+    ['literature',1,['l-experimental','l-japanese','l-asia','l-1900s']]
+  ];
+  const chosen=groups.flatMap(([kind,count,ids])=>{
+    const valid=ids.map(id=>promptById.get(id)!).filter(Boolean)
+      .filter(p=>kind!=='literature'||eligible(p).length>=2);
+    return shuffle(valid,date+kind).slice(0,count);
+  });
+  return shuffle(chosen,date+'all');
 }
 
 /** Unicode-aware canonicalization; Hangul is preserved. */
