@@ -1,3 +1,4 @@
+import {searchTmdbMovies,exactTmdbMovies,enrichTmdbMovie,tmdbEnabled} from './tmdb-films.mjs';
 import {searchTVMaze,exactTV} from './tvmaze-live.mjs';
 /** Actual live guest 1v1 server; deliberately separate from the static GitHub Pages frontend.
  * Start via npm run server. Production: build first, then npm start. */
@@ -123,7 +124,7 @@ const server=http.createServer((req,res)=>{
     const allowed=new Set(['film','literature','anime','games','tv']);
     const local=allowed.has(kind)&&q.trim().length>=2&&kind==='literature'?sourceCatalog.suggest(kind,q,7):[];
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
-    if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
+    if(kind==='film'&&q.trim().length>=2){Promise.allSettled([searchWikidataFilms(q,{limit:35}),searchTmdbMovies(q)]).then(results=>respond(results.flatMap(r=>r.status==='fulfilled'?r.value:[]))).catch(()=>respond());}
     else if(kind==='tv'&&q.trim().length>=2){searchTVMaze(q).then(respond).catch(()=>respond());}
     else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
     else if(kind==='games'&&q.trim().length>=2){Promise.allSettled([searchVNDB(q),searchWikidataGames(q)]).then(results=>respond(results.flatMap(r=>r.status==='fulfilled'?r.value:[]))).catch(()=>respond());}
@@ -154,9 +155,15 @@ const server=http.createServer((req,res)=>{
       }
       if(!found.length&&prompt.kind==='film'){
         const searchTitle=raw.split(/\\s+[—–]\\s+/u)[0];
-        try{found=exactFilmMatches(raw,await searchWikidataFilms(searchTitle,{limit:18}));}catch{}
+        const responses=await Promise.allSettled([searchWikidataFilms(searchTitle,{limit:35}),searchTmdbMovies(searchTitle)]);
+        const wikidata=responses[0].status==='fulfilled'?exactFilmMatches(raw,responses[0].value):[];
+        const tmdb=responses[1].status==='fulfilled'?exactTmdbMovies(raw,responses[1].value):[];
+        found=wikidata.length?wikidata:tmdb;
       }
-      if(prompt.kind==='film'&&found.length){found=await Promise.all(found.map(async w=>{if(w.source!=='wikidata-live')return w;try{return await enrichWikidataFilm(w);}catch{return {...w,metadataUnavailable:true};}}));}
+      if(prompt.kind==='film'&&found.length){found=await Promise.all(found.map(async w=>{
+        try{return w.source==='wikidata-live'?await enrichWikidataFilm(w):w.source==='tmdb-live'?await enrichTmdbMovie(w):w;}
+        catch{return {...w,metadataUnavailable:true};}
+      }));}
       const valid=found.filter(w=>prompt.match(w));
       const metadataMissing=found.length>0&&found.every(w=>w.metadataUnavailable);
       const chosen=valid.length?valid[0]:found[0];
@@ -176,7 +183,7 @@ const server=http.createServer((req,res)=>{
     const players=Object.entries(ratings).filter(([,v])=>Number.isFinite(v.rating)&&v.played>0).map(([id,v])=>({id:id.slice(0,8),name:v.name,rating:v.rating,played:v.played,wins:v.wins||0})).sort((a,b)=>b.rating-a.rating).slice(0,100);
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
   }
-  if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),liveSearch:{music:{provider:'MusicBrainz',enabled:false},film:{provider:'Wikidata',enabled:true,coverage:'live-search-not-exhaustive'},anime:{provider:'AniList',enabled:true,coverage:'live-search-not-exhaustive'},games:{providers:['VNDB','Wikidata'],enabled:true,coverage:'live-search-not-exhaustive'},literature:{provider:'imported-catalog',enabled:true,coverage:'local-only'}},catalogComplete:false,coverageVerified:false,live:true}));return;}
+  if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),liveSearch:{music:{provider:'MusicBrainz',enabled:false},film:{provider:'Wikidata',enabled:true,coverage:'live-search-not-exhaustive'},anime:{provider:'AniList',enabled:true,coverage:'live-search-not-exhaustive'},games:{providers:['VNDB','Wikidata'],enabled:true,coverage:'live-search-not-exhaustive'},literature:{provider:'imported-catalog',enabled:true,coverage:'local-only'}},catalogComplete:false,coverageVerified:false,tmdbConfigured:tmdbEnabled,live:true}));return;}
   if(/^\/api\/matches\/[A-Za-z0-9]{12}$/.test(pathname)){const id=pathname.split('/').pop();const item=completedMatches[id];res.writeHead(item?200:404,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(item||{error:'not_found'}));return;}
   if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({ok:true,players:clients.size,matches:matches.size}));return;}
   // Production bundle served by the same origin as the websocket endpoint.
