@@ -33,6 +33,12 @@ jobs:
       - name: Incrementally ingest permitted AniList metadata
         run: |
           npm run catalog:bootstrap -- --anime-pages 80 --db "$CATALOG_DB"
+      - name: Expand literature using Open Library
+        continue-on-error: true
+        run: |
+          PAGE=$(( 10#$(date -u +%V) * 5 ))
+          node scripts/fetch-openlibrary-search.mjs --pages 5 --start-page "$PAGE" --out data/books.jsonl
+          node scripts/import-catalog.mjs --file data/books.jsonl --source openlibrary --db "$CATALOG_DB"
       - name: Optional TMDB catalog sync
         if: env.TMDB_READ_TOKEN != ''
         run: |
