@@ -28,6 +28,8 @@ jobs:
         run: |
           mkdir -p data
           gh release download catalog-latest --pattern catalog.sqlite --dir data --clobber || echo "No previous catalog release yet."
+      - name: Install build dependencies
+        run: npm ci
       - name: Test importer pagination
         run: node --test scripts/fetch-anilist.test.mjs
       - name: Incrementally ingest permitted AniList metadata
@@ -58,6 +60,8 @@ jobs:
         if: env.TMDB_READ_TOKEN != ''
         run: |
           npm run catalog:bootstrap -- --anime-pages 0 --movies --movie-from 1990 --movie-to 1999 --db "$CATALOG_DB"
+      - name: Freeze answers for each predefined question
+        run: npm run catalog:questions -- --db "$CATALOG_DB"
       - name: Verify snapshot and checkpoint WAL
         run: |
           node scripts/catalog-snapshot.mjs --db "$CATALOG_DB"
