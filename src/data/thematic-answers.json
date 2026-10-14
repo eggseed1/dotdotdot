@@ -603,7 +603,13 @@
       "Gintama°",
       "Gintama': Enchousen",
       "Gintama'",
-      "Kaguya-sama: Love Is War - Ultra Romantic"
+      "Kaguya-sama: Love Is War - Ultra Romantic",
+      "No Game No Life",
+      "Comic Party",
+      "Kyoufu no Kyo-chan",
+      "Ayu Mayu Theater",
+      "My Teen Romantic Comedy SNAFU",
+      "The Disastrous Life of Saiki K."
     ],
     "source": "https://www.animenation.net/blog/ask-john-what-are-some-major-anime-parodies/"
   },
@@ -1010,5 +1016,16 @@
       ]
     },
     "caveat": "Some entries are search candidates only, not confirmed under exact prompt definition; rarity points estimated."
+  },
+  "_sourcesSupplement": {
+    "date": "2026-10-14",
+    "anime": [
+      "https://www.animenation.net/blog/ask-john-what-are-some-major-anime-parodies/",
+      "https://animereferences.com/no-game-no-life-episode-7-references-parodies/",
+      "https://animereferences.com/yahari-ore-no-seishun-love-come-wa-machigatteiru-episode-2-3-4-6-references-parodies/"
+    ],
+    "literature": [
+      "https://www.borges.pitt.edu/documents/0108.pdf"
+    ]
   }
 }
