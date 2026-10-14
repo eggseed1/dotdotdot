@@ -465,7 +465,40 @@
       "BAWS",
       "Percepto Corporation",
       "Pangaea Corporation",
-      "Alpha Pharmaceuticals"
+      "Alpha Pharmaceuticals",
+      "FrobozzCo",
+      "Fazbear Entertainment, Inc.",
+      "TF Industries",
+      "Vault-Tec Corporation",
+      "Soulstorm Brewery",
+      "Gadd Science, Incorporated",
+      "Citrusoft",
+      "Izanagi Corporation",
+      "Fleeca",
+      "FlyUS",
+      "Sunshine Corporation",
+      "Canyon Entertainment",
+      "Cannonball",
+      "Eugenics Incorporated",
+      "Excelsior Elevator Repair",
+      "Douglas Development Corporation",
+      "Cherry Popper Ice Cream Company",
+      "Carson",
+      "ECola",
+      "Sprunk",
+      "Cluckin' Bell",
+      "Frobozz Magic Grue Company",
+      "Jüngle",
+      "Kamazon",
+      "Aggle",
+      "Fruit Computers",
+      "Vapid",
+      "Karin",
+      "Coyota",
+      "Axxon",
+      "Globe Oil",
+      "Terroil",
+      "Deludamol"
     ],
     "source": "https://www.gamespot.com/articles/100-fictional-game-brands-and-logos/1100-6452901/"
   },
@@ -608,7 +641,26 @@
       "The Sacred Jedi Texts",
       "The Dynamics of an Asteroid",
       "The Book of Sand",
-      "The Encyclopedia of Tlön"
+      "The Encyclopedia of Tlön",
+      "The Autobiographies",
+      "The Book of the Wonders of Urth and Sky",
+      "The Courier's Tragedy",
+      "Den hemlige Frälsaren",
+      "The Doubtful Asphodel",
+      "Fillory and Further",
+      "A First Encyclopaedia of Tlön",
+      "Gigamesh",
+      "The God of the Labyrinth",
+      "The Novel of the Typist",
+      "The Oak Tree",
+      "The Octavo",
+      "The Parchments of Melquíades",
+      "Pierre Menard's Quixote",
+      "The Plan",
+      "Venus on the Half-Shell",
+      "A Young Lady's Illustrated Primer",
+      "The Works of Bergotte",
+      "The Works of Hugh Vereker"
     ],
     "source": "https://en.wikipedia.org/wiki/Imaginary_book",
     "additionalSources": [
@@ -731,8 +783,44 @@
       "Perfect Day",
       "Velvet Goldmine",
       "Hedwig and the Angry Inch",
-      "The Rocky Horror Picture Show"
+      "The Rocky Horror Picture Show",
+      "The Night the Lights Went Out in Georgia",
+      "Boyz N the Hood",
+      "Magical Mystery Tour",
+      "I'm Not There",
+      "Running on Empty",
+      "Shine a Light",
+      "Imagine",
+      "Things to Do in Denver When You're Dead",
+      "Runnin' Down a Dream",
+      "American Pie",
+      "Wah-Wah",
+      "I Want Your Sex",
+      "Song Sung Blue"
     ]
   },
-  "_notes": "Expanded broad candidate discovery, not exhaustive. Many semantic items are unverified leads and must be reviewed before use for ranked correct-answer judging."
+  "_notes": "Expanded broad candidate discovery, not exhaustive. Many semantic items are unverified leads and must be reviewed before use for ranked correct-answer judging.",
+  "_searchExpansion": {
+    "date": "2026-10-14",
+    "method": "manual topical web searches, NOT catalog title filtering",
+    "sources": {
+      "l-fictional-book": [
+        "https://imaginedlibrary.com/shelf/books-within-books/",
+        "https://list.fandom.com/wiki/List_of_fictional_books"
+      ],
+      "g-fictional-corporation": [
+        "https://fictionalcompanies.fandom.com/wiki/List_of_fictional_brands_in_video_games"
+      ],
+      "a-anime-parodies-anime": [
+        "https://www.ranker.com/list/x-times-anime-hilariously-parodied-other-anime/anna-lindwasser",
+        "https://binbougamiga.fandom.com/wiki/List_of_Parodies"
+      ],
+      "f-title-song": [
+        "https://www.imdb.com/list/ls029067068/",
+        "https://list.fandom.com/wiki/List_of_films_which_share_their_name_with_a_title_of_a_song",
+        "https://letterboxd.com/scarequotes/list/trivia-movies-named-after-songs/"
+      ]
+    },
+    "caveat": "Web-search discoveries are candidates. Confirm fictional book status, business status and same-titled song individually."
+  }
 }
