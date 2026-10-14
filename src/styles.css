@@ -775,3 +775,14 @@ body:has(.krillion-game-screen) .game-main,body:has(.krillion-game-screen) .ques
 .integrated-home .home-stage-title{top:21dvh!important}
 .integrated-home .home-stage-title h1{font-size:clamp(24px,7vw,38px)!important}
 }
+
+
+/* Korean buttons match crisp pixel typography and hard-edge game controls. */
+button,.lang-toggle button,.home-start-actions button,.pixel-landing-start,.pixel-landing-duel,.submit-button,.skip-button,.scene-back-button,.action-button,.secondary-button,.next-button,.modal button{font-family:'Galmuri11','Press Start 2P',monospace!important;font-synthesis:none!important;letter-spacing:0!important;border-radius:0!important;text-rendering:optimizeLegibility}
+.krillion-game-screen button,.integrated-home button{box-shadow:4px 4px 0 #110812!important;transition:translate 90ms steps(2,end),box-shadow 90ms steps(2,end)!important}
+.krillion-game-screen button:active,.integrated-home button:active{translate:2px 2px;box-shadow:2px 2px 0 #110812!important}
+.krillion-game-screen .infernal-sky{background-image:var(--pixel-scene)!important;background-size:cover!important;background-position:center!important;filter:none!important}
+.krillion-game-screen .infernal-game-scene:after{background:linear-gradient(180deg,transparent,#160a18 64%,#130817)!important}
+.krillion-game-screen .infernal-game-scene .infernal-sky:after{display:none!important}
+.krillion-game-screen .cinematic-stage-top h1{font-family:'Galmuri11',monospace!important;font-weight:800!important}
+@media(max-width:700px){.krillion-game-screen .submit-button,.integrated-home button{font-size:clamp(11px,3vw,14px)!important}}
