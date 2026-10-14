@@ -15,9 +15,10 @@ try{
     prompt_id TEXT NOT NULL,work_id TEXT NOT NULL,points INTEGER NOT NULL,tier INTEGER NOT NULL,
     PRIMARY KEY(prompt_id,work_id));
    CREATE INDEX IF NOT EXISTS prompt_answer_work ON prompt_answers(work_id,prompt_id);
-   CREATE TABLE IF NOT EXISTS prompt_coverage(prompt_id TEXT PRIMARY KEY,answer_count INTEGER NOT NULL,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);
+   CREATE TABLE IF NOT EXISTS prompt_coverage(prompt_id TEXT PRIMARY KEY,answer_count INTEGER NOT NULL,ready INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);
+ if(!catalog.db.prepare('PRAGMA table_info(prompt_coverage)').all().some(c=>c.name==='ready'))catalog.db.exec('ALTER TABLE prompt_coverage ADD COLUMN ready INTEGER NOT NULL DEFAULT 0');
  const add=catalog.db.prepare('INSERT OR REPLACE INTO prompt_answers(prompt_id,work_id,points,tier) VALUES(?,?,?,?)');
- const coverage=catalog.db.prepare('INSERT OR REPLACE INTO prompt_coverage(prompt_id,answer_count,updated_at) VALUES(?,?,CURRENT_TIMESTAMP)');
+ const coverage=catalog.db.prepare('INSERT OR REPLACE INTO prompt_coverage(prompt_id,answer_count,ready,updated_at) VALUES(?,?,?,CURRENT_TIMESTAMP)');
  catalog.db.exec('BEGIN');
  try{
   catalog.db.exec('DELETE FROM prompt_answers; DELETE FROM prompt_coverage;');
@@ -35,8 +36,10 @@ try{
     const tier=Math.max(1,Math.min(7,Math.ceil(points/15)));
     add.run(prompt.id,w.id,points,tier);
    }
-   coverage.run(prompt.id,works.length);
-   console.log(prompt.id+': '+works.length+' accepted answers');
+   const ready=works.length>=5?1:0;
+   coverage.run(prompt.id,works.length,ready);
+   console.log(prompt.id+': '+works.length+' verified candidates '+(ready?'READY':'NOT READY (need at least 5)'));
+
   }
   catalog.db.exec('COMMIT');
  }catch(e){catalog.db.exec('ROLLBACK');throw e;}
