@@ -1,3 +1,4 @@
+import {searchTVMaze,exactTV} from './tvmaze-live.mjs';
 /** Actual live guest 1v1 server; deliberately separate from the static GitHub Pages frontend.
  * Start via npm run server. Production: build first, then npm start. */
 import http from 'node:http';
@@ -119,10 +120,11 @@ const server=http.createServer((req,res)=>{
   const pathname=parsedUrl.pathname;
   if(pathname==='/api/suggest' && req.method==='GET'){
     const kind=parsedUrl.searchParams.get('kind'),q=(parsedUrl.searchParams.get('q')||'').slice(0,100);
-    const allowed=new Set(['film','literature','anime','games']);
+    const allowed=new Set(['film','literature','anime','games','tv']);
     const local=allowed.has(kind)&&q.trim().length>=2&&kind==='literature'?sourceCatalog.suggest(kind,q,7):[];
     const respond=(more=[])=>{if(res.writableEnded)return;const found=[...local,...more],seen=new Set();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({suggestions:found.filter(w=>{const key=w.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,7).map(w=>({id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,creator:w.creator,year:w.year,source:w.source}))}));};
     if(kind==='film'&&q.trim().length>=2){searchWikidataFilms(q).then(respond).catch(()=>respond());}
+    else if(kind==='tv'&&q.trim().length>=2){searchTVMaze(q).then(respond).catch(()=>respond());}
     else if(kind==='anime'&&q.trim().length>=2){searchAniList(q).then(respond).catch(()=>respond());}
     else if(kind==='games'&&q.trim().length>=2){Promise.allSettled([searchVNDB(q),searchWikidataGames(q)]).then(results=>respond(results.flatMap(r=>r.status==='fulfilled'?r.value:[]))).catch(()=>respond());}
     else respond();
@@ -135,7 +137,10 @@ const server=http.createServer((req,res)=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
-      let found=['film','anime','games'].includes(prompt.kind)?[]:sourceCatalog.lookup(prompt.kind,raw);
+      let found=['film','anime','games','tv'].includes(prompt.kind)?[]:sourceCatalog.lookup(prompt.kind,raw);
+      if(!found.length&&prompt.kind==='tv'){
+        try{found=exactTV(raw,await searchTVMaze(raw));}catch{}
+      }
       if(!found.length&&prompt.kind==='games'){
         const q=raw.split(/\s+[—–]\s+/u)[0];
         const responses=await Promise.allSettled([searchVNDB(q,{limit:30}),searchWikidataGames(q,{limit:25})]);
