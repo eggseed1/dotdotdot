@@ -14,7 +14,7 @@ export function useTitleAutocomplete(value:string,kind:Kind,lang:Lang,enabled=tr
  const request=async()=>{
   const query=value.trim();if(!enabled||query.length<2)return;
   setQueried(query);setLoading(true);setOpen(true);setItems([]);
-  const local=suggestWorks(query,catalog.filter(w=>w.kind===kind),3) as Item[];
+  const local=kind==='literature'?suggestWorks(query,catalog.filter(w=>w.kind===kind),3) as Item[]:[];
   try{
    const res=await fetch(`${apiOrigin()}/api/suggest?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(query.slice(0,90))}`);
    const data=res.ok?await res.json():null;
