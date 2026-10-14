@@ -47,6 +47,11 @@ export function Hellscape({score=0,opponentScore,lang,compact=false,opponentName
    <div className="infernal-black-spires left"><i/><i/><i/><i/></div>
    <div className="infernal-black-spires right"><i/><i/><i/><i/></div>
    <div className={`infernal-devil ${recentPoints>0?'infernal-devil--descending':''}`} key={`devil-${score}-${recentPoints}`} aria-hidden="true"><div className="infernal-devil-glow"/><img src={devilArt} alt=""/><span className="infernal-devil-trail"/></div>
+   {recentPoints>0&&<div className="infernal-fall-overlay" key={`fall-${score}-${recentPoints}`} aria-hidden="true">
+     <div className="infernal-fall-vignette"/>
+     <div className="infernal-fall-streaks">{Array.from({length:22},(_,i)=><i key={i} style={{left:`${(i*41+11)%100}%`,animationDelay:`${(i%7)*-.13}s`,height:`${45+(i%5)*25}px`}}/>)}</div>
+     <div className="infernal-fall-depth"><span>{lang==='ko'?'지옥 하강 중':'DESCENDING'}</span><strong>+{(recentPoints*10).toLocaleString()}m</strong><div className="infernal-fall-progress"><i style={{'--fall-distance':String(recentPoints)} as CSSProperties}/></div></div>
+   </div>}
    {recentPoints>0&&<div className="infernal-descent-announcement" key={`descend-${score}`} aria-live="polite"><span>{lang==='ko'?'악마가 더 깊이 내려갑니다':'DESCENDING INTO HELL'}</span><strong>▼ {recentPoints*10}m</strong><small>{lang==='ko'?'희귀한 답일수록 더 깊이':'RARER ANSWERS · DEEPER DESCENT'}</small></div>}
    <div className="infernal-depth-meter"><small>{lang==='ko'?'현재 심도':'DEPTH'}</small><strong>{depth.toLocaleString()}m</strong><span>{zone[lang]} · {rank[lang]}</span></div>
    {opponentScore!==undefined&&<div className="hell-versus"><span>YOU · {depth}m</span><span>{opponentName||'RIVAL'} · {Math.max(0,opponentScore*10)}m</span></div>}
