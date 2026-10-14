@@ -43,10 +43,10 @@ export default function App(){
     const param=new URLSearchParams(window.location.search).get('r');
     if(param){const shared=decodeShare(param);if(shared)return shared.session;}
     const saved=getSaved<GameSession>('deepcut:session');
-    return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS?saved:null;
+    return saved?.date===todayKey()&&saved?.prompts?.length===ROUNDS&&saved?.mode==='all'?saved:null;
   });
   const [duelOpen,setDuelOpen]=useState(false);
-  const [landingMode,setLandingMode]=useState<Mode>('music');
+  const [landingMode,setLandingMode]=useState<Mode>('all');
   const [publicMatch,setPublicMatch]=useState(()=>new URLSearchParams(window.location.search).get('match'));
   const [publicShare,setPublicShare]=useState(()=>{try{return new URLSearchParams(window.location.search).get('r');}catch{return null;}});
   const publicResults=publicShare?decodeShare(publicShare):null;
@@ -81,6 +81,7 @@ export default function App(){
   useEffect(()=>{if(session?.state==='play')inputRef.current?.focus();},[session?.index,session?.state]);
 
   const start=(mode:Mode,practice=false)=>{
+    mode='all';
     setPublicShare(null);window.history.replaceState(null,'',window.location.pathname);
     const finished=getSaved<{score:number}>(gameKey(mode,date));
     const existing=getSaved<GameSession>('deepcut:session');
@@ -94,28 +95,29 @@ export default function App(){
     setSession(s=>s&&s.state==='play'?{...s,state:'reveal',results:[...s.results,result]}:s);
     setFeedback('');
   };
-  const submit=async(event?:FormEvent)=>{
+  const submit=async(event?:FormEvent,override?:string)=>{
+    const entry=override??answer;
     event?.preventDefault();
     if(!session||session.state!=='play'||!activePrompt)return;
     if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-    if(!answer.trim()){setFeedback(t.empty);return;}
-    const found=lookupAnswer(answer,activePrompt.kind);
+    if(!entry.trim()){setFeedback(t.empty);return;}
+    const found=lookupAnswer(entry,activePrompt.kind);
     if(found.status==='missing'){
       try{
         const api=location.hostname==='eggseed1.github.io'?'https://dotdotdot-7yot.onrender.com':location.port==='5173'?`${location.protocol}//${location.hostname}:8787`:location.origin;
-        const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:answer.trim()})});
+        const response=await fetch(`${api}/api/validate`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({promptId:activePrompt.id,answer:entry.trim()})});
         if(response.ok){
           const data=await response.json() as {status:string;work?:{id:string;title:string;titleKo?:string;creator:string;year:number;country?:string};points?:number;tier?:number};
           if(data.status==='found'&&data.work&&Number.isFinite(data.points)&&Number.isFinite(data.tier)){
             if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
-            lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:answer.trim(),points:data.points!,tier:data.tier!});return;
+            lock({promptId:activePrompt.id,workId:data.work.id,title:data.work.title,titleKo:data.work.titleKo,creator:data.work.creator,year:data.work.year,country:data.work.country,rawAnswer:entry.trim(),points:data.points!,tier:data.tier!});return;
           }
           if(data.status==='ambiguous'){setFeedback(t.ambiguous);return;}
           if(data.status==='notEligible'){setFeedback(t.notEligible);return;}
         }
       }catch{/* Static-only mode has no live catalog API. */}
       // GitHub Pages has no Node API. Validate exact entries from the published static catalog.
-      const records=await staticCatalogExact(answer,activePrompt.kind);
+      const records=await staticCatalogExact(entry,activePrompt.kind);
       if(records.length>1){setFeedback(t.ambiguous);return;}
       if(records.length===1){
         const work=records[0];
@@ -123,14 +125,14 @@ export default function App(){
         if(Date.now()-session.roundStartedAt>=ROUND_SECONDS*1000)return;
         // This is *neutral provisional credit*: metadata presence never proves rarity.
         lock({promptId:activePrompt.id,workId:work.id,title:work.title,titleKo:work.titleKo,
-          creator:work.creator,year:work.year,country:work.country,rawAnswer:answer.trim(),points:44,tier:5});return;
+          creator:work.creator,year:work.year,country:work.country,rawAnswer:entry.trim(),points:44,tier:5});return;
       }
       setFeedback(t.invalid);return;
     }
     if(found.status==='ambiguous'){setFeedback(t.ambiguous);return;}
     if(!activePrompt.match(found.work)){setFeedback(t.notEligible);return;}
     const points=rarity(found.work,activePrompt);
-    lock({promptId:activePrompt.id,workId:found.work.id,rawAnswer:answer.trim(),points:points.points,tier:points.tier});
+    lock({promptId:activePrompt.id,workId:found.work.id,rawAnswer:entry.trim(),points:points.points,tier:points.tier});
   };
   const next=()=>{
     if(!session||session.state!=='reveal')return;
@@ -171,12 +173,12 @@ export default function App(){
         <img className="pixel-landing-devil" src={devilArt} alt={lang==='ko'?'픽셀 악마':'Little pixel devil'} draggable="false"/>
         
         <div className="pixel-landing-choices" role="group" aria-label={lang==='ko'?'카테고리 선택':'Choose category'}>
-          <button type="button" className={landingMode==='music'?'selected':''} aria-pressed={landingMode==='music'} onClick={()=>setLandingMode('music')}>{lang==='ko'?'음악':'MUSIC'}</button>
+          
           <button type="button" className={landingMode==='all'?'selected':''} aria-pressed={landingMode==='all'} onClick={()=>setLandingMode('all')}>{lang==='ko'?'전체 미디어':'ALL MEDIA'}</button>
         </div>
         <button className="pixel-landing-start" onClick={()=>start(landingMode)}>{lang==='ko'?'시작하기':'START'} <ArrowRight size={20}/></button>
         <button className="pixel-landing-duel" onClick={()=>setDuelOpen(true)}><Swords size={14}/>{lang==='ko'?'1대1 대결':'1V1 RANKED / FRIENDS'}</button>
-        <span className="pixel-landing-fineprint">{lang==='ko'?'7문제 · 25초 · 데이터 확장 중':'7 ROUNDS · 25 SECONDS · CATALOG EXPANDING'}</span>
+        <span className="pixel-landing-fineprint">{lang==='ko'?'7문제 · 25초 · 데이터 확장 중':'7 ROUNDS · FILMS / ANIME / GAMES / BOOKS'}</span>
       </div>
     </main>:<main className="game-main">
       <div className="game-topbar"><button className="small-link" onClick={home}><ArrowLeft size={15}/> {t.back}</button><div className="game-title-plate"><span className="mini-diamond">◆</span>{modeLabel(session.mode)}<span className="game-slash">/</span>{session.ranked?t.daily:t.unranked}</div><span className="date-tag">{stamp(session.date)}</span></div>
@@ -201,7 +203,7 @@ export default function App(){
           <h1 className="question-text">{activePrompt?.label[lang]}</h1>
           <div className="answer-card"><div className="answer-label"><label htmlFor="answer">{t.yourAnswer}</label><div className={`timer ${timeLeft<=7?'urgent':''}`}><Clock3 size={15}/><span>{Math.ceil(timeLeft).toString().padStart(2,'0')}</span><small>s</small></div></div>
             <div className="timer-rail"><div style={{width:percent((timeLeft/ROUND_SECONDS)*100)}}/></div>
-            <form onSubmit={submit}><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={e=>autocomplete.onKeyDown(e,setAnswer)}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
+            <form onSubmit={submit}><div className="title-suggest-wrap"><input ref={inputRef} id="answer" type="text" spellCheck="false" autoComplete="off" placeholder={t.placeholder} value={answer} onChange={event=>{setAnswer(event.target.value);if(feedback)setFeedback('');}} onKeyDown={e=>autocomplete.onKeyDown(e,setAnswer,selected=>{void submit(undefined,selected);})}/><TitleSuggestions {...autocomplete} lang={lang} onSelect={item=>autocomplete.select(item,setAnswer)}/></div><button className="action-button submit-button" type="submit" disabled={!answer.trim()}>{t.submit}<ArrowRight size={17}/></button></form>
             {feedback&&<p className="answer-feedback" role="alert">! {feedback}</p>}
             <button className="skip-button" onClick={()=>lock({promptId:activePrompt?.id||'',rawAnswer:'',points:0,tier:-1})}>{t.skip} <SkipForward size={14}/></button>
           </div>
