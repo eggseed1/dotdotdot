@@ -199,3 +199,48 @@ Existing `import:books`, `import-imdb-dump.mjs` and `fetch:wikidata` scripts rem
 - Build full-coverage prompt eligibility only where genre, year, country and valid rarity counts are actually known.
 - Move indexed search and scoring to a persistent server; add account authentication and server-validated Elo before a competitive launch.
 - Run `npm run test:catalog-pipelines` before large imports.
+
+## Real full music catalog: official Discogs CC0 dumps
+
+**The 136-item browser fixture is NOT the database.** To cover genuinely obscure releases,
+run the complete official Discogs monthly **masters** and **releases** dumps on a
+persistent backend. Discogs publishes four CC0 XML.GZ datasets (artists, labels,
+masters, releases) at https://data.discogs.com/. These are multi-gigabyte
+archives and should not be stored in GitHub or GitHub Pages.
+
+The new `scripts/import-discogs-dump.py` converts the official XML incrementally
+using Python's streaming parser. It keeps all masters and standalone releases
+without a master, so different pressings of the same album do not become
+independent game answers. It imports title, credited artists, year, Discogs
+genres and detailed styles, and a source link. It **does not** treat the
+release's country as the artist's origin or invent listener counts.
+
+```bash
+# Download the current OFFICIAL masters.xml.gz and releases.xml.gz
+# from https://data.discogs.com/ (the exact date changes each month).
+# Run these commands on a machine with plenty of disk space and Node 22.13+.
+set -o pipefail
+python3 scripts/import-discogs-dump.py --kind masters --file /data/discogs_masters.xml.gz \
+  | node scripts/import-catalog.mjs --file - --source discogs --db /data/catalog.sqlite
+python3 scripts/import-discogs-dump.py --kind releases --file /data/discogs_releases.xml.gz \
+  | node scripts/import-catalog.mjs --file - --source discogs --db /data/catalog.sqlite
+```
+
+For every individual release edition, add `--include-mastered-releases`, but
+avoid that for rarity-game canonical works because multiple editions duplicate
+albums. Large imports can take hours and require substantial disk space.
+The importer does not download the dumps or scrape Discogs pages.
+
+**Important distinction:** Discogs bulk metadata has genres and styles but
+no comparable listener/vote counts. Imported works with verified metadata but
+no votes are recognized in the *solo* game and assigned a **provisional neutral
+44 points**; this is NOT an actual obscurity rating. Ranked play requires
+scorable data. For actual rarity, enrich with separately licensed audience
+metrics, normalize source-by-source, and freeze daily score snapshots.
+
+**Live deployment:** A `Dockerfile` and `railway.json` now support a Node
+backend with persistent `/data` volume. Mount a persistent disk at `/data`
+and import the datasets there. GitHub Pages only serves a small static demo;
+it cannot hold the full catalog, run indexed SQL queries, or host live Elo.
+Discogs artist and label XML dumps also exist; those should be indexed into
+separate artist/label tables before offering artist/label-specific prompts.
