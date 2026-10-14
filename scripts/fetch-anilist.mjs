@@ -18,10 +18,11 @@ export function normalizeAniList(media){
   genres:media.genres||[],aliases:[media.title?.romaji,media.title?.english,media.title?.native,...(media.synonyms||[])].filter(Boolean),
   ratingCount:count,verified:true,sourceUrl:media.siteUrl||`https://anilist.co/anime/${media.id}`};
 }
-export async function fetchAniList({out,pages=100,request=fetch,wait=delay,progress=console.error}){
+export async function fetchAniList({out,pages=100,startPage=1,request=fetch,wait=delay,progress=console.error}){
+ if(!Number.isSafeInteger(startPage)||startPage<1||!Number.isSafeInteger(pages)||pages<1||pages>1000)throw Error('Invalid AniList page range');
  fs.mkdirSync(path.dirname(path.resolve(out)),{recursive:true});const stream=fs.createWriteStream(out);
  let imported=0,done=0;
- try{for(let page=1;page<=pages;page++){
+ try{for(let page=startPage;page<startPage+pages;page++){
    let json;
    for(let attempt=0;attempt<5;attempt++){
     const response=await request('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query,variables:{page,perPage:50}})});
@@ -39,6 +40,6 @@ export async function fetchAniList({out,pages=100,request=fetch,wait=delay,progr
  return {imported,pages:done,out,source:'anilist'};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===new URL(import.meta.url).pathname){
- const out=opt('--out','data/anilist.jsonl'),pages=Math.max(1,Number(opt('--pages','100')));
- try{console.log(JSON.stringify(await fetchAniList({out,pages})));}catch(e){console.error(e.message);process.exitCode=1;}
+ const out=opt('--out','data/anilist.jsonl'),pages=Number(opt('--pages','100')),startPage=Number(opt('--start-page','1'));
+ try{console.log(JSON.stringify(await fetchAniList({out,pages,startPage})));}catch(e){console.error(e.message);process.exitCode=1;}
 }
