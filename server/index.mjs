@@ -16,6 +16,8 @@ import {searchVNDB,exactVNDB,vnRarity} from './vndb-live.mjs';
 import {searchWikidataFilms,enrichWikidataFilm,exactFilmMatches} from './wikidata-films.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
+const dailyEditorial=JSON.parse(fs.readFileSync(path.join(root,'src/data/daily-editorial.json'),'utf8'));
+const lineupFor=date=>{const ids=dailyEditorial[date];return Array.isArray(ids)&&ids.length===7&&new Set(ids).size===7&&ids.every(id=>promptById.has(id))?ids:null;};
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
 const ratingsFile = path.join(dataDir, 'guest-ratings.json');
 const matchesFile = path.join(dataDir,'match-results.json');
@@ -221,10 +223,12 @@ const server=http.createServer((req,res)=>{
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
   }
   if(pathname==='/api/questions' && req.method==='GET'){
-    const coverage=sourceCatalog.promptCoverage();
-    const questions=coverage.filter(x=>x.ready===1||x.answers>=5).filter(x=>promptById.has(x.promptId));
+    const date=String(parsedUrl.searchParams.get('date')||todayKey());
+    const ids=lineupFor(date);
+    const coverage=new Map(sourceCatalog.promptCoverage().map(x=>[x.promptId,x]));
+    const questions=(ids||[]).map(promptId=>({promptId,answers:coverage.get(promptId)?.answers||0}));
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-    res.end(JSON.stringify({questions,ready:questions.length>=7,minimumAnswers:5,revision:'precomputed-v1'}));
+    res.end(JSON.stringify({date,questions,ready:Boolean(ids),editorial:true,revision:'manual-daily-v1'}));
     return;
   }
   if(pathname==='/api/examples' && req.method==='GET'){
