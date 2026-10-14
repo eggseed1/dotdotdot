@@ -12,6 +12,7 @@ export type Work = {
   year: number;
   country: string;
   genres: string[];
+  format?: string;
   aliases?: string[];
   /** Hand-curated DEMO popularity proxy, NOT RYM or other service popularity. */
   popularity: number;
