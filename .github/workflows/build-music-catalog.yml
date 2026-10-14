@@ -15,12 +15,18 @@ on:
         description: "I confirm noncommercial CC BY-NC-SA 3.0 obligations; fetch derived tags and rating counts"
         type: boolean
         default: false
+      deploy_pages:
+        description: "Deploy catalog with website when below Pages size limit"
+        type: boolean
+        default: true
       publish_release:
         description: "Publish resulting small catalog as GitHub Release assets (no site deployment)"
         type: boolean
         default: false
 permissions:
   contents: write
+  pages: write
+  id-token: write
 concurrency:
   group: music-catalog
   cancel-in-progress: false
@@ -28,6 +34,9 @@ jobs:
   catalog:
     runs-on: ubuntu-latest
     timeout-minutes: 345
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -100,6 +109,22 @@ jobs:
           cat public/catalog-shards/manifest.json | head -c 500
       - name: Check catalog files can build on Pages
         run: npm run build
+      - name: Check Pages site size
+        id: sizecheck
+        run: |
+          BYTES=$(du -sb dist | cut -f1)
+          echo "Site size: $BYTES bytes"
+          if [ "$BYTES" -lt 900000000 ]; then echo "fits=true" >> "$GITHUB_OUTPUT"; else echo "fits=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/configure-pages@v5
+        if: ${{ inputs.deploy_pages && steps.sizecheck.outputs.fits == 'true' }}
+      - uses: actions/upload-pages-artifact@v3
+        if: ${{ inputs.deploy_pages && steps.sizecheck.outputs.fits == 'true' }}
+        with:
+          path: ./dist
+      - name: Deploy catalog to GitHub Pages
+        id: pages
+        if: ${{ inputs.deploy_pages && steps.sizecheck.outputs.fits == 'true' }}
+        uses: actions/deploy-pages@v4
       - name: Create downloadable catalog tarball
         run: |
           mkdir -p out
