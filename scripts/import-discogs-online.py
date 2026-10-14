@@ -39,7 +39,7 @@ def month_stamp(month):
     if len(month) != 6 or not month.isdigit():
         raise ValueError("month must be YYYYMM")
     date = dt.datetime.strptime(month, "%Y%m")
-    if date.year < 2008 or date > dt.datetime.utcnow() + dt.timedelta(days=35):
+    if date.year < 2008 or date > dt.datetime.now(dt.timezone.utc).replace(tzinfo=None) + dt.timedelta(days=35):
         raise ValueError("month out of range")
     return f"{month}01"
 
@@ -89,7 +89,7 @@ def init_entities(db):
 
 
 def save_entity(db, kind, elem):
-    sid = elem.get("id")
+    sid = elem.get("id") or CONVERTER.value(elem, "id")
     name = CONVERTER.value(elem, "name")
     if not sid or not sid.isdigit() or not name:
         return False
