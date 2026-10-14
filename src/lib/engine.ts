@@ -14,6 +14,14 @@ export const kindNames: Record<Exclude<Kind,'any'>, {en:string;ko:string}> = {
 };
 
 export const promptPool: Prompt[] = [
+  {id:'f-tsai-feature',kind:'film',badge:{en:'CINEMA · TAIWAN',ko:'영화 · 대만'},label:{en:'Name a feature film directed by Tsai Ming-liang.',ko:'차이밍량이 감독한 장편영화 한 편을 대보세요.'},match:()=>false},
+  {id:'a-serial-experiments-character',kind:'anime',badge:{en:'ANIME · LAIN',ko:'애니 · 레인'},label:{en:'Name a character from Serial Experiments Lain.',ko:'《serial experiments lain》에 등장하는 인물 한 명을 대보세요.'},match:()=>false},
+  {id:'g-cave-arcade',kind:'games',badge:{en:'GAMES · BULLET HELL',ko:'게임 · 탄막 슈팅'},label:{en:'Name a shoot-em-up developed by CAVE for arcades.',ko:'CAVE가 만든 아케이드 탄막 슈팅 게임을 대보세요.'},match:()=>false},
+  {id:'f-svankmajer-feature',kind:'film',badge:{en:'CINEMA · SURREALISM',ko:'영화 · 초현실'},label:{en:'Name a feature film directed by Jan Švankmajer.',ko:'얀 슈반크마예르가 감독한 장편영화를 대보세요.'},match:()=>false},
+  {id:'a-yuasa-directed',kind:'anime',badge:{en:'ANIME · CREATOR',ko:'애니 · 연출가'},label:{en:'Name an anime series or film directed by Masaaki Yuasa.',ko:'유아사 마사아키가 감독한 애니메이션 작품을 대보세요.'},match:()=>false},
+  {id:'l-perec-book',kind:'literature',badge:{en:'BOOKS · OULIPO',ko:'문학 · 울리포'},label:{en:'Name a book by Georges Perec.',ko:'조르주 페렉이 쓴 책 한 권을 대보세요.'},match:()=>false},
+  {id:'tv-twilight-episode',kind:'tv',badge:{en:'TV · EPISODES',ko:'TV · 에피소드'},label:{en:'Name an episode of the original 1959–1964 Twilight Zone series.',ko:'1959~1964년 방영된 원조 《환상특급》의 에피소드 제목을 대보세요.'},match:()=>false},
+
   {id:'f-lynch-directed',kind:'film',badge:{en:'FILM · DIRECTOR',ko:'영화 · 감독'},label:{en:'Name a feature film directed by David Lynch.',ko:'데이비드 린치가 감독한 장편영화를 대보세요.'},match:()=>false},
   {id:'f-park-directed',kind:'film',badge:{en:'FILM · DIRECTOR',ko:'영화 · 감독'},label:{en:'Name a feature film directed by Park Chan-wook.',ko:'박찬욱이 감독한 장편영화를 대보세요.'},match:()=>false},
   {id:'a-evangelion-character',kind:'anime',badge:{en:'ANIME · CHARACTERS',ko:'애니 · 등장인물'},label:{en:'Name a character from Neon Genesis Evangelion.',ko:'《신세기 에반게리온》 등장인물 한 명을 대보세요.'},match:()=>false},
