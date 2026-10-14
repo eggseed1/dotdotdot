@@ -1,0 +1,439 @@
+{
+  "_schema": "Title-to-alias mapping keyed by prompt ID. Korean forms include editorial approximations and should not be represented as all official release titles.",
+  "_sources": {
+    "f-title-number": {
+      "964 Pinocchio": "https://www.yes24.com/product/goods/144994525",
+      "71 Fragments of a Chronology of Chance": "https://cine21.com/movie/info/?movie_id=7704"
+    }
+  },
+  "f-title-number": {
+    "1917": [
+      "1917"
+    ],
+    "1984": [
+      "1984"
+    ],
+    "2012": [
+      "2012"
+    ],
+    "2046": [
+      "2046"
+    ],
+    "2001: A Space Odyssey": [
+      "2001 스페이스 오디세이"
+    ],
+    "12 Angry Men": [
+      "12인의 성난 사람들"
+    ],
+    "8½": [
+      "8과 1/2",
+      "8 1/2"
+    ],
+    "Fahrenheit 451": [
+      "화씨 451"
+    ],
+    "THX 1138": [
+      "THX 1138"
+    ],
+    "3 Women": [
+      "세 여인"
+    ],
+    "24 Frames": [
+      "24 프레임"
+    ],
+    "964 Pinocchio": [
+      "964 피노키오",
+      "피노키오 964"
+    ],
+    "The 400 Blows": [
+      "400번의 구타"
+    ],
+    "4 Months, 3 Weeks and 2 Days": [
+      "4개월, 3주... 그리고 2일"
+    ],
+    "71 Fragments of a Chronology of Chance": [
+      "우연의 연대기에 관한 71개의 단편들"
+    ],
+    "The 36th Chamber of Shaolin": [
+      "소림36방"
+    ],
+    "28 Days Later": [
+      "28일 후"
+    ],
+    "28 Weeks Later": [
+      "28주 후"
+    ],
+    "10 Cloverfield Lane": [
+      "클로버필드 10번지"
+    ],
+    "3-Iron": [
+      "빈집"
+    ],
+    "5 Centimeters per Second": [
+      "초속 5센티미터"
+    ],
+    "One Hundred and One Dalmatians": [
+      "101마리 달마시안"
+    ],
+    "13 Assassins": [
+      "13인의 자객"
+    ],
+    "Seven Samurai": [
+      "7인의 사무라이"
+    ],
+    "The 39 Steps": [
+      "39계단"
+    ],
+    "The 7th Continent": [
+      "일곱 번째 대륙"
+    ],
+    "100 Yen Love": [
+      "백엔의 사랑"
+    ],
+    "The 5th Element": [
+      "제5원소"
+    ],
+    "Seven Psychopaths": [
+      "세븐 싸이코패스"
+    ],
+    "9 Songs": [
+      "나인 송즈"
+    ],
+    "The 10th Victim": [
+      "열 번째 희생자"
+    ],
+    "The 1000 Eyes of Dr. Mabuse": [
+      "마부제 박사의 천 개의 눈"
+    ],
+    "The 5000 Fingers of Dr. T": [
+      "닥터 T의 5000개의 손가락"
+    ],
+    "A Page of Madness": [
+      "광란의 한 페이지"
+    ],
+    "5 Broken Cameras": [
+      "다섯 대의 부서진 카메라"
+    ],
+    "4:44 Last Day on Earth": [
+      "4:44 지구 최후의 날"
+    ],
+    "The 47 Ronin": [
+      "47인의 낭인"
+    ],
+    "The 8 Diagram Pole Fighter": [
+      "오랑팔괘곤"
+    ],
+    "The 3 Rooms of Melancholia": [
+      "멜랑콜리아의 세 방"
+    ],
+    "13 Lakes": [
+      "13개의 호수"
+    ]
+  },
+  "f-nonhuman-romance": {
+    "Her": [
+      "그녀"
+    ],
+    "The Shape of Water": [
+      "셰이프 오브 워터: 사랑의 모양"
+    ],
+    "Beauty and the Beast": [
+      "미녀와 야수"
+    ],
+    "The Lure": [
+      "더 루어",
+      "코르키 단싱구"
+    ],
+    "Edward Scissorhands": [
+      "가위손"
+    ],
+    "Warm Bodies": [
+      "웜 바디스"
+    ],
+    "The Little Mermaid": [
+      "인어공주"
+    ],
+    "Corpse Bride": [
+      "유령 신부"
+    ],
+    "Let the Right One In": [
+      "렛 미 인"
+    ],
+    "A Girl Walks Home Alone at Night": [
+      "밤을 걷는 뱀파이어 소녀"
+    ],
+    "Only Lovers Left Alive": [
+      "오직 사랑하는 이들만이 살아남는다"
+    ],
+    "Border": [
+      "경계선"
+    ],
+    "The Untamed": [
+      "디 언테임드"
+    ],
+    "Spring": [
+      "스프링"
+    ],
+    "Splash": [
+      "스플래쉬"
+    ],
+    "Thirst": [
+      "박쥐"
+    ],
+    "November": [
+      "노벰버"
+    ]
+  },
+  "f-after-death-protagonist": {
+    "Ghost": [
+      "사랑과 영혼"
+    ],
+    "The Sixth Sense": [
+      "식스 센스"
+    ],
+    "Beetlejuice": [
+      "비틀쥬스"
+    ],
+    "A Ghost Story": [
+      "고스트 스토리"
+    ],
+    "Enter the Void": [
+      "엔터 더 보이드"
+    ],
+    "The Lovely Bones": [
+      "러블리 본즈"
+    ],
+    "What Dreams May Come": [
+      "천국보다 아름다운"
+    ],
+    "Coco": [
+      "코코"
+    ],
+    "Soul": [
+      "소울"
+    ],
+    "The Crow": [
+      "크로우"
+    ],
+    "The Book of Life": [
+      "마놀로와 마법의 책"
+    ],
+    "Along with the Gods: The Two Worlds": [
+      "신과함께-죄와 벌"
+    ],
+    "Along with the Gods: The Last 49 Days": [
+      "신과함께-인과 연"
+    ],
+    "The Frighteners": [
+      "프라이트너"
+    ],
+    "Corpse Bride": [
+      "유령 신부"
+    ],
+    "The Others": [
+      "디 아더스"
+    ],
+    "Wristcutters: A Love Story": [
+      "리스트커터스"
+    ],
+    "Hello Ghost": [
+      "헬로우 고스트"
+    ],
+    "The Ghost and Mrs. Muir": [
+      "유령과 뮤어 부인"
+    ],
+    "A Matter of Life and Death": [
+      "천국으로 가는 계단"
+    ]
+  },
+  "a-anime-parodies-anime": {
+    "Gintama": [
+      "은혼"
+    ],
+    "Excel Saga": [
+      "엑셀 사가"
+    ],
+    "Project A-ko": [
+      "프로젝트 A코"
+    ],
+    "Lucky Star": [
+      "러키☆스타",
+      "럭키 스타"
+    ],
+    "Osomatsu-san": [
+      "오소마츠상"
+    ],
+    "Pop Team Epic": [
+      "팝 팀 에픽"
+    ],
+    "One Punch Man": [
+      "원펀맨"
+    ],
+    "Food Wars! Shokugeki no Soma": [
+      "식극의 소마"
+    ],
+    "Hayate the Combat Butler": [
+      "하야테처럼!"
+    ],
+    "Sayonara, Zetsubou-Sensei": [
+      "안녕 절망선생"
+    ],
+    "Keroro Gunso": [
+      "개구리 중사 케로로"
+    ],
+    "Nichijou": [
+      "일상"
+    ],
+    "Panty & Stocking with Garterbelt": [
+      "팬티 & 스타킹 with 가터벨트"
+    ],
+    "Kill la Kill": [
+      "킬라킬"
+    ],
+    "Magical Shopping Arcade Abenobashi": [
+      "아베노바시 마법상점가"
+    ],
+    "Nurse Witch Komugi-chan": [
+      "너스위치 코무기짱"
+    ],
+    "Bobobo-bo Bo-bobo": [
+      "무적코털 보보보"
+    ],
+    "KonoSuba": [
+      "이 멋진 세계에 축복을!"
+    ],
+    "Shirobako": [
+      "시로바코"
+    ],
+    "Keep Your Hands Off Eizouken!": [
+      "영상연에는 손대지 마!"
+    ],
+    "Carnival Phantasm": [
+      "카니발 판타즘"
+    ]
+  },
+  "l-fictional-book": {
+    "Necronomicon": [
+      "네크로노미콘"
+    ],
+    "The King in Yellow": [
+      "황색의 왕"
+    ],
+    "The Book of Sand": [
+      "모래의 책"
+    ],
+    "The Grasshopper Lies Heavy": [
+      "메뚜기가 짓누르다"
+    ],
+    "The Hitchhiker's Guide to the Galaxy": [
+      "은하수를 여행하는 히치하이커를 위한 안내서"
+    ],
+    "The Princess Bride by S. Morgenstern": [
+      "모건스턴의 프린세스 브라이드"
+    ],
+    "The Navidson Record": [
+      "나비드슨 기록"
+    ],
+    "The Book of Bokonon": [
+      "보코논의 서"
+    ],
+    "The Tales of Beedle the Bard": [
+      "음유시인 비들 이야기"
+    ],
+    "Fantastic Beasts and Where to Find Them": [
+      "신비한 동물사전"
+    ],
+    "Quidditch Through the Ages": [
+      "퀴디치의 역사"
+    ],
+    "A History of Magic": [
+      "마법의 역사"
+    ],
+    "The Approach to Al-Mu'tasim": [
+      "알 무타심에 다가가기"
+    ],
+    "The Garden of Forking Paths": [
+      "끝없이 두 갈래로 갈라지는 길들이 있는 정원"
+    ],
+    "The Book of Eibon": [
+      "에이본의 서"
+    ]
+  },
+  "f-title-song": {
+    "Blue Velvet": [
+      "블루 벨벳"
+    ],
+    "Purple Rain": [
+      "퍼플 레인"
+    ],
+    "Pretty in Pink": [
+      "핑크빛 연인"
+    ],
+    "Stand by Me": [
+      "스탠 바이 미"
+    ],
+    "Yesterday": [
+      "예스터데이"
+    ],
+    "Yellow Submarine": [
+      "노란 잠수함"
+    ],
+    "Help!": [
+      "헬프!"
+    ],
+    "Let It Be": [
+      "렛 잇 비"
+    ],
+    "Mamma Mia!": [
+      "맘마미아!"
+    ],
+    "Wild at Heart": [
+      "광란의 사랑"
+    ],
+    "The Crying Game": [
+      "크라잉 게임"
+    ],
+    "Hedwig and the Angry Inch": [
+      "헤드윅"
+    ],
+    "Velvet Goldmine": [
+      "벨벳 골드마인"
+    ],
+    "24 Hour Party People": [
+      "24시간 파티하는 사람들"
+    ],
+    "Walk the Line": [
+      "앙코르"
+    ],
+    "Bohemian Rhapsody": [
+      "보헤미안 랩소디"
+    ],
+    "Shaft": [
+      "샤프트"
+    ],
+    "Grease": [
+      "그리스"
+    ],
+    "Footloose": [
+      "풋루즈"
+    ],
+    "Flashdance": [
+      "플래시댄스"
+    ],
+    "Fame": [
+      "페임"
+    ],
+    "Singin' in the Rain": [
+      "사랑은 비를 타고"
+    ],
+    "The Sound of Music": [
+      "사운드 오브 뮤직"
+    ],
+    "West Side Story": [
+      "웨스트 사이드 스토리"
+    ],
+    "The Rocky Horror Picture Show": [
+      "록키 호러 픽쳐 쇼"
+    ]
+  }
+}
