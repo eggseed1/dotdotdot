@@ -27,7 +27,8 @@
     ],
     "8½": [
       "8과 1/2",
-      "8 1/2"
+      "8 1/2",
+      "Otto e mezzo"
     ],
     "Fahrenheit 451": [
       "화씨 451"
@@ -36,26 +37,33 @@
       "THX 1138"
     ],
     "3 Women": [
-      "세 여인"
+      "세 여인",
+      "3 Women",
+      "쓰리 우먼"
     ],
     "24 Frames": [
       "24 프레임"
     ],
     "964 Pinocchio": [
       "964 피노키오",
-      "피노키오 964"
+      "피노키오 964",
+      "ピノキオ√964",
+      "Pinocchio 964"
     ],
     "The 400 Blows": [
-      "400번의 구타"
+      "400번의 구타",
+      "Les Quatre Cents Coups"
     ],
     "4 Months, 3 Weeks and 2 Days": [
       "4개월, 3주... 그리고 2일"
     ],
     "71 Fragments of a Chronology of Chance": [
-      "우연의 연대기에 관한 71개의 단편들"
+      "우연의 연대기에 관한 71개의 단편들",
+      "71 Fragmente einer Chronologie des Zufalls"
     ],
     "The 36th Chamber of Shaolin": [
-      "소림36방"
+      "소림36방",
+      "少林三十六房"
     ],
     "28 Days Later": [
       "28일 후"
@@ -70,7 +78,9 @@
       "빈집"
     ],
     "5 Centimeters per Second": [
-      "초속 5센티미터"
+      "초속 5센티미터",
+      "秒速5センチメートル",
+      "Byousoku 5 Centimeter"
     ],
     "One Hundred and One Dalmatians": [
       "101마리 달마시안"
@@ -127,7 +137,14 @@
       "멜랑콜리아의 세 방"
     ],
     "13 Lakes": [
-      "13개의 호수"
+      "13개의 호수",
+      "13 Lakes"
+    ],
+    "36 Fillette": [
+      "36 fillette"
+    ],
+    "88:88": [
+      "88:88"
     ]
   },
   "f-nonhuman-romance": {
@@ -135,14 +152,16 @@
       "그녀"
     ],
     "The Shape of Water": [
-      "셰이프 오브 워터: 사랑의 모양"
+      "셰이프 오브 워터: 사랑의 모양",
+      "The Shape of Water"
     ],
     "Beauty and the Beast": [
       "미녀와 야수"
     ],
     "The Lure": [
       "더 루어",
-      "코르키 단싱구"
+      "코르키 단싱구",
+      "Córki dancingu"
     ],
     "Edward Scissorhands": [
       "가위손"
@@ -157,19 +176,23 @@
       "유령 신부"
     ],
     "Let the Right One In": [
-      "렛 미 인"
+      "렛 미 인",
+      "Låt den rätte komma in"
     ],
     "A Girl Walks Home Alone at Night": [
-      "밤을 걷는 뱀파이어 소녀"
+      "밤을 걷는 뱀파이어 소녀",
+      "دختری در شب تنها به خانه می‌رود"
     ],
     "Only Lovers Left Alive": [
       "오직 사랑하는 이들만이 살아남는다"
     ],
     "Border": [
-      "경계선"
+      "경계선",
+      "Gräns"
     ],
     "The Untamed": [
-      "디 언테임드"
+      "디 언테임드",
+      "La región salvaje"
     ],
     "Spring": [
       "스프링"
@@ -181,7 +204,8 @@
       "박쥐"
     ],
     "November": [
-      "노벰버"
+      "노벰버",
+      "November (2017)"
     ]
   },
   "f-after-death-protagonist": {
@@ -248,41 +272,51 @@
   },
   "a-anime-parodies-anime": {
     "Gintama": [
-      "은혼"
+      "은혼",
+      "銀魂"
     ],
     "Excel Saga": [
-      "엑셀 사가"
+      "엑셀 사가",
+      "へっぽこ実験アニメーション エクセル♥サーガ"
     ],
     "Project A-ko": [
-      "프로젝트 A코"
+      "프로젝트 A코",
+      "プロジェクトA子"
     ],
     "Lucky Star": [
       "러키☆스타",
-      "럭키 스타"
+      "럭키 스타",
+      "らき☆すた"
     ],
     "Osomatsu-san": [
-      "오소마츠상"
+      "오소마츠상",
+      "おそ松さん"
     ],
     "Pop Team Epic": [
-      "팝 팀 에픽"
+      "팝 팀 에픽",
+      "ポプテピピック"
     ],
     "One Punch Man": [
-      "원펀맨"
+      "원펀맨",
+      "ワンパンマン"
     ],
     "Food Wars! Shokugeki no Soma": [
-      "식극의 소마"
+      "식극의 소마",
+      "食戟のソーマ"
     ],
     "Hayate the Combat Butler": [
       "하야테처럼!"
     ],
     "Sayonara, Zetsubou-Sensei": [
-      "안녕 절망선생"
+      "안녕 절망선생",
+      "さよなら絶望先生"
     ],
     "Keroro Gunso": [
       "개구리 중사 케로로"
     ],
     "Nichijou": [
-      "일상"
+      "일상",
+      "日常"
     ],
     "Panty & Stocking with Garterbelt": [
       "팬티 & 스타킹 with 가터벨트"
@@ -291,10 +325,12 @@
       "킬라킬"
     ],
     "Magical Shopping Arcade Abenobashi": [
-      "아베노바시 마법상점가"
+      "아베노바시 마법상점가",
+      "アベノ橋魔法☆商店街"
     ],
     "Nurse Witch Komugi-chan": [
-      "너스위치 코무기짱"
+      "너스위치 코무기짱",
+      "ナースウィッチ小麦ちゃんマジカルて"
     ],
     "Bobobo-bo Bo-bobo": [
       "무적코털 보보보"
@@ -303,7 +339,8 @@
       "이 멋진 세계에 축복을!"
     ],
     "Shirobako": [
-      "시로바코"
+      "시로바코",
+      "SHIROBAKO"
     ],
     "Keep Your Hands Off Eizouken!": [
       "영상연에는 손대지 마!"
@@ -317,13 +354,16 @@
       "네크로노미콘"
     ],
     "The King in Yellow": [
-      "황색의 왕"
+      "황색의 왕",
+      "Le Roi en Jaune"
     ],
     "The Book of Sand": [
-      "모래의 책"
+      "모래의 책",
+      "El libro de arena"
     ],
     "The Grasshopper Lies Heavy": [
-      "메뚜기가 짓누르다"
+      "메뚜기가 짓누르다",
+      "The Grasshopper Lies Heavy"
     ],
     "The Hitchhiker's Guide to the Galaxy": [
       "은하수를 여행하는 히치하이커를 위한 안내서"
@@ -350,10 +390,12 @@
       "마법의 역사"
     ],
     "The Approach to Al-Mu'tasim": [
-      "알 무타심에 다가가기"
+      "알 무타심에 다가가기",
+      "El acercamiento a Almotásim"
     ],
     "The Garden of Forking Paths": [
-      "끝없이 두 갈래로 갈라지는 길들이 있는 정원"
+      "끝없이 두 갈래로 갈라지는 길들이 있는 정원",
+      "El jardín de senderos que se bifurcan"
     ],
     "The Book of Eibon": [
       "에이본의 서"
@@ -361,7 +403,8 @@
   },
   "f-title-song": {
     "Blue Velvet": [
-      "블루 벨벳"
+      "블루 벨벳",
+      "Blue Velvet"
     ],
     "Purple Rain": [
       "퍼플 레인"
@@ -388,10 +431,12 @@
       "맘마미아!"
     ],
     "Wild at Heart": [
-      "광란의 사랑"
+      "광란의 사랑",
+      "Wild at Heart"
     ],
     "The Crying Game": [
-      "크라잉 게임"
+      "크라잉 게임",
+      "The Crying Game"
     ],
     "Hedwig and the Angry Inch": [
       "헤드윅"
