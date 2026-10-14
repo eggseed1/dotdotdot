@@ -220,6 +220,13 @@ const server=http.createServer((req,res)=>{
     const players=Object.entries(ratings).filter(([,v])=>Number.isFinite(v.rating)&&v.played>0).map(([id,v])=>({id:id.slice(0,8),name:v.name,rating:v.rating,played:v.played,wins:v.wins||0})).sort((a,b)=>b.rating-a.rating).slice(0,100);
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({players,provisional:true}));return;
   }
+  if(pathname==='/api/questions' && req.method==='GET'){
+    const coverage=sourceCatalog.promptCoverage();
+    const questions=coverage.filter(x=>x.ready===1||x.answers>=5).filter(x=>promptById.has(x.promptId));
+    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+    res.end(JSON.stringify({questions,ready:questions.length>=7,minimumAnswers:5,revision:'precomputed-v1'}));
+    return;
+  }
   if(pathname==='/api/examples' && req.method==='GET'){
     const promptId=String(parsedUrl.searchParams.get('promptId')||'');
     const prompt=promptById.get(promptId);
