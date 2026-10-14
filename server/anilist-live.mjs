@@ -1,7 +1,7 @@
 const cache=new Map(),TTL=6*60*60*1000;
 const GQL=`query($search:String,$perPage:Int){Page(perPage:$perPage){media(search:$search,type:ANIME){id title{romaji english native}startDate{year}seasonYear format genres tags{name rank}popularity favourites countryOfOrigin isAdult}}}`;
 function normalize(m){
- const genres=[...(m.genres||[]).map(x=>x.toLowerCase()),...(m.tags||[]).filter(x=>x.rank>=55).map(x=>x.name.toLowerCase())];
+ const genres=[...(m.genres||[]).map(x=>x.toLowerCase()==='sci-fi'?'science fiction':x.toLowerCase()),...(m.tags||[]).filter(x=>x.rank>=55).map(x=>x.name.toLowerCase())];
  return {id:'anilist:'+m.id,kind:'anime',title:m.title?.english||m.title?.romaji||m.title?.native,
   titleKo:'',creator:'',year:m.startDate?.year||m.seasonYear||0,country:m.countryOfOrigin==='JP'?'Japan':m.countryOfOrigin==='KR'?'South Korea':'',
   genres:[...new Set(genres)],aliases:[m.title?.romaji,m.title?.english,m.title?.native].filter(Boolean),
