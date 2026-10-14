@@ -138,6 +138,16 @@ const server=http.createServer((req,res)=>{
       let request;try{request=JSON.parse(chunks);}catch{res.writeHead(400);res.end('{}');return;}
       const prompt=promptById.get(String(request.promptId||'')),raw=String(request.answer||'').slice(0,200);
       if(!prompt||prompt.kind==='music'||!sourceCatalog){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({status:'missing'}));return;}
+      // The published per-question answer set is authoritative and fast.
+      const prepared=sourceCatalog.promptLookup(prompt.id,prompt.kind,raw);
+      if(prepared.length){
+        const w=prepared[0];
+        res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+        res.end(JSON.stringify({status:'found',work:{id:w.id,kind:w.kind,title:w.title,titleKo:w.titleKo,
+          creator:w.creator,year:w.year,country:w.country},points:w.points,tier:w.tier,
+          provisional:true,rarityMethod:'precomputed-prompt-ranking',unrated:!w.ratingCount}));
+        return;
+      }
       // Search imported records and external providers together. Never allow a sparse
       // Wikidata hit to hide a richly tagged TMDB, AniList, or imported match.
       let found=sourceCatalog.lookup(prompt.kind,raw);
@@ -214,14 +224,16 @@ const server=http.createServer((req,res)=>{
     const promptId=String(parsedUrl.searchParams.get('promptId')||'');
     const prompt=promptById.get(promptId);
     if(!prompt){res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({examples:[]}));return;}
-    const imported=sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w)).slice(0,24);
+    const prepared=sourceCatalog.promptExamples(promptId,80);
+    const imported=prepared.length?prepared:sourceCatalog.possible(promptId,100).filter(w=>w.kind===prompt.kind&&prompt.match(w));
     const curated=eligible(prompt).slice(0,24);
-    const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i).slice(0,24);
-    const examples=combined.map(w=>({title:w.title,titleKo:w.titleKo||'',creator:w.creator||'',year:w.year||0,source:w.source||'curated-demo',ratingCount:w.ratingCount??null}));
+    const combined=[...imported,...curated].filter((w,i,all)=>all.findIndex(x=>x.title===w.title&&x.year===w.year)===i).slice(0,80);
+    const examples=combined.map(w=>({title:w.title,titleKo:w.titleKo||'',creator:w.creator||'',year:w.year||0,
+      source:w.source||'curated-demo',points:w.points??null,ratingCount:w.ratingCount??null}));
     res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({examples,complete:false}));
     return;
   }
-  if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),liveSearch:{music:{provider:'MusicBrainz',enabled:false},film:{provider:'Wikidata',enabled:true,coverage:'live-search-not-exhaustive'},anime:{provider:'AniList',enabled:true,coverage:'live-search-not-exhaustive'},games:{providers:['VNDB','Wikidata'],enabled:true,coverage:'live-search-not-exhaustive'},literature:{provider:'imported-catalog',enabled:true,coverage:'local-only'}},catalogComplete:false,coverageVerified:false,tmdbConfigured:tmdbEnabled,live:true}));return;}
+  if(pathname==='/api/catalog/status'){const imported=sourceCatalog.stats();res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({imported,records:imported.reduce((n,r)=>n+r.entries,0),liveSearch:{music:{provider:'MusicBrainz',enabled:false},film:{provider:'Wikidata',enabled:true,coverage:'live-search-not-exhaustive'},anime:{provider:'AniList',enabled:true,coverage:'live-search-not-exhaustive'},games:{providers:['VNDB','Wikidata'],enabled:true,coverage:'live-search-not-exhaustive'},literature:{provider:'imported-catalog',enabled:true,coverage:'local-only'}},catalogComplete:false,coverageVerified:false,promptCoverage:sourceCatalog.promptCoverage(),tmdbConfigured:tmdbEnabled,live:true}));return;}
   if(/^\/api\/matches\/[A-Za-z0-9]{12}$/.test(pathname)){const id=pathname.split('/').pop();const item=completedMatches[id];res.writeHead(item?200:404,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(item||{error:'not_found'}));return;}
   if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({ok:true,players:clients.size,matches:matches.size}));return;}
   // Production bundle served by the same origin as the websocket endpoint.
